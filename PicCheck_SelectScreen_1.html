@@ -1,0 +1,3676 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PicCheck — 写真セレクト</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      height: 100%;
+    }
+
+    :root {
+      --bg: #0D0F14;
+      --surface: #13161E;
+      --surface2: #1A1E28;
+      --surface3: #222736;
+      --border: #2A2F3E;
+      --border2: #333849;
+      --text: #E8EAF0;
+      --text-sub: #7B849A;
+      --text-dim: #454C60;
+
+      --coral: #FF6B6B;
+      --mint: #3BBFA5;
+      --lavender: #9B7FE8;
+      --sky: #4A9EE0;
+      --yellow: #F5C842;
+      --green: #4CAF7D;
+      --pink: #F06292;
+      --orange: #FF8A65;
+
+      /* Group colors */
+      --g1: #FF6B6B;
+      --g2: #3BBFA5;
+      --g3: #9B7FE8;
+      --g4: #4A9EE0;
+      --g5: #F5C842;
+      --g6: #F06292;
+    }
+
+    body {
+      font-family: 'Syne', 'Zen Kaku Gothic New', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ===== TOP BAR ===== */
+    .topbar {
+      height: 56px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 16px;
+      flex-shrink: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--coral);
+      letter-spacing: -0.5px;
+      white-space: nowrap;
+    }
+
+    .logo span {
+      color: var(--text);
+    }
+
+    .topbar-divider {
+      width: 1px;
+      height: 24px;
+      background: var(--border);
+    }
+
+    .session-name {
+      font-size: 13px;
+      color: var(--text-sub);
+    }
+
+    .session-name strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .topbar-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .progress-label {
+      font-size: 12px;
+      color: var(--text-sub);
+      white-space: nowrap;
+    }
+
+    .progress-bar-bg {
+      width: 120px;
+      height: 6px;
+      background: var(--surface3);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--coral), var(--orange));
+      border-radius: 6px;
+      transition: width 0.4s ease;
+    }
+
+    .progress-count {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      color: var(--coral);
+      white-space: nowrap;
+    }
+
+    .btn-complete {
+      background: var(--coral);
+      color: white;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .btn-complete:hover {
+      opacity: 0.85;
+      transform: translateY(-1px);
+    }
+
+    /* Download Dropdown */
+    .btn-download {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .btn-download:hover {
+      background: var(--surface3);
+      border-color: var(--border2);
+    }
+
+    .dl-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 6px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 6px;
+      min-width: 200px;
+      z-index: 1000;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .dl-menu.open {
+      display: block;
+    }
+
+    .dl-menu button {
+      display: block;
+      width: 100%;
+      padding: 10px 14px;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 13px;
+      font-family: inherit;
+      text-align: left;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .dl-menu button:hover {
+      background: var(--surface2);
+    }
+
+    /* ===== MAIN LAYOUT ===== */
+    .main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: 220px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 4px;
+    }
+
+    .sidebar-section {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .filter-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 7px 10px;
+      border-radius: 7px;
+      background: none;
+      border: none;
+      color: var(--text-sub);
+      font-size: 12.5px;
+      cursor: pointer;
+      font-family: inherit;
+      text-align: left;
+      transition: background 0.15s, color 0.15s;
+      margin-bottom: 2px;
+    }
+
+    .filter-btn:hover {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .filter-btn.active {
+      background: var(--surface3);
+      color: var(--text);
+    }
+
+    .filter-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .filter-count {
+      margin-left: auto;
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    .filter-btn.active .filter-count {
+      color: var(--text-sub);
+    }
+
+    /* Group nav items */
+    .group-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 7px 10px;
+      border-radius: 7px;
+      background: none;
+      border: none;
+      color: var(--text-sub);
+      font-size: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      text-align: left;
+      transition: background 0.15s, color 0.15s;
+      margin-bottom: 2px;
+    }
+
+    .group-nav-item:hover {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .group-nav-item.active {
+      background: var(--surface3);
+      color: var(--text);
+    }
+
+    .group-color-bar {
+      width: 3px;
+      height: 16px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .group-nav-name {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .group-nav-sel {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    .group-nav-item.active .group-nav-sel {
+      color: var(--text-sub);
+    }
+
+    /* Stats */
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .stat-key {
+      font-size: 11px;
+      color: var(--text-sub);
+    }
+
+    .stat-val {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .stat-val.green {
+      color: var(--green);
+    }
+
+    .stat-val.coral {
+      color: var(--coral);
+    }
+
+    .stat-val.yellow {
+      color: var(--yellow);
+    }
+
+    /* ===== CONTENT ===== */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    .content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .content::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .content::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 6px;
+    }
+
+    /* ===== TOOLBAR ===== */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .toolbar-sub {
+      font-size: 12px;
+      color: var(--text-sub);
+      margin-left: 4px;
+    }
+
+    .toolbar-right {
+      margin-left: auto;
+      display: flex;
+      gap: 8px;
+    }
+
+    .tb-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 7px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-sub);
+      font-size: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+
+    .tb-btn:hover {
+      border-color: var(--border2);
+      color: var(--text);
+      background: var(--surface3);
+    }
+
+    .tb-btn.active {
+      border-color: var(--coral);
+      color: var(--coral);
+    }
+
+    .grid-size-btn {
+      padding: 7px 10px;
+    }
+
+    /* ===== GROUP SECTION ===== */
+    .group-section {
+      margin-bottom: 36px;
+    }
+
+    .group-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .group-color-pill {
+      height: 28px;
+      padding: 0 12px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+
+    .group-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .group-meta {
+      font-size: 11px;
+      color: var(--text-sub);
+    }
+
+    .group-limit-badge {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--text-sub);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .group-limit-badge.warn {
+      color: var(--yellow);
+      border-color: rgba(245, 200, 66, 0.3);
+      background: rgba(245, 200, 66, 0.08);
+    }
+
+    .group-limit-badge.done {
+      color: var(--green);
+      border-color: rgba(76, 175, 125, 0.3);
+      background: rgba(76, 175, 125, 0.08);
+    }
+
+    /* ===== PHOTO GRID ===== */
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 8px;
+    }
+
+    .photo-grid.large {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+    }
+
+    .photo-grid.small {
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 6px;
+    }
+
+    .photo-card {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.15s, border-color 0.15s;
+      aspect-ratio: 3/4;
+      background: var(--surface2);
+    }
+
+    .photo-card:hover {
+      transform: scale(1.02);
+    }
+
+    .photo-card.ok {
+      border-color: var(--green) !important;
+    }
+
+    .photo-card.nearok {
+      border-color: var(--yellow) !important;
+    }
+
+    .photo-card.ng {
+      border-color: var(--coral) !important;
+      opacity: 0.55;
+    }
+
+    .photo-card.ng .photo-img {
+      filter: grayscale(50%);
+    }
+
+    /* Photo image area */
+    .photo-img {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(28px, 5vw, 48px);
+      position: relative;
+      transition: filter 0.2s;
+    }
+
+    /* Group left border */
+    .photo-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      z-index: 3;
+      border-radius: 10px 0 0 10px;
+    }
+
+    /* Overlay on hover */
+    .photo-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 50%);
+      opacity: 0;
+      transition: opacity 0.2s;
+      z-index: 2;
+      display: flex;
+      align-items: flex-end;
+      padding: 10px;
+      gap: 6px;
+    }
+
+    .photo-card:hover .photo-overlay {
+      opacity: 1;
+    }
+
+    .photo-card.ok .photo-overlay,
+    .photo-card.nearok .photo-overlay,
+    .photo-card.ng .photo-overlay {
+      opacity: 1;
+    }
+
+    .overlay-btn {
+      flex: 1;
+      padding: 6px 4px;
+      border-radius: 6px;
+      border: none;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.15s;
+      text-align: center;
+    }
+
+    .overlay-btn:hover {
+      opacity: 0.85;
+    }
+
+    .btn-ok {
+      background: var(--green);
+      color: white;
+    }
+
+    .btn-nearok {
+      background: var(--yellow);
+      color: #111;
+    }
+
+    .btn-ng {
+      background: var(--coral);
+      color: white;
+    }
+
+    .btn-clear {
+      background: var(--surface3);
+      color: var(--text);
+      border: 1px solid var(--border2);
+    }
+
+    .btn-active-ok {
+      outline: 2px solid var(--green) !important;
+      outline-offset: 1px;
+    }
+
+    .btn-active-nearok {
+      outline: 2px solid var(--yellow) !important;
+      outline-offset: 1px;
+    }
+
+    .btn-active-ng {
+      outline: 2px solid var(--coral) !important;
+      outline-offset: 1px;
+    }
+
+    /* AI Badges */
+    .ai-badges {
+      position: absolute;
+      top: 7px;
+      left: 7px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      z-index: 4;
+    }
+
+    .ai-badge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 3px 7px;
+      border-radius: 4px;
+      letter-spacing: 0.3px;
+      line-height: 1;
+    }
+
+    .badge-hanme {
+      background: rgba(155, 127, 232, 0.9);
+      color: white;
+    }
+
+    .badge-blur {
+      background: rgba(74, 158, 224, 0.9);
+      color: white;
+    }
+
+    .badge-expo {
+      background: rgba(255, 107, 107, 0.9);
+      color: white;
+    }
+
+    .badge-sim {
+      background: rgba(245, 200, 66, 0.9);
+      color: #1a1a1a;
+    }
+
+    /* Status badge top-right */
+    .status-badge {
+      position: absolute;
+      top: 7px;
+      right: 7px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      z-index: 4;
+    }
+
+    .status-ok {
+      background: var(--green);
+      color: white;
+    }
+
+    .status-nearok {
+      background: var(--yellow);
+      color: #111;
+    }
+
+    .status-ng {
+      background: var(--coral);
+      color: white;
+    }
+
+    /* Comment icon on card */
+    .comment-icon {
+      position: absolute;
+      bottom: 28px;
+      right: 6px;
+      font-size: 12px;
+      z-index: 4;
+      opacity: 0.8;
+      pointer-events: none;
+    }
+
+    /* ===== BULK ACTION BAR ===== */
+    .bulk-bar {
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+
+    .bulk-label {
+      font-size: 11px;
+      color: var(--text-sub);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-right: 2px;
+      white-space: nowrap;
+    }
+
+    .bulk-btn {
+      padding: 5px 14px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .bulk-btn:hover {
+      opacity: 0.85;
+      transform: translateY(-1px);
+    }
+
+    .bulk-btn-ok {
+      background: rgba(76, 175, 125, 0.15);
+      border-color: rgba(76, 175, 125, 0.4);
+      color: var(--green);
+    }
+
+    .bulk-btn-nearok {
+      background: rgba(245, 200, 66, 0.15);
+      border-color: rgba(245, 200, 66, 0.4);
+      color: var(--yellow);
+    }
+
+    .bulk-btn-ng {
+      background: rgba(255, 107, 107, 0.15);
+      border-color: rgba(255, 107, 107, 0.4);
+      color: var(--coral);
+    }
+
+    .bulk-btn-reset {
+      background: var(--surface3);
+      border-color: var(--border2);
+      color: var(--text-sub);
+    }
+
+    .bulk-sep {
+      width: 1px;
+      height: 20px;
+      background: var(--border);
+      margin: 0 4px;
+    }
+
+    /* Per-group bulk buttons */
+    .group-bulk-btns {
+      display: flex;
+      gap: 5px;
+      margin-left: 8px;
+    }
+
+    .group-bulk-btn {
+      padding: 3px 10px;
+      border-radius: 5px;
+      border: 1px solid transparent;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.15s;
+    }
+
+    .group-bulk-btn:hover {
+      opacity: 0.8;
+    }
+
+    .gbtn-ok {
+      background: rgba(76, 175, 125, 0.15);
+      border-color: rgba(76, 175, 125, 0.4);
+      color: var(--green);
+    }
+
+    .gbtn-nearok {
+      background: rgba(245, 200, 66, 0.15);
+      border-color: rgba(245, 200, 66, 0.4);
+      color: var(--yellow);
+    }
+
+    .gbtn-ng {
+      background: rgba(255, 107, 107, 0.15);
+      border-color: rgba(255, 107, 107, 0.4);
+      color: var(--coral);
+    }
+
+    .gbtn-reset {
+      background: rgba(123, 132, 154, 0.12);
+      border-color: rgba(123, 132, 154, 0.3);
+      color: var(--text-sub);
+    }
+
+    .gbtn-reset:hover {
+      background: rgba(255, 107, 107, 0.12);
+      border-color: rgba(255, 107, 107, 0.35);
+      color: var(--coral);
+    }
+
+    /* Group Reset Confirm Dialog */
+    .group-reset-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s;
+      backdrop-filter: blur(3px);
+    }
+
+    .group-reset-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .group-reset-box {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      padding: 28px 32px;
+      text-align: center;
+      max-width: 340px;
+      width: 90vw;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+    }
+
+    .group-reset-btn {
+      padding: 10px 24px;
+      border-radius: 10px;
+      border: none;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.15s;
+    }
+
+    .group-reset-btn:hover {
+      opacity: 0.85;
+    }
+
+    /* File name */
+    .photo-fname {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 6px 8px 5px;
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.6);
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.65), transparent);
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    /* ===== RIGHT PANEL ===== */
+    .right-panel {
+      width: 240px;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      overflow-y: auto;
+    }
+
+    .right-panel::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .right-panel::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .right-panel::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 4px;
+    }
+
+    .rp-section {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .rp-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+      font-family: 'Space Mono', monospace;
+    }
+
+    /* Group progress bars */
+    .gp-item {
+      margin-bottom: 12px;
+    }
+
+    .gp-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+
+    .gp-name {
+      font-size: 11px;
+      color: var(--text-sub);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 130px;
+    }
+
+    .gp-count {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+    }
+
+    .gp-bar {
+      height: 4px;
+      background: var(--surface3);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .gp-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    /* Selected thumbnails */
+    .selected-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .sel-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 7px 8px;
+      background: var(--surface2);
+      border-radius: 8px;
+      border-left: 3px solid;
+    }
+
+    .sel-thumb {
+      width: 34px;
+      height: 34px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .sel-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .sel-name {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      color: var(--text-sub);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sel-group {
+      font-size: 10px;
+      font-weight: 700;
+      margin-top: 1px;
+    }
+
+    .sel-remove {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 2px 4px;
+      transition: color 0.15s;
+    }
+
+    .sel-remove:hover {
+      color: var(--coral);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface3);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+      opacity: 0;
+      z-index: 999;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast.green {
+      border-color: rgba(76, 175, 125, 0.5);
+    }
+
+    .toast.coral {
+      border-color: rgba(255, 107, 107, 0.5);
+    }
+
+    /* Scrollbar */
+    .content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-photo {
+      position: relative;
+      max-width: 520px;
+      width: 90vw;
+      max-height: 92vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      border-radius: 16px;
+      background: var(--surface);
+    }
+
+    .modal-photo::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .modal-photo::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .modal-photo::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 4px;
+    }
+
+    .modal-photo-img {
+      width: calc(100% - 32px);
+      margin: 16px auto 0;
+      aspect-ratio: 3/4;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 120px;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+      border: 2px solid var(--border2);
+      flex-shrink: 0;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      padding: 14px 20px 0;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: none;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+
+    .modal-btn:hover {
+      opacity: 0.85;
+      transform: translateY(-1px);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+    }
+
+    .modal-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+      z-index: 10;
+    }
+
+    .modal-nav:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .modal-nav-prev {
+      left: -60px;
+    }
+
+    .modal-nav-next {
+      right: -60px;
+    }
+
+    .modal-nav:disabled {
+      opacity: 0.2;
+      cursor: default;
+    }
+
+    .modal-meta {
+      padding: 16px 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .modal-fname {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+
+    .modal-group-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 5px;
+    }
+
+    .modal-ai-badges {
+      display: flex;
+      gap: 5px;
+    }
+
+    /* ===== CONFIRM MODAL ===== */
+    .confirm-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      backdrop-filter: blur(4px);
+    }
+
+    .confirm-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .confirm-box {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
+      padding: 36px 40px;
+      width: 400px;
+      box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
+      text-align: center;
+    }
+
+    .confirm-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .confirm-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .confirm-desc {
+      font-size: 13px;
+      color: var(--text-sub);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .confirm-stats {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-bottom: 28px;
+    }
+
+    .confirm-stat {
+      background: var(--surface3);
+      border-radius: 10px;
+      padding: 12px 20px;
+      text-align: center;
+    }
+
+    .confirm-stat-val {
+      font-family: 'Space Mono', monospace;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .confirm-stat-key {
+      font-size: 11px;
+      color: var(--text-sub);
+      margin-top: 2px;
+    }
+
+    .confirm-btns {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .confirm-btn {
+      padding: 12px 28px;
+      border-radius: 10px;
+      border: none;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+
+    .confirm-btn:hover {
+      opacity: 0.85;
+      transform: translateY(-1px);
+    }
+
+    /* ===== CONFETTI ===== */
+    #confettiCanvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 700;
+    }
+
+    /* ===== KEYBOARD HINT ===== */
+    .kbd-hint {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 11px;
+      color: var(--text-dim);
+      display: flex;
+      gap: 12px;
+      z-index: 10;
+    }
+
+    .kbd {
+      background: var(--surface3);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-family: 'Space Mono', monospace;
+      color: var(--text-sub);
+    }
+
+    /* ===== MOBILE STYLES (max-width: 767px) ===== */
+    @media (max-width: 767px) {
+
+      /* Hide PC-only elements */
+      .sidebar {
+        display: none !important;
+      }
+
+      .right-panel {
+        display: none !important;
+      }
+
+      .topbar-divider {
+        display: none;
+      }
+
+      .topbar-right {
+        display: none;
+      }
+
+      .kbd-hint {
+        display: none;
+      }
+
+      .session-name span {
+        display: none;
+      }
+
+      /* Topbar compact */
+      .topbar {
+        padding: 0 14px;
+        gap: 10px;
+        height: 52px;
+      }
+
+      .logo {
+        font-size: 16px;
+      }
+
+      .session-name strong {
+        font-size: 12px;
+      }
+
+      /* Mobile progress bar under topbar */
+      .mobile-progress {
+        display: flex !important;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 14px;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        flex-shrink: 0;
+      }
+
+      .mobile-progress-bar-bg {
+        flex: 1;
+        height: 5px;
+        background: var(--surface3);
+        border-radius: 5px;
+        overflow: hidden;
+      }
+
+      .mobile-progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--coral), var(--orange));
+        border-radius: 5px;
+        transition: width 0.4s ease;
+      }
+
+      .mobile-progress-count {
+        font-family: 'Space Mono', monospace;
+        font-size: 12px;
+        color: var(--coral);
+        white-space: nowrap;
+        font-weight: 700;
+      }
+
+      /* Main layout: full width, add bottom padding for nav */
+      .main {
+        overflow: hidden;
+      }
+
+      .content {
+        padding: 14px 10px 90px;
+        overflow-y: auto;
+      }
+
+      /* 2-column grid */
+      .photo-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+      }
+
+      .photo-grid.large {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+
+      .photo-grid.small {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+
+      /* Toolbar compact */
+      .toolbar {
+        margin-bottom: 14px;
+        gap: 8px;
+      }
+
+      .toolbar-title {
+        font-size: 13px;
+      }
+
+      .toolbar-sub {
+        font-size: 11px;
+      }
+
+      .tb-btn {
+        font-size: 11px;
+        padding: 6px 10px;
+      }
+
+      /* Group header compact */
+      .group-header {
+        gap: 8px;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+      }
+
+      .group-title {
+        font-size: 13px;
+      }
+
+      .group-meta {
+        font-size: 10px;
+      }
+
+      .group-limit-badge {
+        font-size: 10px;
+        padding: 3px 8px;
+      }
+
+      .group-section {
+        margin-bottom: 24px;
+      }
+
+      /* Photo card: larger tap area */
+      .photo-card {
+        border-radius: 8px;
+      }
+
+      .overlay-btn {
+        font-size: 11px;
+        padding: 8px 4px;
+      }
+
+      /* Modal: full screen on mobile */
+      .modal-photo {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        height: 100dvh !important;
+        max-height: 100dvh !important;
+        display: flex;
+        flex-direction: column;
+        border-radius: 0;
+      }
+
+      .modal-photo-img {
+        width: 100% !important;
+        flex: 1;
+        border-radius: 0 !important;
+        border: none !important;
+        font-size: 80px !important;
+      }
+
+      .modal-meta {
+        position: static !important;
+        padding: 12px 16px 0;
+        flex-shrink: 0;
+      }
+
+      .modal-close {
+        position: absolute !important;
+        top: 12px !important;
+        right: 12px !important;
+        z-index: 20;
+      }
+
+      .modal-nav-prev {
+        left: 8px !important;
+      }
+
+      .modal-nav-next {
+        right: 8px !important;
+      }
+
+      .modal-actions {
+        position: static !important;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+        flex-shrink: 0;
+        padding: 0;
+        margin-top: 0;
+      }
+
+      /* Close button spans full width at bottom */
+      #modalCloseBtn {
+        grid-column: 1 / -1;
+        border-radius: 0 !important;
+        padding: 14px !important;
+        font-size: 13px !important;
+        background: var(--surface2) !important;
+        color: var(--text-sub) !important;
+      }
+
+      .modal-btn {
+        border-radius: 0 !important;
+        padding: 18px 4px !important;
+        font-size: 15px !important;
+      }
+
+      /* Swipe hint */
+      .swipe-hint {
+        display: flex !important;
+        position: absolute;
+        bottom: 130px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.3);
+        white-space: nowrap;
+        pointer-events: none;
+        gap: 16px;
+      }
+
+      /* Bottom nav bar */
+      .bottom-nav {
+        display: flex !important;
+      }
+
+      /* Bottom sheet */
+      .bottom-sheet {
+        display: flex !important;
+      }
+    }
+
+    /* Elements hidden on mobile by default, shown via JS/media */
+    .mobile-progress {
+      display: none;
+    }
+
+    .swipe-hint {
+      display: none;
+    }
+
+    /* ===== BOTTOM NAV BAR ===== */
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      z-index: 200;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 8px;
+      gap: 4px;
+    }
+
+    .bn-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 8px 16px;
+      border-radius: 12px;
+      background: none;
+      border: none;
+      color: var(--text-sub);
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s, color 0.15s;
+      flex: 1;
+    }
+
+    .bn-btn:hover,
+    .bn-btn.active {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .bn-icon {
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .bn-badge {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: var(--coral);
+      color: white;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 10px;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .bn-btn-wrap {
+      position: relative;
+    }
+
+    .bn-complete {
+      background: var(--coral);
+      color: white;
+      border-radius: 14px;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      flex: 1.5;
+      transition: opacity 0.15s;
+    }
+
+    .bn-complete:hover {
+      opacity: 0.85;
+    }
+
+    /* ===== BOTTOM SHEET ===== */
+    .bottom-sheet {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      flex-direction: column;
+      justify-content: flex-end;
+      pointer-events: none;
+    }
+
+    .bottom-sheet.open {
+      pointer-events: all;
+    }
+
+    .bs-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(2px);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .bottom-sheet.open .bs-backdrop {
+      opacity: 1;
+    }
+
+    .bs-panel {
+      position: relative;
+      background: var(--surface);
+      border-radius: 20px 20px 0 0;
+      border-top: 1px solid var(--border2);
+      max-height: 80vh;
+      overflow-y: auto;
+      transform: translateY(100%);
+      transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    .bottom-sheet.open .bs-panel {
+      transform: translateY(0);
+    }
+
+
+    .bs-handle {
+      width: 36px;
+      height: 4px;
+      background: var(--border2);
+      border-radius: 4px;
+      margin: 12px auto 0;
+    }
+
+    .bs-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .bs-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .bs-close {
+      background: var(--surface2);
+      border: none;
+      color: var(--text-sub);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .bs-content {
+      padding: 12px 16px 24px;
+    }
+
+    /* Mobile filter chips */
+    .filter-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .filter-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 20px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-sub);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+
+    .filter-chip.active {
+      border-color: var(--coral);
+      color: var(--coral);
+      background: rgba(255, 107, 107, 0.1);
+    }
+
+    .filter-chip-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+
+    /* Mobile group list */
+    .mobile-group-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .mobile-group-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .mobile-group-item:hover {
+      background: var(--surface3);
+    }
+
+    .mobile-group-bar {
+      width: 4px;
+      height: 32px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .mobile-group-info {
+      flex: 1;
+    }
+
+    .mobile-group-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .mobile-group-count {
+      font-size: 11px;
+      color: var(--text-sub);
+      margin-top: 2px;
+    }
+
+    .mobile-group-progress {
+      width: 48px;
+      height: 4px;
+      background: var(--surface3);
+      border-radius: 4px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .mobile-group-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ===== TOP BAR ===== -->
+  <div class="topbar">
+    <div class="logo">Pic<span>Check</span></div>
+    <div class="topbar-divider"></div>
+    <div class="session-name">
+      <strong>夏コスプレ撮影会 #2025-08</strong>
+      <span style="color:var(--text-dim);margin-left:8px;font-size:11px">by @photographer_tanaka</span>
+    </div>
+    <div class="topbar-right">
+      <div class="progress-wrap">
+        <span class="progress-label">セレクト進捗</span>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+        </div>
+        <span class="progress-count" id="progressCount">0 / 15</span>
+      </div>
+      <div class="topbar-divider"></div>
+      <div class="topbar-divider"></div>
+      <div class="dl-dropdown" style="position:relative">
+        <button class="btn-download" onclick="toggleDlMenu()" id="dlBtn">
+          📥 ダウンロード ▼
+        </button>
+        <div class="dl-menu" id="dlMenu">
+          <button onclick="downloadPhotos('all')">📥 全部ダウンロード</button>
+          <button onclick="downloadPhotos('ok')">✓ OKカットのみ</button>
+          <button onclick="downloadPhotos('ok+nearok')">△ ほぼOKも含む</button>
+          <button onclick="downloadPhotos('ng')">✕ NGのみ</button>
+        </div>
+      </div>
+      <button class="btn-complete" onclick="openConfirm()">
+        完了して送信 →
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile progress bar -->
+  <div class="mobile-progress" id="mobileProgress">
+    <div class="mobile-progress-bar-bg">
+      <div class="mobile-progress-bar-fill" id="mobileProgressFill" style="width:0%"></div>
+    </div>
+    <span class="mobile-progress-count" id="mobileProgressCount">0 / 15</span>
+  </div>
+
+  <div class="main">
+
+    <!-- ===== LEFT SIDEBAR ===== -->
+    <div class="sidebar">
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">表示フィルター</div>
+        <button class="filter-btn active" onclick="setFilter('all', this)">
+          <span class="filter-dot" style="background:var(--text-sub)"></span>
+          すべて
+          <span class="filter-count" id="cnt-all">87</span>
+        </button>
+        <button class="filter-btn" onclick="setFilter('ok', this)">
+          <span class="filter-dot" style="background:var(--green)"></span>
+          OK
+          <span class="filter-count" id="cnt-ok">0</span>
+        </button>
+        <button class="filter-btn" onclick="setFilter('nearok', this)">
+          <span class="filter-dot" style="background:var(--yellow)"></span>
+          ほぼOK
+          <span class="filter-count" id="cnt-nearok">0</span>
+        </button>
+        <button class="filter-btn" onclick="setFilter('ng', this)">
+          <span class="filter-dot" style="background:var(--coral)"></span>
+          NG
+          <span class="filter-count" id="cnt-ng">0</span>
+        </button>
+        <button class="filter-btn" onclick="setFilter('ai', this)">
+          <span class="filter-dot" style="background:var(--lavender)"></span>
+          AI 要確認
+          <span class="filter-count">0</span>
+        </button>
+        <button class="filter-btn" onclick="setFilter('none', this)">
+          <span class="filter-dot" style="background:var(--text-dim)"></span>
+          未判定
+          <span class="filter-count" id="cnt-none">87</span>
+        </button>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">グループ一覧</div>
+        <button class="group-nav-item active" onclick="scrollToGroup('g1', this)">
+          <div class="group-color-bar" style="background:var(--g1)"></div>
+          <span class="group-nav-name">A：メインポーズ</span>
+          <span class="group-nav-sel" id="nav-g1">0/3</span>
+        </button>
+        <button class="group-nav-item" onclick="scrollToGroup('g2', this)">
+          <div class="group-color-bar" style="background:var(--g2)"></div>
+          <span class="group-nav-name">B：アップカット</span>
+          <span class="group-nav-sel" id="nav-g2">0/2</span>
+        </button>
+        <button class="group-nav-item" onclick="scrollToGroup('g3', this)">
+          <div class="group-color-bar" style="background:var(--g3)"></div>
+          <span class="group-nav-name">C：立ちポーズ</span>
+          <span class="group-nav-sel" id="nav-g3">0/3</span>
+        </button>
+        <button class="group-nav-item" onclick="scrollToGroup('g4', this)">
+          <div class="group-color-bar" style="background:var(--g4)"></div>
+          <span class="group-nav-name">D：背景引き</span>
+          <span class="group-nav-sel" id="nav-g4">0/2</span>
+        </button>
+        <button class="group-nav-item" onclick="scrollToGroup('g5', this)">
+          <div class="group-color-bar" style="background:var(--g5)"></div>
+          <span class="group-nav-name">E：座りポーズ</span>
+          <span class="group-nav-sel" id="nav-g5">0/2</span>
+        </button>
+        <button class="group-nav-item" onclick="scrollToGroup('g6', this)">
+          <div class="group-color-bar" style="background:var(--g6)"></div>
+          <span class="group-nav-name">F：小道具あり</span>
+          <span class="group-nav-sel" id="nav-g6">0/3</span>
+        </button>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">撮影情報</div>
+        <div class="stat-row"><span class="stat-key">合計枚数</span><span class="stat-val">42枚</span></div>
+        <div class="stat-row"><span class="stat-key">選択上限</span><span class="stat-val yellow">15枚</span></div>
+        <div class="stat-row"><span class="stat-key">AI 要確認</span><span class="stat-val"
+            style="color:var(--lavender)">8枚</span></div>
+        <div class="stat-row"><span class="stat-key">保存期間</span><span class="stat-val">2025/09/08まで</span></div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">露出 NG ライン</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <label style="display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--text-sub);cursor:pointer">
+            <input type="checkbox" checked style="accent-color:var(--coral)"> 下着が見える写真
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--text-sub);cursor:pointer">
+            <input type="checkbox" style="accent-color:var(--coral)"> 水着が見える写真
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--text-sub);cursor:pointer">
+            <input type="checkbox" style="accent-color:var(--coral)"> 胸元が大きく開く
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== CONTENT ===== -->
+    <div class="content" id="content">
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div>
+          <span class="toolbar-title">写真にステータスをつけてください</span>
+          <span class="toolbar-sub">OK / ほぼOK / NG で判定</span>
+        </div>
+        <div class="toolbar-right">
+          <button class="tb-btn" onclick="toggleGridSize()">
+            <span id="gridIcon">⊞</span> 表示サイズ
+          </button>
+          <button class="tb-btn" id="aiFilterBtn" onclick="toggleAIFilter()">
+            AI 要確認のみ
+          </button>
+        </div>
+      </div>
+
+      <!-- Bulk Action Bar (全体一括) -->
+      <div class="bulk-bar">
+        <span class="bulk-label">全体：</span>
+        <button class="bulk-btn bulk-btn-ok" onclick="bulkSetAll('ok')">✓ 全てOK</button>
+        <button class="bulk-btn bulk-btn-nearok" onclick="bulkSetAll('nearok')">△ 全てほぼOK</button>
+        <button class="bulk-btn bulk-btn-ng" onclick="bulkSetAll('ng')">✕ 全てNG</button>
+        <div class="bulk-sep"></div>
+        <button class="bulk-btn bulk-btn-reset" onclick="bulkSetAll(null)">リセット</button>
+      </div>
+
+      <!-- ====== GROUP A ====== -->
+      <div class="group-section" id="g1">
+        <div class="group-header">
+          <div class="group-color-pill"
+            style="background:rgba(255,107,107,0.15);color:var(--g1);border:1px solid rgba(255,107,107,0.3)">
+            <span style="width:7px;height:7px;border-radius:50%;background:var(--g1);display:inline-block"></span>
+            グループ A
+          </div>
+          <div class="group-title" id="gtitle-g1">グループ A</div>
+          <div class="group-meta" id="gmeta-g1">15枚</div>
+          <div class="group-bulk-btns">
+            <button class="group-bulk-btn gbtn-ok" onclick="bulkSetGroup('g1','ok')">全OK</button>
+            <button class="group-bulk-btn gbtn-nearok" onclick="bulkSetGroup('g1','nearok')">全ほぼOK</button>
+            <button class="group-bulk-btn gbtn-ng" onclick="bulkSetGroup('g1','ng')">全NG</button>
+            <button class="group-bulk-btn gbtn-reset" onclick="confirmGroupReset('g1')">リセット</button>
+          </div>
+          <div class="group-limit-badge" id="limit-g1">0 OK</div>
+        </div>
+        <div class="photo-grid" id="grid-g1"></div>
+      </div>
+
+      <!-- ====== GROUP B ====== -->
+      <div class="group-section" id="g2">
+        <div class="group-header">
+          <div class="group-color-pill"
+            style="background:rgba(59,191,165,0.15);color:var(--g2);border:1px solid rgba(59,191,165,0.3)">
+            <span style="width:7px;height:7px;border-radius:50%;background:var(--g2);display:inline-block"></span>
+            グループ B
+          </div>
+          <div class="group-title" id="gtitle-g2">グループ B</div>
+          <div class="group-meta" id="gmeta-g2">15枚</div>
+          <div class="group-bulk-btns">
+            <button class="group-bulk-btn gbtn-ok" onclick="bulkSetGroup('g2','ok')">全OK</button>
+            <button class="group-bulk-btn gbtn-nearok" onclick="bulkSetGroup('g2','nearok')">全ほぼOK</button>
+            <button class="group-bulk-btn gbtn-ng" onclick="bulkSetGroup('g2','ng')">全NG</button>
+            <button class="group-bulk-btn gbtn-reset" onclick="confirmGroupReset('g2')">リセット</button>
+          </div>
+          <div class="group-limit-badge" id="limit-g2">0 OK</div>
+        </div>
+        <div class="photo-grid" id="grid-g2"></div>
+      </div>
+
+      <!-- ====== GROUP C ====== -->
+      <div class="group-section" id="g3">
+        <div class="group-header">
+          <div class="group-color-pill"
+            style="background:rgba(155,127,232,0.15);color:var(--g3);border:1px solid rgba(155,127,232,0.3)">
+            <span style="width:7px;height:7px;border-radius:50%;background:var(--g3);display:inline-block"></span>
+            グループ C
+          </div>
+          <div class="group-title" id="gtitle-g3">グループ C</div>
+          <div class="group-meta" id="gmeta-g3">15枚</div>
+          <div class="group-bulk-btns">
+            <button class="group-bulk-btn gbtn-ok" onclick="bulkSetGroup('g3','ok')">全OK</button>
+            <button class="group-bulk-btn gbtn-nearok" onclick="bulkSetGroup('g3','nearok')">全ほぼOK</button>
+            <button class="group-bulk-btn gbtn-ng" onclick="bulkSetGroup('g3','ng')">全NG</button>
+            <button class="group-bulk-btn gbtn-reset" onclick="confirmGroupReset('g3')">リセット</button>
+          </div>
+          <div class="group-limit-badge" id="limit-g3">0 OK</div>
+        </div>
+        <div class="photo-grid" id="grid-g3"></div>
+      </div>
+
+      <!-- ====== GROUP D ====== -->
+      <div class="group-section" id="g4">
+        <div class="group-header">
+          <div class="group-color-pill"
+            style="background:rgba(74,158,224,0.15);color:var(--g4);border:1px solid rgba(74,158,224,0.3)">
+            <span style="width:7px;height:7px;border-radius:50%;background:var(--g4);display:inline-block"></span>
+            グループ D
+          </div>
+          <div class="group-title" id="gtitle-g4">グループ D</div>
+          <div class="group-meta" id="gmeta-g4">15枚</div>
+          <div class="group-bulk-btns">
+            <button class="group-bulk-btn gbtn-ok" onclick="bulkSetGroup('g4','ok')">全OK</button>
+            <button class="group-bulk-btn gbtn-nearok" onclick="bulkSetGroup('g4','nearok')">全ほぼOK</button>
+            <button class="group-bulk-btn gbtn-ng" onclick="bulkSetGroup('g4','ng')">全NG</button>
+            <button class="group-bulk-btn gbtn-reset" onclick="confirmGroupReset('g4')">リセット</button>
+          </div>
+          <div class="group-limit-badge" id="limit-g4">0 OK</div>
+        </div>
+        <div class="photo-grid" id="grid-g4"></div>
+      </div>
+
+      <!-- ====== GROUP E ====== -->
+      <div class="group-section" id="g5">
+        <div class="group-header">
+          <div class="group-color-pill"
+            style="background:rgba(245,200,66,0.15);color:var(--g5);border:1px solid rgba(245,200,66,0.3)">
+            <span style="width:7px;height:7px;border-radius:50%;background:var(--g5);display:inline-block"></span>
+            グループ E
+          </div>
+          <div class="group-title" id="gtitle-g5">グループ E</div>
+          <div class="group-meta" id="gmeta-g5">15枚</div>
+          <div class="group-bulk-btns">
+            <button class="group-bulk-btn gbtn-ok" onclick="bulkSetGroup('g5','ok')">全OK</button>
+            <button class="group-bulk-btn gbtn-nearok" onclick="bulkSetGroup('g5','nearok')">全ほぼOK</button>
+            <button class="group-bulk-btn gbtn-ng" onclick="bulkSetGroup('g5','ng')">全NG</button>
+            <button class="group-bulk-btn gbtn-reset" onclick="confirmGroupReset('g5')">リセット</button>
+          </div>
+          <div class="group-limit-badge" id="limit-g5">0 OK</div>
+        </div>
+        <div class="photo-grid" id="grid-g5"></div>
+      </div>
+
+      <!-- ====== GROUP F ====== -->
+      <div class="group-section" id="g6">
+        <div class="group-header">
+          <div class="group-color-pill"
+            style="background:rgba(240,98,146,0.15);color:var(--g6);border:1px solid rgba(240,98,146,0.3)">
+            <span style="width:7px;height:7px;border-radius:50%;background:var(--g6);display:inline-block"></span>
+            グループ F
+          </div>
+          <div class="group-title" id="gtitle-g6">グループ F</div>
+          <div class="group-meta" id="gmeta-g6">12枚</div>
+          <div class="group-bulk-btns">
+            <button class="group-bulk-btn gbtn-ok" onclick="bulkSetGroup('g6','ok')">全OK</button>
+            <button class="group-bulk-btn gbtn-nearok" onclick="bulkSetGroup('g6','nearok')">全ほぼOK</button>
+            <button class="group-bulk-btn gbtn-ng" onclick="bulkSetGroup('g6','ng')">全NG</button>
+            <button class="group-bulk-btn gbtn-reset" onclick="confirmGroupReset('g6')">リセット</button>
+          </div>
+          <div class="group-limit-badge" id="limit-g6">0 OK</div>
+        </div>
+        <div class="photo-grid" id="grid-g6"></div>
+      </div>
+
+    </div>
+
+    <!-- ===== RIGHT PANEL ===== -->
+    <div class="right-panel">
+
+      <div class="rp-section">
+        <div class="rp-label">グループ別 進捗</div>
+        <div id="groupProgress"></div>
+      </div>
+
+      <div class="rp-section">
+        <div class="rp-label" style="display:flex;justify-content:space-between">
+          <span>OK 一覧</span>
+          <span style="color:var(--green);font-family:'Space Mono',monospace" id="selCountBadge">0</span>
+        </div>
+        <div class="selected-list" id="selectedList">
+          <div style="font-size:12px;color:var(--text-dim);text-align:center;padding:20px 0">
+            OK 写真を選んでください
+          </div>
+        </div>
+      </div>
+
+      <div class="rp-section">
+        <div class="rp-label" style="display:flex;justify-content:space-between">
+          <span>ほぼOK 一覧</span>
+          <span style="color:var(--yellow);font-family:'Space Mono',monospace" id="nearokCountBadge">0</span>
+        </div>
+        <div id="nearokList">
+          <div style="font-size:12px;color:var(--text-dim);text-align:center;padding:12px 0">
+            ほぼOK はありません
+          </div>
+        </div>
+      </div>
+
+      <div class="rp-section">
+        <div class="rp-label">NG 一覧</div>
+        <div id="ngList">
+          <div style="font-size:12px;color:var(--text-dim);text-align:center;padding:12px 0">
+            NG はありません
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== BOTTOM NAV BAR (mobile) ===== -->
+  <div class="bottom-nav" id="bottomNav">
+    <div class="bn-btn-wrap">
+      <button class="bn-btn" onclick="openBottomSheet('groupSheet')">
+        <span class="bn-icon">🗂️</span>
+        <span>グループ</span>
+      </button>
+    </div>
+    <div class="bn-btn-wrap">
+      <button class="bn-btn" id="bnFilterBtn" onclick="openBottomSheet('filterSheet')">
+        <span class="bn-icon">✨</span>
+        <span>フィルター</span>
+      </button>
+    </div>
+    <div class="bn-btn-wrap">
+      <button class="bn-btn" onclick="openBottomSheet('selectedSheet')">
+        <span class="bn-icon">✅</span>
+        <span>選択済み</span>
+        <span class="bn-badge" id="bnSelBadge" style="display:none">0</span>
+      </button>
+    </div>
+    <button class="bn-complete" onclick="openConfirm()">完了して送信 →</button>
+  </div>
+
+  <!-- ===== BOTTOM SHEET: Group & Filter ===== -->
+  <div class="bottom-sheet" id="groupSheet">
+    <div class="bs-backdrop" onclick="closeBottomSheet('groupSheet')"></div>
+    <div class="bs-panel">
+      <div class="bs-handle"></div>
+      <div class="bs-header">
+        <span class="bs-title">グループ・フィルター</span>
+        <button class="bs-close" onclick="closeBottomSheet('groupSheet')">✕</button>
+      </div>
+      <div class="bs-content">
+        <!-- Filter chips -->
+        <div class="filter-chips" id="mobileFilterChips">
+          <button class="filter-chip active" data-filter="all" onclick="mobileSetFilter('all', this)">
+            <span class="filter-chip-dot" style="background:var(--text-sub)"></span>すべて
+          </button>
+          <button class="filter-chip" data-filter="selected" onclick="mobileSetFilter('selected', this)">
+            <span class="filter-chip-dot" style="background:var(--green)"></span>選択済み
+          </button>
+          <button class="filter-chip" data-filter="ng" onclick="mobileSetFilter('ng', this)">
+            <span class="filter-chip-dot" style="background:var(--coral)"></span>NG
+          </button>
+          <button class="filter-chip" data-filter="ai" onclick="mobileSetFilter('ai', this)">
+            <span class="filter-chip-dot" style="background:var(--lavender)"></span>AI要確認
+          </button>
+          <button class="filter-chip" data-filter="none" onclick="mobileSetFilter('none', this)">
+            <span class="filter-chip-dot" style="background:var(--text-dim)"></span>未選択
+          </button>
+        </div>
+        <!-- Group list -->
+        <div class="mobile-group-list" id="mobileGroupList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== BOTTOM SHEET: Selected & NG ===== -->
+  <div class="bottom-sheet" id="selectedSheet">
+    <div class="bs-backdrop" onclick="closeBottomSheet('selectedSheet')"></div>
+    <div class="bs-panel">
+      <div class="bs-handle"></div>
+      <div class="bs-header">
+        <span class="bs-title">選択済み・ NG 一覧</span>
+        <button class="bs-close" onclick="closeBottomSheet('selectedSheet')">✕</button>
+      </div>
+      <div class="bs-content">
+        <div style="margin-bottom:12px">
+          <div class="rp-label" style="margin-bottom:8px">選択済み</div>
+          <div id="mobileSelectedList">
+            <div style="font-size:12px;color:var(--text-dim);text-align:center;padding:12px 0">写真を選んでください</div>
+          </div>
+        </div>
+        <div>
+          <div class="rp-label" style="margin-bottom:8px">NG フラグ</div>
+          <div id="mobileNgList">
+            <div style="font-size:12px;color:var(--text-dim);text-align:center;padding:12px 0">NG はありません</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Photo Modal -->
+  <div class="modal-overlay" id="modal" onclick="closeModal(event)">
+    <div class="modal-photo" id="modalPhoto">
+      <div class="modal-meta">
+        <span class="modal-fname" id="modalFname"></span>
+        <span class="modal-group-tag" id="modalGroupTag"></span>
+        <div class="modal-ai-badges" id="modalAiBadges"></div>
+      </div>
+      <button class="modal-nav modal-nav-prev" id="modalPrev" onclick="modalNav(-1)">‹</button>
+      <div class="modal-photo-img" id="modalImg"></div>
+      <button class="modal-nav modal-nav-next" id="modalNext" onclick="modalNav(1)">›</button>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div class="modal-actions">
+        <button class="modal-btn" id="modalOkBtn" style="background:var(--green);color:white"
+          onclick="modalAction('ok')">✓ OK</button>
+        <button class="modal-btn" id="modalNearokBtn" style="background:var(--yellow);color:#111"
+          onclick="modalAction('nearok')">△ ほぼOK</button>
+        <button class="modal-btn" id="modalNgBtn" style="background:var(--coral);color:white"
+          onclick="modalAction('ng')">✕ NG</button>
+        <button class="modal-btn" style="background:var(--surface3);color:var(--text)"
+          onclick="closeModal()">閉じる</button>
+      </div>
+      <!-- Comment field -->
+      <div style="padding:0 20px 16px;">
+        <textarea id="modalComment" placeholder="修正指示・コメントを入力（例：目を開けたカットを採用）" oninput="saveComment()"
+          style="width:100%;background:var(--surface3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:inherit;font-size:12px;padding:10px;resize:vertical;min-height:64px;line-height:1.5;outline:none;"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Modal -->
+  <div class="confirm-overlay" id="confirmModal">
+    <div class="confirm-box">
+      <div class="confirm-icon">📤</div>
+      <div class="confirm-title">セレクトを送信しますか？</div>
+      <div class="confirm-desc" id="confirmDesc">選択内容をカメラマンに送信します。<br>送信後は変更できません。</div>
+      <div class="confirm-stats">
+        <div class="confirm-stat">
+          <div class="confirm-stat-val" id="confirmSelCount" style="color:var(--green)">0</div>
+          <div class="confirm-stat-key">選択済み</div>
+        </div>
+        <div class="confirm-stat">
+          <div class="confirm-stat-val" id="confirmNgCount" style="color:var(--coral)">0</div>
+          <div class="confirm-stat-key">NG フラグ</div>
+        </div>
+      </div>
+      <div class="confirm-btns">
+        <button class="confirm-btn" style="background:var(--surface3);color:var(--text)"
+          onclick="closeConfirm()">キャンセル</button>
+        <button class="confirm-btn" style="background:var(--coral);color:white" onclick="doSend()">送信する →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Group Reset Confirm Dialog -->
+  <div class="group-reset-overlay" id="groupResetModal" onclick="closeGroupReset(event)">
+    <div class="group-reset-box">
+      <div style="font-size:28px;margin-bottom:10px">⚠️</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:8px">グループのデータをリセットしますか？</div>
+      <div style="font-size:13px;color:var(--text-sub);margin-bottom:18px" id="groupResetDesc">このグループの OK / ほぼOK / NG
+        全ての判定が消えます。</div>
+      <div style="display:flex;gap:10px;justify-content:center">
+        <button class="group-reset-btn" style="background:var(--surface3);color:var(--text)"
+          onclick="closeGroupReset()">キャンセル</button>
+        <button class="group-reset-btn" style="background:var(--coral);color:#fff"
+          onclick="doGroupReset()">リセットする</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confetti Canvas -->
+  <canvas id="confettiCanvas"></canvas>
+
+  <!-- Keyboard Hint -->
+  <div class="kbd-hint">
+    <span><span class="kbd">←</span><span class="kbd">→</span> 移動</span>
+    <span><span class="kbd">O</span> OK</span>
+    <span><span class="kbd">H</span> ほぼOK</span>
+    <span><span class="kbd">N</span> NG</span>
+    <span><span class="kbd">ESC</span> 閉じる</span>
+  </div>
+
+  <script>
+    // ===== DATA =====
+    // Load from Upload screen (direct injection or sessionStorage) if available, otherwise use demo data
+    function loadGroupData() {
+      let raw = null;
+
+      // 1. Check direct injection (window property, set before navigation)
+      if (window.PICCHECK_DATA) {
+        raw = window.PICCHECK_DATA;
+        console.log('[loadGroupData] Source: window.PICCHECK_DATA');
+      }
+
+      // 2. Check opener (for window.open scenarios)
+      if (!raw && window.opener) {
+        try {
+          if (window.opener.PICCHECK_DATA) {
+            raw = window.opener.PICCHECK_DATA;
+            console.log('[loadGroupData] Source: opener.PICCHECK_DATA');
+          }
+        } catch (e) { /* cross-origin error, ignore */ }
+      }
+
+      // 3. Check localStorage (primary storage for file:// protocol)
+      if (!raw) {
+        const stored = localStorage.getItem('piccheck_groups');
+        if (stored) {
+          try {
+            raw = JSON.parse(stored);
+            console.log('[loadGroupData] Source: localStorage');
+          } catch (e) {
+            console.error('localStorage parse error:', e);
+          }
+        }
+      }
+
+      // 4. Check sessionStorage (secondary fallback)
+      if (!raw) {
+        const stored = sessionStorage.getItem('piccheck_groups');
+        if (stored) {
+          try {
+            raw = JSON.parse(stored);
+            console.log('[loadGroupData] Source: sessionStorage');
+          } catch (e) { }
+        }
+      }
+
+      if (raw) {
+        try {
+          // If raw is string, parse it. If object/array, use as is.
+          const imported = (typeof raw === 'string') ? JSON.parse(raw) : raw;
+
+          // Handle both array format and {groups: [...]} format
+          const arr = Array.isArray(imported) ? imported : (imported.groups || []);
+
+          if (arr.length === 0) {
+            console.warn('[loadGroupData] Data array is empty');
+            return null;
+          }
+
+          console.log('[loadGroupData] Loaded', arr.length, 'groups');
+
+          const defaultColors = ['#FF6B6B', '#3BBFA5', '#9B7FE8', '#4A9EE0', '#F5C842', '#F06292'];
+          const defaultLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+
+          return arr.map((g, i) => ({
+            id: g.id || `g${i + 1}`,
+            label: g.label || defaultLabels[i] || String.fromCharCode(65 + i),
+            name: g.name || g.label || `グループ ${defaultLabels[i] || i + 1}`,
+            color: g.color || defaultColors[i % defaultColors.length],
+            limit: typeof g.limit === 'number' ? g.limit : (parseInt(g.limit) || 1),
+            photos: (g.photos || []).map((p, j) => ({
+              id: p.id || `${(g.label || defaultLabels[i] || 'x').toLowerCase()}${j + 1}`,
+              fname: p.fname || `photo_${j + 1}.jpg`,
+              url: p.url || '',
+              emoji: '📷',
+              bg: `linear-gradient(135deg, #1a1a2a, #0a0a1a)`,
+              ai: p.ai || []
+            }))
+          }));
+        } catch (e) {
+          console.error('Data parse error:', e);
+        }
+      }
+
+      console.log('[loadGroupData] No data found, using demo data');
+      return null;
+    }
+
+    const _imported = loadGroupData();
+    const isPreviewMode = !!_imported;
+
+    // Default Demo Data
+    const DEMO_DATA = [
+      {
+        id: 'g1', label: 'A', name: 'グループ A', color: '#FF6B6B', limit: 5,
+        photos: [
+          { id: 'a1', fname: 'LINE_ALBUM_2026.2.17_260219_1.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_1.jpg', ai: [] },
+          { id: 'a2', fname: 'LINE_ALBUM_2026.2.17_260219_2.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_2.jpg', ai: [] },
+          { id: 'a3', fname: 'LINE_ALBUM_2026.2.17_260219_3.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_3.jpg', ai: [] },
+          { id: 'a4', fname: 'LINE_ALBUM_2026.2.17_260219_4.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_4.jpg', ai: [] },
+          { id: 'a5', fname: 'LINE_ALBUM_2026.2.17_260219_5.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_5.jpg', ai: [] },
+          { id: 'a6', fname: 'LINE_ALBUM_2026.2.17_260219_6.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_6.jpg', ai: [] },
+          { id: 'a7', fname: 'LINE_ALBUM_2026.2.17_260219_7.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_7.jpg', ai: [] },
+          { id: 'a8', fname: 'LINE_ALBUM_2026.2.17_260219_8.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_8.jpg', ai: [] },
+          { id: 'a9', fname: 'LINE_ALBUM_2026.2.17_260219_9.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_9.jpg', ai: [] },
+          { id: 'a10', fname: 'LINE_ALBUM_2026.2.17_260219_10.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_10.jpg', ai: [] },
+          { id: 'a11', fname: 'LINE_ALBUM_2026.2.17_260219_11.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_11.jpg', ai: [] },
+          { id: 'a12', fname: 'LINE_ALBUM_2026.2.17_260219_12.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_12.jpg', ai: [] },
+          { id: 'a13', fname: 'LINE_ALBUM_2026.2.17_260219_13.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_13.jpg', ai: [] },
+          { id: 'a14', fname: 'LINE_ALBUM_2026.2.17_260219_14.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_14.jpg', ai: [] },
+          { id: 'a15', fname: 'LINE_ALBUM_2026.2.17_260219_15.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_15.jpg', ai: [] },
+        ]
+      },
+
+      {
+        id: 'g2', label: 'B', name: 'グループ B', color: '#3BBFA5', limit: 5,
+        photos: [
+          { id: 'b1', fname: 'LINE_ALBUM_2026.2.17_260219_16.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_16.jpg', ai: [] },
+          { id: 'b2', fname: 'LINE_ALBUM_2026.2.17_260219_17.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_17.jpg', ai: [] },
+          { id: 'b3', fname: 'LINE_ALBUM_2026.2.17_260219_18.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_18.jpg', ai: [] },
+          { id: 'b4', fname: 'LINE_ALBUM_2026.2.17_260219_19.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_19.jpg', ai: [] },
+          { id: 'b5', fname: 'LINE_ALBUM_2026.2.17_260219_20.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_20.jpg', ai: [] },
+          { id: 'b6', fname: 'LINE_ALBUM_2026.2.17_260219_21.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_21.jpg', ai: [] },
+          { id: 'b7', fname: 'LINE_ALBUM_2026.2.17_260219_22.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_22.jpg', ai: [] },
+          { id: 'b8', fname: 'LINE_ALBUM_2026.2.17_260219_23.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_23.jpg', ai: [] },
+          { id: 'b9', fname: 'LINE_ALBUM_2026.2.17_260219_24.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_24.jpg', ai: [] },
+          { id: 'b10', fname: 'LINE_ALBUM_2026.2.17_260219_25.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_25.jpg', ai: [] },
+          { id: 'b11', fname: 'LINE_ALBUM_2026.2.17_260219_26.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_26.jpg', ai: [] },
+          { id: 'b12', fname: 'LINE_ALBUM_2026.2.17_260219_27.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_27.jpg', ai: [] },
+          { id: 'b13', fname: 'LINE_ALBUM_2026.2.17_260219_28.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_28.jpg', ai: [] },
+          { id: 'b14', fname: 'LINE_ALBUM_2026.2.17_260219_29.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_29.jpg', ai: [] },
+          { id: 'b15', fname: 'LINE_ALBUM_2026.2.17_260219_30.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_30.jpg', ai: [] },
+        ]
+      },
+      {
+        id: 'g3', label: 'C', name: 'グループ C', color: '#9B7FE8', limit: 5,
+        photos: [
+          { id: 'c1', fname: 'LINE_ALBUM_2026.2.17_260219_31.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_31.jpg', ai: [] },
+          { id: 'c2', fname: 'LINE_ALBUM_2026.2.17_260219_32.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_32.jpg', ai: [] },
+          { id: 'c3', fname: 'LINE_ALBUM_2026.2.17_260219_33.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_33.jpg', ai: [] },
+          { id: 'c4', fname: 'LINE_ALBUM_2026.2.17_260219_34.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_34.jpg', ai: [] },
+          { id: 'c5', fname: 'LINE_ALBUM_2026.2.17_260219_35.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_35.jpg', ai: [] },
+          { id: 'c6', fname: 'LINE_ALBUM_2026.2.17_260219_36.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_36.jpg', ai: [] },
+          { id: 'c7', fname: 'LINE_ALBUM_2026.2.17_260219_37.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_37.jpg', ai: [] },
+          { id: 'c8', fname: 'LINE_ALBUM_2026.2.17_260219_38.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_38.jpg', ai: [] },
+          { id: 'c9', fname: 'LINE_ALBUM_2026.2.17_260219_39.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_39.jpg', ai: [] },
+          { id: 'c10', fname: 'LINE_ALBUM_2026.2.17_260219_40.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_40.jpg', ai: [] },
+          { id: 'c11', fname: 'LINE_ALBUM_2026.2.17_260219_41.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_41.jpg', ai: [] },
+          { id: 'c12', fname: 'LINE_ALBUM_2026.2.17_260219_42.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_42.jpg', ai: [] },
+          { id: 'c13', fname: 'LINE_ALBUM_2026.2.17_260219_43.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_43.jpg', ai: [] },
+          { id: 'c14', fname: 'LINE_ALBUM_2026.2.17_260219_44.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_44.jpg', ai: [] },
+          { id: 'c15', fname: 'LINE_ALBUM_2026.2.17_260219_45.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_45.jpg', ai: [] },
+        ]
+      },
+      {
+        id: 'g4', label: 'D', name: 'グループ D', color: '#4A9EE0', limit: 5,
+        photos: [
+          { id: 'd1', fname: 'LINE_ALBUM_2026.2.17_260219_46.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_46.jpg', ai: [] },
+          { id: 'd2', fname: 'LINE_ALBUM_2026.2.17_260219_47.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_47.jpg', ai: [] },
+          { id: 'd3', fname: 'LINE_ALBUM_2026.2.17_260219_48.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_48.jpg', ai: [] },
+          { id: 'd4', fname: 'LINE_ALBUM_2026.2.17_260219_49.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_49.jpg', ai: [] },
+          { id: 'd5', fname: 'LINE_ALBUM_2026.2.17_260219_50.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_50.jpg', ai: [] },
+          { id: 'd6', fname: 'LINE_ALBUM_2026.2.17_260219_51.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_51.jpg', ai: [] },
+          { id: 'd7', fname: 'LINE_ALBUM_2026.2.17_260219_52.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_52.jpg', ai: [] },
+          { id: 'd8', fname: 'LINE_ALBUM_2026.2.17_260219_53.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_53.jpg', ai: [] },
+          { id: 'd9', fname: 'LINE_ALBUM_2026.2.17_260219_54.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_54.jpg', ai: [] },
+          { id: 'd10', fname: 'LINE_ALBUM_2026.2.17_260219_55.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_55.jpg', ai: [] },
+          { id: 'd11', fname: 'LINE_ALBUM_2026.2.17_260219_56.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_56.jpg', ai: [] },
+          { id: 'd12', fname: 'LINE_ALBUM_2026.2.17_260219_57.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_57.jpg', ai: [] },
+          { id: 'd13', fname: 'LINE_ALBUM_2026.2.17_260219_58.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_58.jpg', ai: [] },
+          { id: 'd14', fname: 'LINE_ALBUM_2026.2.17_260219_59.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_59.jpg', ai: [] },
+          { id: 'd15', fname: 'LINE_ALBUM_2026.2.17_260219_60.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_60.jpg', ai: [] },
+        ]
+      },
+      {
+        id: 'g5', label: 'E', name: 'グループ E', color: '#F5C842', limit: 5,
+        photos: [
+          { id: 'e1', fname: 'LINE_ALBUM_2026.2.17_260219_61.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_61.jpg', ai: [] },
+          { id: 'e2', fname: 'LINE_ALBUM_2026.2.17_260219_62.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_62.jpg', ai: [] },
+          { id: 'e3', fname: 'LINE_ALBUM_2026.2.17_260219_63.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_63.jpg', ai: [] },
+          { id: 'e4', fname: 'LINE_ALBUM_2026.2.17_260219_64.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_64.jpg', ai: [] },
+          { id: 'e5', fname: 'LINE_ALBUM_2026.2.17_260219_65.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_65.jpg', ai: [] },
+          { id: 'e6', fname: 'LINE_ALBUM_2026.2.17_260219_66.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_66.jpg', ai: [] },
+          { id: 'e7', fname: 'LINE_ALBUM_2026.2.17_260219_67.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_67.jpg', ai: [] },
+          { id: 'e8', fname: 'LINE_ALBUM_2026.2.17_260219_68.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_68.jpg', ai: [] },
+          { id: 'e9', fname: 'LINE_ALBUM_2026.2.17_260219_69.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_69.jpg', ai: [] },
+          { id: 'e10', fname: 'LINE_ALBUM_2026.2.17_260219_70.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_70.jpg', ai: [] },
+          { id: 'e11', fname: 'LINE_ALBUM_2026.2.17_260219_71.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_71.jpg', ai: [] },
+          { id: 'e12', fname: 'LINE_ALBUM_2026.2.17_260219_72.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_72.jpg', ai: [] },
+          { id: 'e13', fname: 'LINE_ALBUM_2026.2.17_260219_73.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_73.jpg', ai: [] },
+          { id: 'e14', fname: 'LINE_ALBUM_2026.2.17_260219_74.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_74.jpg', ai: [] },
+          { id: 'e15', fname: 'LINE_ALBUM_2026.2.17_260219_75.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_75.jpg', ai: [] },
+        ]
+      },
+      {
+        id: 'g6', label: 'F', name: 'グループ F', color: '#F06292', limit: 4,
+        photos: [
+          { id: 'f1', fname: 'LINE_ALBUM_2026.2.17_260219_76.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_76.jpg', ai: [] },
+          { id: 'f2', fname: 'LINE_ALBUM_2026.2.17_260219_77.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_77.jpg', ai: [] },
+          { id: 'f3', fname: 'LINE_ALBUM_2026.2.17_260219_78.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_78.jpg', ai: [] },
+          { id: 'f4', fname: 'LINE_ALBUM_2026.2.17_260219_79.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_79.jpg', ai: [] },
+          { id: 'f5', fname: 'LINE_ALBUM_2026.2.17_260219_80.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_80.jpg', ai: [] },
+          { id: 'f6', fname: 'LINE_ALBUM_2026.2.17_260219_81.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_81.jpg', ai: [] },
+          { id: 'f7', fname: 'LINE_ALBUM_2026.2.17_260219_82.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_82.jpg', ai: [] },
+          { id: 'f8', fname: 'LINE_ALBUM_2026.2.17_260219_83.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_83.jpg', ai: [] },
+          { id: 'f9', fname: 'LINE_ALBUM_2026.2.17_260219_84.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_84.jpg', ai: [] },
+          { id: 'f10', fname: 'LINE_ALBUM_2026.2.17_260219_85.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_85.jpg', ai: [] },
+          { id: 'f11', fname: 'LINE_ALBUM_2026.2.17_260219_86.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_86.jpg', ai: [] },
+          { id: 'f12', fname: 'LINE_ALBUM_2026.2.17_260219_87.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_87.jpg', ai: [] },
+        ]
+      }
+    ];
+
+    // Initialize Global Groups
+    let GROUPS = _imported || JSON.parse(JSON.stringify(DEMO_DATA));
+
+    // Support Data Receive via Opener (Pull)
+    if (!isPreviewMode && window.opener && window.opener.PICCHECK_DATA) {
+      try {
+        const d = window.opener.PICCHECK_DATA;
+        if (d && Array.isArray(d.groups)) {
+          GROUPS = d.groups;
+          console.log('Loaded data from opener.PICCHECK_DATA');
+        } else if (Array.isArray(d)) {
+          GROUPS = d;
+          console.log('Loaded data array from opener.PICCHECK_DATA');
+        }
+      } catch (e) { console.error('Opener data load failed:', e); }
+    }
+
+    // Support Data Receive via postMessage (Push)
+    window.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'PICCHECK_DATA') {
+        const d = event.data.data;
+        if (d && Array.isArray(d.groups)) {
+          window.setGroupData(d.groups);
+        } else if (Array.isArray(d)) {
+          window.setGroupData(d);
+        }
+      }
+    });
+
+    function hexToRgba(hex, alpha) {
+      let r = 0, g = 0, b = 0;
+      if (hex.length === 4) {
+        r = parseInt("0x" + hex[1] + hex[1]);
+        g = parseInt("0x" + hex[2] + hex[2]);
+        b = parseInt("0x" + hex[3] + hex[3]);
+      } else if (hex.length === 7) {
+        r = parseInt("0x" + hex[1] + hex[2]);
+        g = parseInt("0x" + hex[3] + hex[4]);
+        b = parseInt("0x" + hex[5] + hex[6]);
+      }
+      return `rgba(${r},${g},${b},${alpha})`;
+    }
+
+    // Dynamic Update Function (Called from Upload Screen)
+    window.setGroupData = function (newGroups) {
+      if (!newGroups || !Array.isArray(newGroups)) return;
+      GROUPS = newGroups;
+
+      // Reset state
+      if (state && state.status) state.status.clear();
+      if (state && state.comments) state.comments.clear();
+
+      // 1. Rebuild Sidebar Nav
+      const sidebarSection = document.querySelectorAll('.sidebar-section')[1]; // Assume 2nd section is "グループ一覧"
+      if (sidebarSection) {
+        // Keep label, remove buttons
+        const label = sidebarSection.querySelector('.sidebar-label');
+        sidebarSection.innerHTML = '';
+        sidebarSection.appendChild(label);
+
+        GROUPS.forEach((g, i) => {
+          const btn = document.createElement('button');
+          btn.className = `group-nav-item ${i === 0 ? 'active' : ''}`;
+          btn.onclick = function () { scrollToGroup(g.id, this); };
+          btn.innerHTML = `
+                  <div class="group-color-bar" style="background:${g.color}"></div>
+                  <span class="group-nav-name">${g.label}：${g.name}</span>
+                  <span class="group-nav-sel" id="nav-${g.id}">0/${g.limit || 5}</span>
+                `;
+          sidebarSection.appendChild(btn);
+        });
+      }
+
+      // 2. Rebuild Main Content Sections
+      const contentDiv = document.getElementById('content') || document.querySelector('.content');
+      if (contentDiv) {
+        // Remove existing group sections (keep Toolbar and Bulk Bar)
+        // Assuming group sections have class 'group-section'
+        const existing = contentDiv.querySelectorAll('.group-section');
+        existing.forEach(el => el.remove());
+
+        // Append new sections
+        GROUPS.forEach(g => {
+          const section = document.createElement('div');
+          section.className = 'group-section';
+          section.id = g.id;
+
+          const bg = hexToRgba(g.color || '#cccccc', 0.15);
+          const border = hexToRgba(g.color || '#cccccc', 0.3);
+
+          section.innerHTML = `
+                <div class="group-header">
+                  <div class="group-color-pill"
+                    style="background:${bg};color:${g.color};border:1px solid ${border}">
+                    <span style="width:7px;height:7px;border-radius:50%;background:${g.color};display:inline-block"></span>
+                    ${g.name}
+                  </div>
+                  <div class="group-title" id="gtitle-${g.id}">${g.name}</div>
+                  <div class="group-meta" id="gmeta-${g.id}">${g.photos.length}枚</div>
+                  <div class="group-bulk-btns">
+                    <button class="group-bulk-btn gbtn-ok" onclick="bulkSetGroup('${g.id}','ok')">全OK</button>
+                    <button class="group-bulk-btn gbtn-nearok" onclick="bulkSetGroup('${g.id}','nearok')">全ほぼOK</button>
+                    <button class="group-bulk-btn gbtn-ng" onclick="bulkSetGroup('${g.id}','ng')">全NG</button>
+                    <button class="group-bulk-btn gbtn-reset" onclick="confirmGroupReset('${g.id}')">リセット</button>
+                  </div>
+                  <div class="group-limit-badge" id="limit-${g.id}">0 OK</div>
+                </div>
+                <div class="photo-grid" id="grid-${g.id}"></div>
+                `;
+          contentDiv.appendChild(section);
+        });
+      }
+
+      // 3. Render all UI
+      renderAll();
+      GROUPS.forEach(g => { if (typeof updateGroupLimitBadge === 'function') updateGroupLimitBadge(g); });
+      if (typeof updateProgress === 'function') updateProgress();
+      if (typeof updateStats === 'function') updateStats();
+      if (typeof renderSelectedList === 'function') renderSelectedList();
+      if (typeof renderNGList === 'function') renderNGList();
+
+      const totalPhotos = GROUPS.reduce((acc, g) => acc + g.photos.length, 0);
+      showToast(`写真 ${totalPhotos}枚 を読み込みました`, 'green');
+    };
+
+    const MAX_SELECT = 29;
+
+    const state = {
+      status: new Map(),    // photoId -> 'ok' | 'nearok' | 'ng' | null
+      comments: new Map(),  // photoId -> string
+      currentFilter: 'all',
+      gridSize: 'normal',
+      aiFilterOn: false,
+      modalPhotoId: null
+    };
+
+    function getStatus(id) { return state.status.get(id) || null; }
+    function okCount() { return [...state.status.values()].filter(v => v === 'ok').length; }
+    function nearokCount() { return [...state.status.values()].filter(v => v === 'nearok').length; }
+    function ngCount() { return [...state.status.values()].filter(v => v === 'ng').length; }
+
+    // ===== RENDER PHOTOS =====
+    function renderAll() {
+      GROUPS.forEach(g => renderGroup(g));
+      renderGroupProgress();
+    }
+
+    function renderGroup(group) {
+      const grid = document.getElementById(`grid-${group.id}`);
+      const section = document.getElementById(group.id);
+      grid.innerHTML = '';
+
+      const photos = group.photos.filter(p => {
+        const st = getStatus(p.id);
+        if (state.currentFilter === 'ok') return st === 'ok';
+        if (state.currentFilter === 'nearok') return st === 'nearok';
+        if (state.currentFilter === 'ng') return st === 'ng';
+        if (state.currentFilter === 'ai') return p.ai.length > 0;
+        if (state.currentFilter === 'none') return !st;
+        return true;
+      }).filter(p => {
+        if (state.aiFilterOn) return p.ai.length > 0;
+        return true;
+      });
+
+      section.style.display = photos.length === 0 && state.currentFilter !== 'all' ? 'none' : '';
+
+      photos.forEach(photo => {
+        const card = buildCard(photo, group);
+        grid.appendChild(card);
+      });
+
+      grid.className = 'photo-grid' + (state.gridSize === 'large' ? ' large' : state.gridSize === 'small' ? ' small' : '');
+    }
+
+    function buildCard(photo, group) {
+      const st = getStatus(photo.id);
+      const hasComment = !!(state.comments.get(photo.id));
+
+      const card = document.createElement('div');
+      card.className = 'photo-card' + (st ? ' ' + st : '');
+      card.style.setProperty('--group-color', group.color);
+      card.dataset.id = photo.id;
+      card.dataset.group = group.id;
+
+      // Group color left border
+      const borderEl = document.createElement('div');
+      borderEl.style.cssText = `position:absolute;left:0;top:0;bottom:0;width:3px;background:${group.color};z-index:3;border-radius:10px 0 0 10px;opacity:0.8`;
+      card.appendChild(borderEl);
+
+      // Photo image
+      const img = document.createElement('div');
+      img.className = 'photo-img';
+      if (photo.url) {
+        img.style.background = `url(${photo.url}) center/cover no-repeat`;
+        img.style.fontSize = '0';
+      } else {
+        img.style.background = photo.bg;
+        img.style.fontSize = '42px';
+        img.textContent = photo.emoji;
+      }
+      card.appendChild(img);
+
+      // AI badges
+      if (photo.ai.length > 0) {
+        const badges = document.createElement('div');
+        badges.className = 'ai-badges';
+        photo.ai.forEach(ai => {
+          const b = document.createElement('div');
+          b.className = 'ai-badge ' + {
+            '半目': 'badge-hanme',
+            'ピンボケ': 'badge-blur',
+            '露出': 'badge-expo',
+            '類似': 'badge-sim'
+          }[ai];
+          b.textContent = ai;
+          badges.appendChild(b);
+        });
+        card.appendChild(badges);
+      }
+
+      // Status badge (top-right)
+      if (st) {
+        const sb = document.createElement('div');
+        const labels = { ok: '✓ OK', nearok: '△', ng: '✕' };
+        sb.className = 'status-badge status-' + st;
+        sb.textContent = labels[st];
+        sb.style.width = 'auto';
+        sb.style.padding = '2px 6px';
+        sb.style.borderRadius = '5px';
+        card.appendChild(sb);
+      }
+
+      // Comment icon
+      if (hasComment) {
+        const ci = document.createElement('div');
+        ci.className = 'comment-icon';
+        ci.textContent = '💬';
+        card.appendChild(ci);
+      }
+
+      // File name
+      const fname = document.createElement('div');
+      fname.className = 'photo-fname';
+      fname.textContent = photo.fname;
+      card.appendChild(fname);
+
+      // Overlay with 3 action buttons
+      const overlay = document.createElement('div');
+      overlay.className = 'photo-overlay';
+
+      const btns = [
+        { label: 'OK', cls: 'btn-ok', key: 'ok' },
+        { label: '△', cls: 'btn-nearok', key: 'nearok' },
+        { label: 'NG', cls: 'btn-ng', key: 'ng' }
+      ];
+      btns.forEach(({ label, cls, key }) => {
+        const b = document.createElement('button');
+        b.className = 'overlay-btn ' + cls + (st === key ? ' btn-active-' + key : '');
+        b.textContent = label;
+        b.onclick = (e) => { e.stopPropagation(); setPhotoStatus(photo.id, group, key); };
+        overlay.appendChild(b);
+      });
+
+      // Clear button when status is set
+      if (st) {
+        const clr = document.createElement('button');
+        clr.className = 'overlay-btn btn-clear';
+        clr.textContent = '解除';
+        clr.style.flex = '0 0 36px';
+        clr.onclick = (e) => { e.stopPropagation(); setPhotoStatus(photo.id, group, null); };
+        overlay.appendChild(clr);
+      }
+
+      card.appendChild(overlay);
+      card.onclick = () => openModal(photo, group);
+      return card;
+    }
+
+    // ===== STATUS MANAGEMENT =====
+    function setPhotoStatus(photoId, group, newStatus) {
+      const old = getStatus(photoId);
+      if (newStatus === null) {
+        state.status.delete(photoId);
+        showToast('ステータスを解除しました', '');
+      } else if (old === newStatus) {
+        // Toggle off
+        state.status.delete(photoId);
+        showToast('ステータスを解除しました', '');
+      } else {
+        state.status.set(photoId, newStatus);
+        const msgs = { ok: 'OK ✓', nearok: 'ほぼOK △ — 修正してOKに', ng: 'NG ✕' };
+        const colors = { ok: 'green', nearok: 'yellow', ng: 'coral' };
+        showToast(msgs[newStatus], colors[newStatus]);
+      }
+      refreshUI(group);
+    }
+
+    // ===== BULK OPERATIONS =====
+    function bulkSetAll(newStatus) {
+      GROUPS.forEach(g => {
+        g.photos.forEach(p => {
+          if (newStatus === null) state.status.delete(p.id);
+          else state.status.set(p.id, newStatus);
+        });
+      });
+      GROUPS.forEach(g => refreshUI(g));
+      const msgs = { ok: '全写真を OK に設定しました', nearok: '全写真をほぼOK に設定しました', ng: '全写真を NG に設定しました', null: 'すべてリセットしました' };
+      showToast(msgs[newStatus] || 'すべてリセットしました', newStatus === 'ng' ? 'coral' : newStatus === 'ok' ? 'green' : '');
+    }
+
+    function bulkSetGroup(groupId, newStatus) {
+      const group = GROUPS.find(g => g.id === groupId);
+      if (!group) return;
+      group.photos.forEach(p => {
+        if (newStatus === null) state.status.delete(p.id);
+        else state.status.set(p.id, newStatus);
+      });
+      refreshUI(group);
+      const label = { ok: 'OK', nearok: 'ほぼOK', ng: 'NG' }[newStatus];
+      showToast(`${group.name} を全て ${label} にしました`, newStatus === 'ng' ? 'coral' : newStatus === 'ok' ? 'green' : '');
+    }
+
+    // ===== GROUP RESET CONFIRM =====
+    let _pendingResetGroupId = null;
+
+    function confirmGroupReset(groupId) {
+      const group = GROUPS.find(g => g.id === groupId);
+      if (!group) return;
+      _pendingResetGroupId = groupId;
+      const ok = group.photos.filter(p => getStatus(p.id) === 'ok').length;
+      const nearok = group.photos.filter(p => getStatus(p.id) === 'nearok').length;
+      const ng = group.photos.filter(p => getStatus(p.id) === 'ng').length;
+      document.getElementById('groupResetDesc').innerHTML =
+        `<strong>${group.name}</strong> の判定をリセットします。<br>OK:${ok} / ほぼOK:${nearok} / NG:${ng} — 全て消えます。`;
+      document.getElementById('groupResetModal').classList.add('open');
+    }
+
+    function closeGroupReset(e) {
+      if (e && e.target !== document.getElementById('groupResetModal')) return;
+      document.getElementById('groupResetModal').classList.remove('open');
+      _pendingResetGroupId = null;
+    }
+
+    function doGroupReset() {
+      if (!_pendingResetGroupId) return;
+      const group = GROUPS.find(g => g.id === _pendingResetGroupId);
+      if (group) {
+        group.photos.forEach(p => state.status.delete(p.id));
+        refreshUI(group);
+        showToast(`${group.name} をリセットしました`, '');
+      }
+      document.getElementById('groupResetModal').classList.remove('open');
+      _pendingResetGroupId = null;
+    }
+
+    // ===== REFRESH =====
+    function refreshUI(group) {
+      renderGroup(group);
+      renderGroupProgress();
+      updateStats();
+      renderSelectedList();
+      renderNearokList();
+      renderNGList();
+      updateGroupLimitBadge(group);
+      updateProgress();
+      mobileRefreshSelectedSheet();
+      mobileRefreshGroupList();
+    }
+
+    function updateGroupLimitBadge(group) {
+      const okCnt = group.photos.filter(p => getStatus(p.id) === 'ok').length;
+      const el = document.getElementById(`limit-${group.id}`);
+      if (!el) return;
+      el.textContent = `OK ${okCnt} / ほぼOK ${group.photos.filter(p => getStatus(p.id) === 'nearok').length} / NG ${group.photos.filter(p => getStatus(p.id) === 'ng').length}`;
+      el.className = 'group-limit-badge' + (okCnt > 0 ? ' done' : '');
+      const navEl = document.getElementById(`nav-${group.id}`);
+      if (navEl) navEl.textContent = `OK:${okCnt}`;
+    }
+
+    function updateProgress() {
+      const ok = okCount();
+      const nearok = nearokCount();
+      const total = GROUPS.reduce((a, g) => a + g.photos.length, 0);
+      const judged = ok + nearok + ngCount();
+      const pct = Math.min(100, (judged / total) * 100);
+      const fill = document.getElementById('progressFill');
+      const cnt = document.getElementById('progressCount');
+      if (fill) fill.style.width = pct + '%';
+      if (cnt) cnt.textContent = `判定済 ${judged} / ${total}`;
+      document.getElementById('selCountBadge').textContent = ok;
+      const nearokBadge = document.getElementById('nearokCountBadge');
+      if (nearokBadge) nearokBadge.textContent = nearok;
+      const mf = document.getElementById('mobileProgressFill');
+      const mc = document.getElementById('mobileProgressCount');
+      if (mf) mf.style.width = pct + '%';
+      if (mc) mc.textContent = `${judged} / ${total}`;
+      const badge = document.getElementById('bnSelBadge');
+      if (badge) {
+        badge.textContent = ok;
+        badge.style.display = ok > 0 ? '' : 'none';
+      }
+    }
+
+    function updateStats() {
+      const ok = okCount(), nearok = nearokCount(), ng = ngCount();
+      const total = GROUPS.reduce((a, g) => a + g.photos.length, 0);
+      const el_ok = document.getElementById('cnt-ok');
+      const el_nearok = document.getElementById('cnt-nearok');
+      const el_ng = document.getElementById('cnt-ng');
+      const el_none = document.getElementById('cnt-none');
+      const el_all = document.getElementById('cnt-all');
+      if (el_ok) el_ok.textContent = ok;
+      if (el_nearok) el_nearok.textContent = nearok;
+      if (el_ng) el_ng.textContent = ng;
+      if (el_none) el_none.textContent = total - ok - nearok - ng;
+      if (el_all) el_all.textContent = total;
+    }
+
+    function renderGroupProgress() {
+      const container = document.getElementById('groupProgress');
+      container.innerHTML = '';
+      GROUPS.forEach(g => {
+        const ok = g.photos.filter(p => getStatus(p.id) === 'ok').length;
+        const nearok = g.photos.filter(p => getStatus(p.id) === 'nearok').length;
+        const ng = g.photos.filter(p => getStatus(p.id) === 'ng').length;
+        const total = g.photos.length;
+        const judged = ok + nearok + ng;
+        const pct = (judged / total) * 100;
+        const div = document.createElement('div');
+        div.className = 'gp-item';
+        div.innerHTML = `
+      <div class="gp-header">
+        <span class="gp-name" style="color:${g.color}">${g.label}: ${g.name}</span>
+        <span class="gp-count" style="color:${ok > 0 ? '#4CAF7D' : '#7B849A'};font-size:10px">OK:${ok} △:${nearok} NG:${ng}</span>
+      </div>
+      <div class="gp-bar">
+        <div class="gp-fill" style="width:${Math.min(100, pct)}%;background:${g.color}"></div>
+      </div>`;
+        container.appendChild(div);
+      });
+    }
+
+    function _makeThumb(photo, group) {
+      if (photo.url) return `<div class="sel-thumb" style="background:url(${photo.url}) center/cover no-repeat"></div>`;
+      return `<div class="sel-thumb" style="background:${photo.bg || '#222'}">${photo.emoji || '📷'}</div>`;
+    }
+
+    function renderSelectedList() {
+      const list = document.getElementById('selectedList');
+      const ids = [...state.status.entries()].filter(([, v]) => v === 'ok').map(([k]) => k);
+      if (ids.length === 0) {
+        list.innerHTML = '<div style="font-size:12px;color:var(--text-dim);text-align:center;padding:20px 0">OK 写真を選んでください</div>';
+        return;
+      }
+      list.innerHTML = '';
+      ids.forEach(id => {
+        const group = GROUPS.find(g => g.photos.some(p => p.id === id));
+        const photo = group.photos.find(p => p.id === id);
+        const comment = state.comments.get(id) || '';
+        const div = document.createElement('div');
+        div.className = 'sel-item';
+        div.style.borderColor = group.color;
+        div.innerHTML = `
+      ${_makeThumb(photo, group)}
+      <div class="sel-info">
+        <div class="sel-name">${photo.fname}</div>
+        <div class="sel-group" style="color:${group.color}">${group.label}: ${group.name}</div>
+        ${comment ? `<div style="font-size:10px;color:var(--yellow);margin-top:3px">💬 ${comment.substring(0, 30)}${comment.length > 30 ? '…' : ''}</div>` : ''}
+      </div>
+      <button class="sel-remove" onclick="setPhotoStatus('${id}', GROUPS.find(g=>g.id==='${group.id}'), null)">✕</button>`;
+        list.appendChild(div);
+      });
+    }
+
+    function renderNearokList() {
+      const list = document.getElementById('nearokList');
+      if (!list) return;
+      const ids = [...state.status.entries()].filter(([, v]) => v === 'nearok').map(([k]) => k);
+      if (ids.length === 0) {
+        list.innerHTML = '<div style="font-size:12px;color:var(--text-dim);text-align:center;padding:12px 0">ほぼOK はありません</div>';
+        return;
+      }
+      list.innerHTML = '';
+      ids.forEach(id => {
+        const group = GROUPS.find(g => g.photos.some(p => p.id === id));
+        const photo = group.photos.find(p => p.id === id);
+        const comment = state.comments.get(id) || '';
+        const div = document.createElement('div');
+        div.className = 'sel-item';
+        div.style.borderColor = 'var(--yellow)';
+        div.innerHTML = `
+      ${_makeThumb(photo, group)}
+      <div class="sel-info">
+        <div class="sel-name">${photo.fname}</div>
+        <div class="sel-group" style="color:var(--yellow)">ほぼOK — 要修正</div>
+        ${comment ? `<div style="font-size:10px;color:var(--text-sub);margin-top:3px">💬 ${comment.substring(0, 30)}${comment.length > 30 ? '…' : ''}</div>` : ''}
+      </div>
+      <button class="sel-remove" onclick="setPhotoStatus('${id}', GROUPS.find(g=>g.id==='${group.id}'), null)">✕</button>`;
+        list.appendChild(div);
+      });
+    }
+
+    function renderNGList() {
+      const list = document.getElementById('ngList');
+      const ids = [...state.status.entries()].filter(([, v]) => v === 'ng').map(([k]) => k);
+      if (ids.length === 0) {
+        list.innerHTML = '<div style="font-size:12px;color:var(--text-dim);text-align:center;padding:12px 0">NG はありません</div>';
+        return;
+      }
+      list.innerHTML = '';
+      ids.forEach(id => {
+        const group = GROUPS.find(g => g.photos.some(p => p.id === id));
+        const photo = group.photos.find(p => p.id === id);
+        const comment = state.comments.get(id) || '';
+        const div = document.createElement('div');
+        div.className = 'sel-item';
+        div.style.borderColor = 'var(--coral)';
+        div.innerHTML = `
+      ${_makeThumb(photo, group)}
+      <div class="sel-info">
+        <div class="sel-name">${photo.fname}</div>
+        <div class="sel-group" style="color:var(--coral)">NG</div>
+        ${comment ? `<div style="font-size:10px;color:var(--text-sub);margin-top:3px">💬 ${comment.substring(0, 30)}${comment.length > 30 ? '…' : ''}</div>` : ''}
+      </div>
+      <button class="sel-remove" onclick="setPhotoStatus('${id}', GROUPS.find(g=>g.id==='${group.id}'), null)">✕</button>`;
+        list.appendChild(div);
+      });
+    }
+
+    // ===== MODAL =====
+    let modalGroup = null;
+    let modalPhoto = null;
+    let modalAllPhotos = []; // flat list for navigation
+    let modalIdx = 0;
+
+    function buildModalAllPhotos() {
+      modalAllPhotos = [];
+      GROUPS.forEach(g => g.photos.forEach(p => modalAllPhotos.push({ photo: p, group: g })));
+    }
+
+    function openModal(photo, group) {
+      buildModalAllPhotos();
+      modalIdx = modalAllPhotos.findIndex(x => x.photo.id === photo.id);
+      _renderModal();
+      document.getElementById('modal').classList.add('open');
+    }
+
+    function _renderModal() {
+      const { photo, group } = modalAllPhotos[modalIdx];
+      modalPhoto = photo;
+      modalGroup = group;
+
+      const img = document.getElementById('modalImg');
+      if (photo.url) {
+        img.style.background = `url(${photo.url}) center/cover no-repeat`;
+        img.textContent = '';
+        img.style.fontSize = '0';
+      } else {
+        img.style.background = photo.bg;
+        img.textContent = photo.emoji;
+        img.style.fontSize = '120px';
+      }
+      img.style.borderColor = group.color;
+
+      // Meta
+      document.getElementById('modalFname').textContent = photo.fname;
+      const tag = document.getElementById('modalGroupTag');
+      tag.textContent = `${group.label}: ${group.name}`;
+      tag.style.background = group.color + '22';
+      tag.style.color = group.color;
+      tag.style.border = `1px solid ${group.color}55`;
+
+      // AI badges
+      const badgesEl = document.getElementById('modalAiBadges');
+      badgesEl.innerHTML = '';
+      photo.ai.forEach(ai => {
+        const b = document.createElement('div');
+        b.className = 'ai-badge ' + { '半目': 'badge-hanme', 'ピンボケ': 'badge-blur', '露出': 'badge-expo', '類似': 'badge-sim' }[ai];
+        b.textContent = ai;
+        badgesEl.appendChild(b);
+      });
+
+      // Status buttons highlight
+      const st = getStatus(photo.id);
+      const okBtn = document.getElementById('modalOkBtn');
+      const nearokBtn = document.getElementById('modalNearokBtn');
+      const ngBtn = document.getElementById('modalNgBtn');
+      if (okBtn) {
+        okBtn.style.opacity = (!st || st === 'ok') ? '1' : '0.35';
+        okBtn.style.outline = st === 'ok' ? '2px solid white' : 'none';
+      }
+      if (nearokBtn) {
+        nearokBtn.style.opacity = (!st || st === 'nearok') ? '1' : '0.35';
+        nearokBtn.style.outline = st === 'nearok' ? '2px solid white' : 'none';
+      }
+      if (ngBtn) {
+        ngBtn.style.opacity = (!st || st === 'ng') ? '1' : '0.35';
+        ngBtn.style.outline = st === 'ng' ? '2px solid #fff2' : 'none';
+      }
+
+      // Comment
+      const commentEl = document.getElementById('modalComment');
+      if (commentEl) commentEl.value = state.comments.get(photo.id) || '';
+
+      // Nav buttons
+      document.getElementById('modalPrev').disabled = modalIdx === 0;
+      document.getElementById('modalNext').disabled = modalIdx === modalAllPhotos.length - 1;
+    }
+
+    function modalNav(dir) {
+      const next = modalIdx + dir;
+      if (next < 0 || next >= modalAllPhotos.length) return;
+      modalIdx = next;
+      _renderModal();
+    }
+
+    function closeModal(e) {
+      if (e && e.target !== document.getElementById('modal')) return;
+      document.getElementById('modal').classList.remove('open');
+    }
+
+    function modalAction(type) {
+      if (!modalPhoto || !modalGroup) return;
+      setPhotoStatus(modalPhoto.id, modalGroup, type);
+      _renderModal();
+    }
+
+    function saveComment() {
+      if (!modalPhoto) return;
+      const val = document.getElementById('modalComment').value.trim();
+      if (val) state.comments.set(modalPhoto.id, val);
+      else state.comments.delete(modalPhoto.id);
+      // Refresh the card to show/hide comment icon
+      renderGroup(modalGroup);
+    }
+
+    // ===== FILTER =====
+    function setFilter(filter, btn) {
+      state.currentFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      GROUPS.forEach(g => renderGroup(g));
+    }
+
+    // ===== CONFIRM MODAL =====
+    function openConfirm() {
+      const ok = okCount(), nearok = nearokCount(), ng = ngCount();
+      const total = GROUPS.reduce((a, g) => a + g.photos.length, 0);
+      const el = document.getElementById('confirmSelCount');
+      const el2 = document.getElementById('confirmNgCount');
+      if (el) el.textContent = ok;
+      if (el2) el2.textContent = ng;
+      const remaining = total - ok - nearok - ng;
+      document.getElementById('confirmDesc').innerHTML =
+        remaining > 0
+          ? `まだ <strong style="color:var(--yellow)">${remaining}枚</strong> 未判定です。このまま送信しますか？`
+          : '全写真の判定が完了しています。<br>カメラマンに送信します。';
+      document.getElementById('confirmModal').classList.add('open');
+    }
+
+    function closeConfirm() {
+      document.getElementById('confirmModal').classList.remove('open');
+    }
+
+    function doSend() {
+      closeConfirm();
+      showToast('セレクト完了！カメラマンに送信しました 🎉', 'green');
+    }
+
+    // ===== CONFETTI =====
+    let confettiDone = false;
+    function launchConfetti() {
+      if (confettiDone) return;
+      confettiDone = true;
+      const canvas = document.getElementById('confettiCanvas');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const ctx = canvas.getContext('2d');
+      const colors = ['#FF6B6B', '#3BBFA5', '#9B7FE8', '#4A9EE0', '#F5C842', '#F06292', '#4CAF7D'];
+      const pieces = Array.from({ length: 120 }, () => ({
+        x: Math.random() * canvas.width,
+        y: -20 - Math.random() * 100,
+        r: 6 + Math.random() * 8,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        vx: (Math.random() - 0.5) * 4,
+        vy: 2 + Math.random() * 4,
+        angle: Math.random() * Math.PI * 2,
+        va: (Math.random() - 0.5) * 0.2
+      }));
+      let frame = 0;
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        pieces.forEach(p => {
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.angle);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r * 0.5);
+          ctx.restore();
+          p.x += p.vx; p.y += p.vy; p.angle += p.va;
+        });
+        frame++;
+        if (frame < 180) requestAnimationFrame(draw);
+        else ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      draw();
+      showToast('🎉 全グループのセレクト完了！', 'green');
+    }
+
+    function checkAllGroupsComplete() {
+      const allJudged = GROUPS.every(g =>
+        g.photos.every(p => getStatus(p.id) !== null)
+      );
+      if (allJudged) launchConfetti();
+    }
+
+    // ===== KEYBOARD SHORTCUTS =====
+    document.addEventListener('keydown', e => {
+      const modal = document.getElementById('modal');
+      if (!modal.classList.contains('open')) return;
+      if (e.key === 'ArrowRight') { e.preventDefault(); modalNav(1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); modalNav(-1); }
+      else if (e.key === 'o' || e.key === 'O') { e.preventDefault(); modalAction('ok'); }
+      else if (e.key === 'h' || e.key === 'H') { e.preventDefault(); modalAction('nearok'); }
+      else if (e.key === 'n' || e.key === 'N') { e.preventDefault(); modalAction('ng'); }
+      else if (e.key === 'Escape') { closeModal(); }
+    });
+
+    function scrollToGroup(groupId, btn) {
+      document.querySelectorAll('.group-nav-item').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(groupId).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ===== GRID SIZE =====
+    const sizes = ['normal', 'large', 'small'];
+    let sizeIdx = 0;
+    function toggleGridSize() {
+      sizeIdx = (sizeIdx + 1) % sizes.length;
+      state.gridSize = sizes[sizeIdx];
+      const icons = ['⊞', '⬛', '⊟'];
+      document.getElementById('gridIcon').textContent = icons[sizeIdx];
+      GROUPS.forEach(g => renderGroup(g));
+    }
+
+    // ===== AI FILTER =====
+    function toggleAIFilter() {
+      state.aiFilterOn = !state.aiFilterOn;
+      const btn = document.getElementById('aiFilterBtn');
+      btn.classList.toggle('active', state.aiFilterOn);
+      GROUPS.forEach(g => renderGroup(g));
+    }
+
+    // ===== TOAST =====
+    let toastTimer;
+    function showToast(msg, type) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast show ' + type;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    // ===== DOWNLOAD =====
+    const DL_DB_NAME = 'PicCheckDB';
+    const DL_STORE_NAME = 'originalPhotos';
+
+    function dlOpenDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(DL_DB_NAME, 1);
+        req.onupgradeneeded = () => req.result.createObjectStore(DL_STORE_NAME);
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function dlGetFile(photoId) {
+      const db = await dlOpenDB();
+      return new Promise(resolve => {
+        const req = db.transaction(DL_STORE_NAME).objectStore(DL_STORE_NAME).get(photoId);
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => resolve(null);
+      });
+    }
+
+    function toggleDlMenu() {
+      document.getElementById('dlMenu').classList.toggle('open');
+    }
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      const dd = document.querySelector('.dl-dropdown');
+      if (dd && !dd.contains(e.target)) {
+        document.getElementById('dlMenu').classList.remove('open');
+      }
+    });
+
+    function getFilteredPhotos(filter) {
+      const results = [];
+      GROUPS.forEach(g => {
+        g.photos.forEach(p => {
+          const s = getStatus(p.id);
+          let include = false;
+          if (filter === 'all') include = true;
+          else if (filter === 'ok') include = (s === 'ok');
+          else if (filter === 'ok+nearok') include = (s === 'ok' || s === 'nearok');
+          else if (filter === 'ng') include = (s === 'ng');
+          if (include) results.push({ photo: p, group: g });
+        });
+      });
+      return results;
+    }
+
+    async function downloadPhotos(filter) {
+      document.getElementById('dlMenu').classList.remove('open');
+
+      const targets = getFilteredPhotos(filter);
+      if (targets.length === 0) {
+        showToast('対象の写真がありません', 'orange');
+        return;
+      }
+
+      const dlBtn = document.getElementById('dlBtn');
+      const origText = dlBtn.textContent;
+      dlBtn.disabled = true;
+      dlBtn.textContent = `準備中... 0/${targets.length}`;
+
+      try {
+        const zip = new JSZip();
+        let count = 0;
+
+        for (const { photo, group } of targets) {
+          count++;
+          dlBtn.textContent = `準備中... ${count}/${targets.length}`;
+
+          // Try IndexedDB first (full resolution)
+          let blob = await dlGetFile(photo.fname);
+          if (!blob && photo.url && photo.url.startsWith('data:')) {
+            // Fallback: convert data URL to blob
+            const res = await fetch(photo.url);
+            blob = await res.blob();
+          }
+
+          if (blob) {
+            const folderName = `${group.label}_${group.name}`;
+            zip.file(`${folderName}/${photo.fname}`, blob);
+          }
+        }
+
+        dlBtn.textContent = 'ZIP生成中...';
+        const content = await zip.generateAsync({ type: 'blob' }, (metadata) => {
+          dlBtn.textContent = `ZIP生成中... ${Math.round(metadata.percent)}%`;
+        });
+
+        // Download
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(content);
+        const filterLabel = { all: '全部', ok: 'OK', 'ok+nearok': 'OK+ほぼOK', ng: 'NG' }[filter] || filter;
+        a.download = `PicCheck_${filterLabel}_${targets.length}枚.zip`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+
+        showToast(`${targets.length}枚をダウンロードしました`, 'green');
+      } catch (e) {
+        console.error('Download failed:', e);
+        showToast('ダウンロードに失敗しました', 'red');
+      } finally {
+        dlBtn.disabled = false;
+        dlBtn.textContent = origText;
+      }
+    }
+
+    // ===== INIT =====
+    renderAll();
+    GROUPS.forEach(g => updateGroupLimitBadge(g));
+    updateProgress();
+    updateStats();
+    renderSelectedList();
+    renderNGList();
+  </script>
+
+  <!-- ===== MOBILE JS ===== -->
+  <script>
+    // --- Bottom Sheet ---
+    function openBottomSheet(id) {
+      document.getElementById(id).classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeBottomSheet(id) {
+      document.getElementById(id).classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    // --- Mobile Filter ---
+    function mobileSetFilter(filter, btn) {
+      // Sync with PC filter
+      setFilter(filter, null);
+      // Update chip styles
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      // Close sheet after short delay
+      setTimeout(() => closeBottomSheet('groupSheet'), 200);
+    }
+
+    // --- Mobile Group List ---
+    function mobileRefreshGroupList() {
+      const container = document.getElementById('mobileGroupList');
+      if (!container) return;
+      container.innerHTML = '';
+      GROUPS.forEach(g => {
+        const cnt = [...state.selected].filter(id => g.photos.some(p => p.id === id)).length;
+        const pct = Math.min(100, (cnt / g.limit) * 100);
+        const item = document.createElement('div');
+        item.className = 'mobile-group-item';
+        item.innerHTML = `
+          <div class="mobile-group-bar" style="background:${g.color}"></div>
+          <div class="mobile-group-info">
+            <div class="mobile-group-name">${g.label}: ${g.name}</div>
+            <div class="mobile-group-count">${cnt} / ${g.limit} 枚選択 · ${g.photos.length}枚</div>
+          </div>
+          <div class="mobile-group-progress">
+            <div class="mobile-group-fill" style="width:${pct}%;background:${g.color}"></div>
+          </div>
+        `;
+        item.addEventListener('click', () => {
+          closeBottomSheet('groupSheet');
+          setTimeout(() => {
+            const el = document.getElementById(g.id);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 300);
+        });
+        container.appendChild(item);
+      });
+    }
+
+    // --- Mobile Selected/NG Sheet ---
+    function mobileRefreshSelectedSheet() {
+      // Selected list
+      const selEl = document.getElementById('mobileSelectedList');
+      if (selEl) {
+        if (state.selected.size === 0) {
+          selEl.innerHTML = '<div style="font-size:12px;color:var(--text-dim);text-align:center;padding:12px 0">写真を選んでください</div>';
+        } else {
+          selEl.innerHTML = '';
+          state.selected.forEach(id => {
+            const group = GROUPS.find(g => g.photos.some(p => p.id === id));
+            const photo = group.photos.find(p => p.id === id);
+            const div = document.createElement('div');
+            div.className = 'sel-item';
+            div.style.borderColor = group.color;
+            div.innerHTML = `
+              <div class="sel-thumb" style="background:${photo.bg}">${photo.emoji}</div>
+              <div class="sel-info">
+                <div class="sel-name">${photo.fname}</div>
+                <div class="sel-group" style="color:${group.color}">${group.label}: ${group.name}</div>
+              </div>
+              <button class="sel-remove" onclick="toggleSelect('${id}', GROUPS.find(g=>g.id==='${group.id}'))">✕</button>`;
+            selEl.appendChild(div);
+          });
+        }
+      }
+      // NG list
+      const ngEl = document.getElementById('mobileNgList');
+      if (ngEl) {
+        if (state.ng.size === 0) {
+          ngEl.innerHTML = '<div style="font-size:12px;color:var(--text-dim);text-align:center;padding:12px 0">NG はありません</div>';
+        } else {
+          ngEl.innerHTML = '';
+          state.ng.forEach(id => {
+            const group = GROUPS.find(g => g.photos.some(p => p.id === id));
+            const photo = group.photos.find(p => p.id === id);
+            const div = document.createElement('div');
+            div.className = 'sel-item';
+            div.style.borderColor = 'var(--coral)';
+            div.innerHTML = `
+              <div class="sel-thumb" style="background:${photo.bg};filter:grayscale(60%)">${photo.emoji}</div>
+              <div class="sel-info">
+                <div class="sel-name">${photo.fname}</div>
+                <div class="sel-group" style="color:var(--coral)">NG フラグ</div>
+              </div>
+              <button class="sel-remove" onclick="toggleNG('${id}', GROUPS.find(g=>g.id==='${group.id}'))">✕</button>`;
+            ngEl.appendChild(div);
+          });
+        }
+      }
+      mobileRefreshGroupList();
+    }
+
+    // --- Swipe gesture in modal ---
+    (function () {
+      let touchStartX = 0, touchStartY = 0;
+      const overlay = document.getElementById('modal');
+      overlay.addEventListener('touchstart', e => {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+      }, { passive: true });
+      overlay.addEventListener('touchend', e => {
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        const dy = e.changedTouches[0].clientY - touchStartY;
+        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+          // horizontal swipe → navigate
+          if (dx < 0) modalNav(1);
+          else modalNav(-1);
+        }
+      }, { passive: true });
+    })();
+
+    // Init mobile group list after all functions are defined
+    mobileRefreshGroupList();
+  </script>
+</body>
+
+</html>

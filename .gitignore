@@ -1,0 +1,15 @@
+# Sample photos (private data)
+sample model/
+
+# Thumbnails
+thumbs/
+
+# Debug files
+debug_ai_test.html
+
+# System files
+.DS_Store
+.gemini/
+
+# Spec docs (Japanese)
+*.md

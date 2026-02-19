@@ -1,0 +1,1885 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PicCheck — 写真アップロード</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <!-- face-api.js for face detection -->
+    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <!-- exifr for EXIF data (shooting time) -->
+    <script src="https://cdn.jsdelivr.net/npm/exifr@7.1.3/dist/full.umd.js"></script>
+
+    <style>
+        :root {
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface2: #22263a;
+            --surface3: #2c3050;
+            --border: #2e3250;
+            --border2: #3a3f6a;
+            --text: #e8eaf6;
+            --text-sub: #8892b0;
+            --text-dim: #4a5280;
+            --coral: #ff6b6b;
+            --green: #3bbfa5;
+            --lavender: #9b7fe8;
+            --gold: #f5c842;
+            --blue: #4a9ee0;
+            --radius: 14px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Syne', 'Zen Kaku Gothic New', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== TOP BAR ===== */
+        .topbar {
+            height: 56px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            gap: 16px;
+            flex-shrink: 0;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--coral);
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: var(--text);
+        }
+
+        .topbar-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--border);
+        }
+
+        .topbar-title {
+            font-size: 14px;
+            color: var(--text-sub);
+            font-weight: 500;
+        }
+
+        /* ===== STEP INDICATOR ===== */
+        .steps {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            padding: 24px 24px 0;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step-num {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--surface2);
+            border: 2px solid var(--border2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-dim);
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .step.active .step-num {
+            background: var(--coral);
+            border-color: var(--coral);
+            color: white;
+        }
+
+        .step.done .step-num {
+            background: var(--green);
+            border-color: var(--green);
+            color: white;
+        }
+
+        .step-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-dim);
+            white-space: nowrap;
+        }
+
+        .step.active .step-label {
+            color: var(--text);
+        }
+
+        .step.done .step-label {
+            color: var(--green);
+        }
+
+        .step-line {
+            width: 48px;
+            height: 2px;
+            background: var(--border2);
+            margin: 0 4px;
+            flex-shrink: 0;
+        }
+
+        .step-line.done {
+            background: var(--green);
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main {
+            flex: 1;
+            padding: 24px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* ===== STEP PANELS ===== */
+        .step-panel {
+            display: none;
+        }
+
+        .step-panel.active {
+            display: block;
+        }
+
+        /* ===== UPLOAD ZONE ===== */
+        .upload-zone {
+            border: 2px dashed var(--border2);
+            border-radius: 20px;
+            padding: 60px 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s;
+            background: var(--surface);
+            position: relative;
+        }
+
+        .upload-zone:hover,
+        .upload-zone.drag-over {
+            border-color: var(--coral);
+            background: rgba(255, 107, 107, 0.05);
+        }
+
+        .upload-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        .upload-icon {
+            font-size: 56px;
+            margin-bottom: 16px;
+        }
+
+        .upload-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .upload-sub {
+            font-size: 13px;
+            color: var(--text-sub);
+            line-height: 1.6;
+        }
+
+        .upload-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 28px;
+            background: var(--coral);
+            color: white;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            font-family: 'Syne', 'Zen Kaku Gothic New', sans-serif;
+            transition: opacity 0.2s;
+        }
+
+        .upload-btn:hover {
+            opacity: 0.85;
+        }
+
+        /* ===== PREVIEW GRID ===== */
+        .preview-section {
+            margin-top: 28px;
+            display: none;
+        }
+
+        .preview-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .preview-count {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .preview-count span {
+            color: var(--coral);
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 8px;
+        }
+
+        .preview-thumb {
+            aspect-ratio: 3/4;
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--surface2);
+            position: relative;
+        }
+
+        .preview-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-thumb .thumb-name {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            font-size: 8px;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 3px 4px;
+            font-family: 'Space Mono', monospace;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .preview-thumb .thumb-remove {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 18px;
+            height: 18px;
+            background: rgba(255, 107, 107, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: white;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.15s;
+            border: none;
+        }
+
+        .preview-thumb:hover .thumb-remove {
+            opacity: 1;
+        }
+
+        /* ===== NEXT BUTTON ===== */
+        .action-bar {
+            margin-top: 28px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .btn-primary {
+            padding: 14px 32px;
+            background: var(--coral);
+            color: white;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            font-family: 'Syne', 'Zen Kaku Gothic New', sans-serif;
+            transition: opacity 0.2s, transform 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.88;
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            padding: 14px 24px;
+            background: var(--surface2);
+            color: var(--text-sub);
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border2);
+            font-family: 'Syne', 'Zen Kaku Gothic New', sans-serif;
+            transition: background 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface3);
+        }
+
+        /* ===== AI PROCESSING ===== */
+        .ai-processing {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .ai-spinner {
+            width: 64px;
+            height: 64px;
+            border: 4px solid var(--surface3);
+            border-top-color: var(--coral);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+            margin: 0 auto 24px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .ai-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .ai-sub {
+            font-size: 13px;
+            color: var(--text-sub);
+            margin-bottom: 24px;
+        }
+
+        .ai-progress-bar {
+            width: 280px;
+            height: 6px;
+            background: var(--surface3);
+            border-radius: 4px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .ai-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--coral), var(--lavender));
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .ai-log {
+            margin-top: 20px;
+            font-size: 12px;
+            color: var(--text-dim);
+            font-family: 'Space Mono', monospace;
+            min-height: 20px;
+        }
+
+        /* ===== GROUP CONFIRM ===== */
+        .group-confirm-header {
+            margin-bottom: 20px;
+        }
+
+        .group-confirm-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .group-confirm-sub {
+            font-size: 13px;
+            color: var(--text-sub);
+        }
+
+        .group-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .group-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+
+        .group-card:hover {
+            border-color: var(--border2);
+        }
+
+        .group-card-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .group-label-badge {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 800;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .group-name-wrap {
+            flex: 1;
+        }
+
+        .group-name-input {
+            background: transparent;
+            border: none;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            font-family: inherit;
+            width: 100%;
+            outline: none;
+            cursor: text;
+            padding: 2px 6px;
+            border-radius: 6px;
+            transition: background 0.15s;
+        }
+
+        .group-name-input:focus {
+            background: var(--surface2);
+        }
+
+        .group-name-placeholder {
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-top: 2px;
+            padding-left: 6px;
+        }
+
+        .group-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .group-photo-count {
+            font-size: 12px;
+            color: var(--text-sub);
+            background: var(--surface2);
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .group-limit-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .group-limit-label {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        .group-limit-input {
+            width: 48px;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 700;
+            text-align: center;
+            padding: 5px 4px;
+            font-family: 'Space Mono', monospace;
+            outline: none;
+        }
+
+        .group-limit-input:focus {
+            border-color: var(--coral);
+        }
+
+        .group-limit-unit {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        .group-toggle {
+            font-size: 18px;
+            color: var(--text-dim);
+            transition: transform 0.2s;
+        }
+
+        .group-card.open .group-toggle {
+            transform: rotate(180deg);
+        }
+
+        .group-card-photos {
+            display: none;
+            padding: 0 16px 16px;
+        }
+
+        .group-card.open .group-card-photos {
+            display: block;
+        }
+
+        .group-photos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+            gap: 6px;
+        }
+
+        .group-photo-thumb {
+            aspect-ratio: 3/4;
+            border-radius: 6px;
+            overflow: hidden;
+            background: var(--surface2);
+            position: relative;
+        }
+
+        .group-photo-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .group-photo-thumb .ai-badge-mini {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            background: rgba(255, 107, 107, 0.9);
+            color: white;
+            font-size: 8px;
+            font-weight: 700;
+            padding: 1px 4px;
+            border-radius: 4px;
+        }
+
+        .group-reason {
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .group-reason-icon {
+            font-size: 14px;
+        }
+
+        /* ===== SUMMARY BAR ===== */
+        .summary-bar {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .summary-val {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--coral);
+        }
+
+        .summary-key {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        /* ===== SHARE MODAL ===== */
+        .share-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s;
+            backdrop-filter: blur(4px);
+        }
+
+        .share-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .share-modal {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 20px;
+            padding: 36px;
+            max-width: 440px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .share-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .share-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .share-sub {
+            font-size: 13px;
+            color: var(--text-sub);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .share-link-box {
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            color: var(--text-sub);
+            margin-bottom: 16px;
+            word-break: break-all;
+            text-align: left;
+        }
+
+        .share-copy-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--coral);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Syne', 'Zen Kaku Gothic New', sans-serif;
+            margin-bottom: 10px;
+            transition: opacity 0.2s;
+        }
+
+        .share-copy-btn:hover {
+            opacity: 0.85;
+        }
+
+        .share-preview-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--surface3);
+            color: var(--text);
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Syne', 'Zen Kaku Gothic New', sans-serif;
+            transition: background 0.2s;
+        }
+
+        .share-preview-btn:hover {
+            background: var(--border2);
+        }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--surface3);
+            border: 1px solid var(--border2);
+            color: var(--text);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.25s;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* ===== MOBILE ===== */
+        @media (max-width: 600px) {
+            .main {
+                padding: 16px;
+            }
+
+            .upload-zone {
+                padding: 40px 20px;
+            }
+
+            .group-meta {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .summary-bar {
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+        <div class="logo">Pic<span>Check</span></div>
+        <div class="topbar-divider"></div>
+        <div class="topbar-title">写真アップロード &amp; グループ設定</div>
+    </div>
+
+    <!-- STEP INDICATOR -->
+    <div class="steps">
+        <div class="step active" id="stepInd1">
+            <div class="step-num">1</div>
+            <div class="step-label">写真を選ぶ</div>
+        </div>
+        <div class="step-line" id="stepLine1"></div>
+        <div class="step" id="stepInd2">
+            <div class="step-num">2</div>
+            <div class="step-label">AI グループ化</div>
+        </div>
+        <div class="step-line" id="stepLine2"></div>
+        <div class="step" id="stepInd3">
+            <div class="step-num">3</div>
+            <div class="step-label">確認 &amp; 共有</div>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+        <!-- ===== STEP 1: UPLOAD ===== -->
+        <div class="step-panel active" id="panel1">
+            <div class="upload-zone" id="uploadZone">
+                <input type="file" id="fileInput" accept="image/jpeg,image/png,image/heic,image/heif" multiple>
+                <div class="upload-icon">📷</div>
+                <div class="upload-title">写真をドラッグ＆ドロップ</div>
+                <div class="upload-sub">
+                    または下のボタンからファイルを選択<br>
+                    JPG / PNG 対応 ・ 複数ファイル一括OK
+                </div>
+                <button class="upload-btn"
+                    onclick="document.getElementById('fileInput').click(); event.stopPropagation();">
+                    ファイルを選択
+                </button>
+            </div>
+
+            <div class="preview-section" id="previewSection">
+                <div class="preview-header">
+                    <div class="preview-count"><span id="photoCount">0</span> 枚の写真を選択中</div>
+                    <button class="btn-secondary" style="padding:8px 16px;font-size:13px"
+                        onclick="clearAll()">すべて削除</button>
+                </div>
+                <div class="preview-grid" id="previewGrid"></div>
+            </div>
+
+            <div class="action-bar" style="display:flex;gap:12px;flex-wrap:wrap">
+                <button class="btn-primary" id="step1Next" disabled onclick="startAI()">
+                    🤖 AIでグループ化する →
+                </button>
+                <button class="btn-secondary" id="skipGroupBtn" disabled onclick="skipGrouping()"
+                    style="padding:14px 24px;font-size:14px;font-weight:600;border-radius:12px;cursor:pointer">
+                    📷 グループ化しない →
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== STEP 2: AI PROCESSING ===== -->
+        <div class="step-panel" id="panel2">
+            <div class="ai-processing">
+                <div class="ai-spinner"></div>
+                <div class="ai-title">AIがグループ化中...</div>
+                <div class="ai-sub">写真の構図・撮影時刻・色を解析しています</div>
+                <div class="ai-progress-bar">
+                    <div class="ai-progress-fill" id="aiProgressFill"></div>
+                </div>
+                <div class="ai-log" id="aiLog">モデルを読み込み中...</div>
+            </div>
+        </div>
+
+        <!-- ===== STEP 3: GROUP CONFIRM ===== -->
+        <div class="step-panel" id="panel3">
+            <div class="group-confirm-header">
+                <div class="group-confirm-title">グループを確認してください</div>
+                <div class="group-confirm-sub">グループ名をクリックして編集できます。選択枚数制限も設定してください。</div>
+            </div>
+
+            <div class="summary-bar" id="summaryBar">
+                <div class="summary-item">
+                    <div class="summary-val" id="sumPhotos">0</div>
+                    <div class="summary-key">枚の写真</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-val" id="sumGroups">0</div>
+                    <div class="summary-key">グループ</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-val" id="sumLimit">0</div>
+                    <div class="summary-key">合計選択上限</div>
+                </div>
+            </div>
+
+            <div class="group-list" id="groupList"></div>
+
+            <div class="action-bar">
+                <button class="btn-secondary" onclick="goToStep(1)">← やり直す</button>
+                <button class="btn-primary" onclick="openShare()">
+                    共有リンクを発行 →
+                </button>
+            </div>
+        </div>
+
+    </div><!-- /main -->
+
+    <!-- SHARE MODAL -->
+    <div class="share-overlay" id="shareOverlay" onclick="closeShare(event)">
+        <div class="share-modal">
+            <div class="share-icon">🔗</div>
+            <div class="share-title">共有リンクを発行しました</div>
+            <div class="share-sub">このリンクをモデルに送ってください。<br>アカウント不要でセレクトできます。</div>
+            <div class="share-link-box" id="shareLinkBox"></div>
+            <button class="share-copy-btn" onclick="copyLink()">リンクをコピー</button>
+            <button id="previewBtn" class="share-preview-btn" onclick="previewSelect()">セレクト画面をプレビュー →</button>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ===== STATE =====
+        let uploadedFiles = [];   // { file, url, exif, faceData }
+        let groups = [];          // { label, name, reason, color, limit, photos[] }
+        let faceApiReady = false;
+
+        const GROUP_COLORS = [
+            '#FF6B6B', '#3BBFA5', '#9B7FE8', '#4A9EE0', '#F5C842',
+            '#FF9F43', '#EE5A24', '#0652DD', '#1289A7', '#C4E538'
+        ];
+        const LABELS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+        // ===== IndexedDB for Original Photos =====
+        const DB_NAME = 'PicCheckDB';
+        const STORE_NAME = 'originalPhotos';
+
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open(DB_NAME, 1);
+                req.onupgradeneeded = () => req.result.createObjectStore(STORE_NAME);
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        async function saveOriginalFile(photoId, file) {
+            const db = await openDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                tx.objectStore(STORE_NAME).put(file, photoId);
+                tx.oncomplete = () => resolve();
+                tx.onerror = () => reject(tx.error);
+            });
+        }
+
+        async function getOriginalFile(photoId) {
+            const db = await openDB();
+            return new Promise((resolve) => {
+                const req = db.transaction(STORE_NAME).objectStore(STORE_NAME).get(photoId);
+                req.onsuccess = () => resolve(req.result || null);
+                req.onerror = () => resolve(null);
+            });
+        }
+
+        // ===== DRAG & DROP =====
+        const zone = document.getElementById('uploadZone');
+        zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+        zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+        zone.addEventListener('drop', e => {
+            e.preventDefault();
+            zone.classList.remove('drag-over');
+            handleFiles([...e.dataTransfer.files]);
+        });
+        document.getElementById('fileInput').addEventListener('change', e => {
+            handleFiles([...e.target.files]);
+            e.target.value = '';
+        });
+
+        function handleFiles(files) {
+            const imgs = files.filter(f => f.type.startsWith('image/'));
+            imgs.forEach(f => {
+                if (uploadedFiles.find(u => u.file.name === f.name && u.file.size === f.size)) return;
+                const url = URL.createObjectURL(f);
+                uploadedFiles.push({ file: f, url, exif: null, faceData: null });
+                // Save original file to IndexedDB (background, non-blocking)
+                const photoId = f.name; // Use filename as key for now
+                saveOriginalFile(photoId, f).catch(e => console.warn('IndexedDB save failed:', e));
+            });
+            renderPreviews();
+        }
+
+        function renderPreviews() {
+            const grid = document.getElementById('previewGrid');
+            const section = document.getElementById('previewSection');
+            const btn = document.getElementById('step1Next');
+            const skipBtn = document.getElementById('skipGroupBtn');
+            document.getElementById('photoCount').textContent = uploadedFiles.length;
+
+            if (uploadedFiles.length === 0) {
+                section.style.display = 'none';
+                btn.disabled = true;
+                if (skipBtn) skipBtn.disabled = true;
+                return;
+            }
+            section.style.display = 'block';
+            btn.disabled = false;
+            if (skipBtn) skipBtn.disabled = false;
+
+            grid.innerHTML = '';
+            uploadedFiles.forEach((item, i) => {
+                const div = document.createElement('div');
+                div.className = 'preview-thumb';
+                div.innerHTML = `
+          <img src="${item.url}" alt="${item.file.name}" loading="lazy">
+          <div class="thumb-name">${item.file.name}</div>
+          <button class="thumb-remove" onclick="removeFile(${i})">✕</button>
+        `;
+                grid.appendChild(div);
+            });
+        }
+
+        function removeFile(i) {
+            URL.revokeObjectURL(uploadedFiles[i].url);
+            uploadedFiles.splice(i, 1);
+            renderPreviews();
+        }
+
+        function clearAll() {
+            uploadedFiles.forEach(u => URL.revokeObjectURL(u.url));
+            uploadedFiles = [];
+            renderPreviews();
+        }
+
+        // ===== STEP NAVIGATION =====
+        function goToStep(n) {
+            document.querySelectorAll('.step-panel').forEach((p, i) => {
+                p.classList.toggle('active', i + 1 === n);
+            });
+            // Update step indicators
+            for (let i = 1; i <= 3; i++) {
+                const ind = document.getElementById(`stepInd${i}`);
+                ind.classList.remove('active', 'done');
+                if (i < n) ind.classList.add('done');
+                else if (i === n) ind.classList.add('active');
+            }
+            for (let i = 1; i <= 2; i++) {
+                const line = document.getElementById(`stepLine${i}`);
+                line.classList.toggle('done', i < n);
+            }
+        }
+
+        // ===== AI GROUPING =====
+        async function startAI() {
+            goToStep(2);
+            setProgress(0, 'EXIFデータを読み取り中...');
+
+            // Step A: Read EXIF
+            await readAllExif();
+            setProgress(20, '顔検出モデルを準備中...');
+
+            // Step B: Load face-api models (tiny model from CDN)
+            await loadFaceApi();
+            setProgress(40, '顔を検出中...');
+
+            // Step C: Detect faces
+            await detectAllFaces();
+            setProgress(65, '色を解析中...');
+
+            // Step D: Color analysis
+            await analyzeColors();
+            setProgress(85, 'グループを作成中...');
+
+            // Step E: Group
+            await new Promise(r => setTimeout(r, 300));
+            groups = buildGroups();
+            setProgress(100, 'グループ化完了！');
+
+            await new Promise(r => setTimeout(r, 600));
+            renderGroupConfirm();
+            goToStep(3);
+        }
+
+        // ===== SKIP GROUPING (single group) =====
+        function skipGrouping() {
+            groups = [{
+                label: 'A',
+                name: '全写真',
+                reason: '',
+                color: GROUP_COLORS[0],
+                limit: Math.max(1, Math.ceil(uploadedFiles.length * 0.4)),
+                photos: [...uploadedFiles]
+            }];
+            renderGroupConfirm();
+            goToStep(3);
+        }
+
+        function setProgress(pct, msg) {
+            document.getElementById('aiProgressFill').style.width = pct + '%';
+            document.getElementById('aiLog').textContent = msg;
+        }
+
+        // --- EXIF ---
+        async function readAllExif() {
+            for (const item of uploadedFiles) {
+                try {
+                    const exif = await exifr.parse(item.file, { pick: ['DateTimeOriginal', 'CreateDate'] });
+                    item.exif = exif;
+                } catch { item.exif = null; }
+            }
+            // Sort by shooting time if available
+            uploadedFiles.sort((a, b) => {
+                const ta = a.exif?.DateTimeOriginal || a.exif?.CreateDate || new Date(0);
+                const tb = b.exif?.DateTimeOriginal || b.exif?.CreateDate || new Date(0);
+                return new Date(ta) - new Date(tb);
+            });
+        }
+
+        // --- FACE API ---
+        async function loadFaceApi() {
+            if (faceApiReady) return;
+            try {
+                const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model';
+                await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+                faceApiReady = true;
+            } catch (e) {
+                console.warn('face-api load failed, skipping face detection:', e);
+            }
+        }
+
+        async function detectAllFaces() {
+            for (const item of uploadedFiles) {
+                try {
+                    if (!faceApiReady) { item.faceData = null; continue; }
+                    const img = await loadImage(item.url);
+                    const detections = await faceapi.detectAllFaces(img, new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.4 }));
+                    const imgArea = img.width * img.height;
+                    const maxFaceArea = detections.length > 0
+                        ? Math.max(...detections.map(d => d.box.width * d.box.height))
+                        : 0;
+                    item.faceData = {
+                        count: detections.length,
+                        maxFaceRatio: imgArea > 0 ? maxFaceArea / imgArea : 0
+                    };
+                } catch { item.faceData = null; }
+            }
+        }
+
+        function loadImage(url) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = url;
+            });
+        }
+
+        // --- COLOR ANALYSIS ---
+        async function analyzeColors() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 32; canvas.height = 32;
+
+            for (const item of uploadedFiles) {
+                try {
+                    const img = await loadImage(item.url);
+                    ctx.drawImage(img, 0, 0, 32, 32);
+                    const data = ctx.getImageData(0, 0, 32, 32).data;
+                    let r = 0, g = 0, b = 0;
+                    for (let i = 0; i < data.length; i += 4) {
+                        r += data[i]; g += data[i + 1]; b += data[i + 2];
+                    }
+                    const px = 32 * 32;
+                    item.avgColor = { r: r / px, g: g / px, b: b / px };
+                } catch { item.avgColor = null; }
+            }
+        }
+
+        function colorDist(c1, c2) {
+            if (!c1 || !c2) return 0;
+            return Math.sqrt(
+                Math.pow(c1.r - c2.r, 2) +
+                Math.pow(c1.g - c2.g, 2) +
+                Math.pow(c1.b - c2.b, 2)
+            );
+        }
+
+        // --- BUILD GROUPS ---
+        function buildGroups() {
+            if (uploadedFiles.length === 0) return [];
+
+            const result = [];
+            let currentGroup = [uploadedFiles[0]];
+
+            for (let i = 1; i < uploadedFiles.length; i++) {
+                const prev = uploadedFiles[i - 1];
+                const curr = uploadedFiles[i];
+                let shouldSplit = false;
+                let splitReason = '';
+
+                // 1. Time gap > 15 min
+                const tPrev = prev.exif?.DateTimeOriginal || prev.exif?.CreateDate;
+                const tCurr = curr.exif?.DateTimeOriginal || curr.exif?.CreateDate;
+                if (tPrev && tCurr) {
+                    const diffMin = (new Date(tCurr) - new Date(tPrev)) / 60000;
+                    if (diffMin > 15) { shouldSplit = true; splitReason = 'time'; }
+                }
+
+                // 2. Face ratio change > 25%
+                if (!shouldSplit && prev.faceData && curr.faceData) {
+                    const diff = Math.abs(prev.faceData.maxFaceRatio - curr.faceData.maxFaceRatio);
+                    if (diff > 0.25) { shouldSplit = true; splitReason = 'angle'; }
+                }
+
+                // 3. Color change (costume)
+                if (!shouldSplit) {
+                    const dist = colorDist(prev.avgColor, curr.avgColor);
+                    if (dist > 45) { shouldSplit = true; splitReason = 'costume'; }
+                }
+
+                if (shouldSplit) {
+                    result.push({ photos: currentGroup, splitReason: splitReason });
+                    currentGroup = [curr];
+                } else {
+                    currentGroup.push(curr);
+                }
+            }
+            result.push({ photos: currentGroup, splitReason: '' });
+
+            // Assign labels, names, colors
+            return result.map((g, i) => {
+                const label = LABELS[i] || String(i + 1);
+                const color = GROUP_COLORS[i % GROUP_COLORS.length];
+                const { name, reason } = inferGroupName(g.photos, g.splitReason, i);
+                const defaultLimit = Math.max(1, Math.ceil(g.photos.length * 0.4));
+                return { label, name, reason, color, limit: defaultLimit, photos: g.photos };
+            });
+        }
+
+        function inferGroupName(photos, splitReason, idx) {
+            // Compute average face ratio for this group
+            const facedPhotos = photos.filter(p => p.faceData && p.faceData.count > 0);
+            const avgRatio = facedPhotos.length > 0
+                ? facedPhotos.reduce((s, p) => s + p.faceData.maxFaceRatio, 0) / facedPhotos.length
+                : null;
+            const multiface = photos.some(p => p.faceData && p.faceData.count >= 2);
+
+            if (splitReason === 'costume') {
+                return { name: idx === 0 ? 'メインコスチューム' : `衣装チェンジ後`, reason: '👗 衣装の色が大きく変化しました' };
+            }
+            if (multiface) {
+                return { name: 'グループショット', reason: '👥 複数人が検出されました' };
+            }
+            if (avgRatio !== null) {
+                if (avgRatio > 0.30) return { name: 'アップカット', reason: '🔍 顔が大きく映っています（アップ）' };
+                if (avgRatio > 0.12) return { name: 'バストアップ', reason: '📷 バストアップの構図です' };
+                if (avgRatio < 0.05 && facedPhotos.length > 0) return { name: '引きショット', reason: '🌄 全身・引きの構図です' };
+            }
+            if (splitReason === 'time') {
+                return { name: '', reason: '⏱ 撮影時刻が15分以上空きました' };
+            }
+            // Cannot determine
+            return { name: '', reason: '🤖 自動判定できませんでした' };
+        }
+
+        // --- RENDER STEP 3 ---
+        function renderGroupConfirm() {
+            const list = document.getElementById('groupList');
+            list.innerHTML = '';
+
+            const totalPhotos = groups.reduce((s, g) => s + g.photos.length, 0);
+            const totalLimit = groups.reduce((s, g) => s + (parseInt(g.limit) || 0), 0);
+            document.getElementById('sumPhotos').textContent = totalPhotos;
+            document.getElementById('sumGroups').textContent = groups.length;
+            document.getElementById('sumLimit').textContent = totalLimit;
+
+            groups.forEach((g, gi) => {
+                const card = document.createElement('div');
+                card.className = 'group-card';
+                card.innerHTML = `
+          <div class="group-card-header" onclick="toggleCard(${gi})">
+            <div class="group-label-badge" style="background:${g.color}">${g.label}</div>
+            <div class="group-name-wrap">
+              <input class="group-name-input" id="gname-${gi}"
+                value="${g.name}"
+                placeholder="グループ名（空白でアルファベットのみ）"
+                onclick="event.stopPropagation()"
+                oninput="updateGroupName(${gi}, this.value)">
+              <div class="group-name-placeholder">${g.reason}</div>
+            </div>
+            <div class="group-meta">
+              <div class="group-photo-count">${g.photos.length}枚</div>
+              <div class="group-limit-wrap">
+                <span class="group-limit-label">上限</span>
+                <input class="group-limit-input" type="number" min="1" max="${g.photos.length}"
+                  value="${g.limit}" id="glimit-${gi}"
+                  onclick="event.stopPropagation()"
+                  oninput="updateGroupLimit(${gi}, this.value)">
+                <span class="group-limit-unit">枚</span>
+              </div>
+              <div class="group-toggle">▾</div>
+            </div>
+          </div>
+          <div class="group-card-photos">
+            <div class="group-reason">
+              <span class="group-reason-icon"></span>
+              <span>${g.reason}</span>
+            </div>
+            <div class="group-photos-grid" id="gphoto-${gi}"></div>
+          </div>
+        `;
+                list.appendChild(card);
+
+                // Render thumbnails
+                const grid = card.querySelector(`#gphoto-${gi}`);
+                g.photos.forEach(p => {
+                    const thumb = document.createElement('div');
+                    thumb.className = 'group-photo-thumb';
+                    thumb.innerHTML = `<img src="${p.url}" alt="${p.file.name}" loading="lazy">`;
+                    grid.appendChild(thumb);
+                });
+            });
+        }
+
+        function toggleCard(gi) {
+            const cards = document.querySelectorAll('.group-card');
+            cards[gi].classList.toggle('open');
+        }
+
+        function updateGroupName(gi, val) {
+            groups[gi].name = val;
+        }
+
+        function updateGroupLimit(gi, val) {
+            groups[gi].limit = parseInt(val) || 1;
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const totalLimit = groups.reduce((s, g) => s + (parseInt(g.limit) || 0), 0);
+            document.getElementById('sumLimit').textContent = totalLimit;
+        }
+
+        // ===== SHARE =====
+        function openShare() {
+            // Generate a fake share URL (in real app, this would be a Supabase-backed URL)
+            const sessionId = Math.random().toString(36).slice(2, 10).toUpperCase();
+            const url = `${location.origin}/select/${sessionId}`;
+            document.getElementById('shareLinkBox').textContent = url;
+            document.getElementById('shareOverlay').classList.add('open');
+        }
+
+        function closeShare(e) {
+            if (e.target === document.getElementById('shareOverlay')) {
+                document.getElementById('shareOverlay').classList.remove('open');
+            }
+        }
+
+        function copyLink() {
+            const text = document.getElementById('shareLinkBox').textContent;
+            navigator.clipboard.writeText(text).then(() => showToast('リンクをコピーしました ✓'));
+        }
+
+        // =====================================================================
+        // AI DETECTION UTILITIES
+        // =====================================================================
+
+        /** Load a URL into an HTMLImageElement with timeout */
+        function loadImg(url) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                const timer = setTimeout(() => {
+                    img.src = ''; // stop loading
+                    reject(new Error('Image load timeout'));
+                }, 5000); // 5s timeout
+                img.onload = () => { clearTimeout(timer); resolve(img); };
+                img.onerror = (e) => { clearTimeout(timer); reject(e); };
+                img.src = url;
+            });
+        }
+
+        function createResizedCanvas(img) {
+            const MAX_W = 800;
+            let w = img.width;
+            let h = img.height;
+            if (w > MAX_W) {
+                h = Math.round(h * (MAX_W / w));
+                w = MAX_W;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            return canvas;
+        }
+
+        /**
+         * BLUR DETECTION — Laplacian variance via Canvas API
+         * Lower score = more blurry. Threshold: < 80 → ピンボケ
+         */
+        function detectBlur(img) {
+            const SIZE = 256; // downsample for speed
+            const canvas = document.createElement('canvas');
+            canvas.width = SIZE; canvas.height = SIZE;
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            ctx.drawImage(img, 0, 0, SIZE, SIZE);
+            const { data } = ctx.getImageData(0, 0, SIZE, SIZE);
+
+            // Convert to grayscale
+            const gray = new Float32Array(SIZE * SIZE);
+            for (let i = 0; i < SIZE * SIZE; i++) {
+                const o = i * 4;
+                gray[i] = 0.299 * data[o] + 0.587 * data[o + 1] + 0.114 * data[o + 2];
+            }
+
+            // Laplacian kernel: [0,1,0, 1,-4,1, 0,1,0]
+            let sum = 0, sum2 = 0, n = 0;
+            for (let y = 1; y < SIZE - 1; y++) {
+                for (let x = 1; x < SIZE - 1; x++) {
+                    const idx = y * SIZE + x;
+                    const lap = gray[idx - SIZE] + gray[idx + SIZE] +
+                        gray[idx - 1] + gray[idx + 1] - 4 * gray[idx];
+                    sum += lap; sum2 += lap * lap; n++;
+                }
+            }
+            const mean = sum / n;
+            const variance = sum2 / n - mean * mean;
+            return variance; // higher = sharper
+        }
+
+        /**
+         * EYE CLOSED DETECTION — EAR (Eye Aspect Ratio) via face-api.js
+         * EAR < 0.22 → 目閉じ（半目）
+         * Returns true if eye closed detected.
+         */
+        let _faceApiReady = false;
+        let _faceApiLoading = false;
+        let _faceApiAttempts = 0;
+
+        async function _tryLoadFaceApi() {
+            if (typeof faceapi === 'undefined') {
+                console.warn('[FaceAPI] faceapi not loaded — CDN script may have failed');
+                return false;
+            }
+            const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
+
+            // Load models with 15s timeout
+            await Promise.race([
+                Promise.all([
+                    faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+                    faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL),
+                ]),
+                new Promise((_, rej) => setTimeout(() => rej(new Error('Model load timeout (15s)')), 15000))
+            ]);
+            console.log('[FaceAPI] Models loaded successfully');
+
+            // Warmup with 64x64 canvas (1x1 causes WebGL issues in some browsers)
+            const dummy = document.createElement('canvas');
+            dummy.width = 64; dummy.height = 64;
+            const ctx = dummy.getContext('2d');
+            ctx.fillStyle = '#888'; ctx.fillRect(0, 0, 64, 64);
+            const opts = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.3 });
+
+            await Promise.race([
+                faceapi.detectSingleFace(dummy, opts).withFaceLandmarks(true),
+                new Promise((_, rej) => setTimeout(() => rej(new Error('Warmup timeout (10s)')), 10000))
+            ]);
+            console.log('[FaceAPI] Warmup completed');
+            return true;
+        }
+
+        async function ensureFaceApi() {
+            if (_faceApiReady) return true;
+            if (_faceApiLoading) {
+                let waited = 0;
+                while (_faceApiLoading && waited < 20000) {
+                    await new Promise(r => setTimeout(r, 200));
+                    waited += 200;
+                }
+                return _faceApiReady;
+            }
+            _faceApiLoading = true;
+
+            // Try up to 2 times
+            for (let attempt = 1; attempt <= 2; attempt++) {
+                _faceApiAttempts = attempt;
+                try {
+                    console.log(`[FaceAPI] Initialization attempt ${attempt}...`);
+                    const ok = await _tryLoadFaceApi();
+                    if (ok) {
+                        _faceApiReady = true;
+                        _faceApiLoading = false;
+                        console.log('[FaceAPI] ✓ Ready');
+                        return true;
+                    }
+                } catch (e) {
+                    console.warn(`[FaceAPI] Attempt ${attempt} failed:`, e.message);
+                    if (attempt < 2) {
+                        console.log('[FaceAPI] Retrying in 2s...');
+                        await new Promise(r => setTimeout(r, 2000));
+                    }
+                }
+            }
+
+            console.warn('[FaceAPI] ✗ All attempts failed — AI features disabled');
+            _faceApiLoading = false;
+            return false;
+        }
+
+        // Background preload: start loading FaceAPI 2s after page load
+        setTimeout(() => {
+            if (!_faceApiReady && !_faceApiLoading) {
+                console.log('[FaceAPI] Starting background preload...');
+                ensureFaceApi().then(ok => {
+                    if (ok) console.log('[FaceAPI] Background preload succeeded');
+                });
+            }
+        }, 2000);
+
+        function _ear(landmarks, leftIdxs, rightIdxs) {
+            // EAR = (||p2-p6|| + ||p3-p5||) / (2 * ||p1-p4||)
+            const pts = landmarks.positions;
+            function dist(a, b) {
+                const dx = pts[a].x - pts[b].x, dy = pts[a].y - pts[b].y;
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+            const [p1, p2, p3, p4, p5, p6] = leftIdxs;
+            const earL = (dist(p2, p6) + dist(p3, p5)) / (2 * dist(p1, p4));
+            const [q1, q2, q3, q4, q5, q6] = rightIdxs;
+            const earR = (dist(q2, q6) + dist(q3, q5)) / (2 * dist(q1, q4));
+            return (earL + earR) / 2;
+        }
+
+        async function detectEyeClosed(img) {
+            const ready = await ensureFaceApi();
+            if (!ready) return false;
+            try {
+                // Optimized input size for speed (default 416 -> 320)
+                const opts = new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.4 });
+                const result = await faceapi
+                    .detectSingleFace(img, opts)
+                    .withFaceLandmarks(true); // true = tiny model
+                if (!result) return false;
+                // 68-point landmark indices for eyes
+                // Left eye: 36-41, Right eye: 42-47
+                const ear = _ear(result.landmarks,
+                    [36, 37, 38, 39, 40, 41],
+                    [42, 43, 44, 45, 46, 47]);
+                return ear < 0.22;
+            } catch (e) {
+                console.warn('detectEyeClosed error:', e);
+                return false;
+            }
+        }
+
+        /**
+         * SIMILARITY DETECTION — dHash (difference hash)
+         * Returns a 64-bit hash as Uint8Array(64)
+         */
+        function computeDHash(img) {
+            const W = 9, H = 8; // 9 columns, 8 rows → 64-bit hash
+            const canvas = document.createElement('canvas');
+            canvas.width = W; canvas.height = H;
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            ctx.drawImage(img, 0, 0, W, H);
+            const { data } = ctx.getImageData(0, 0, W, H);
+            const hash = new Uint8Array(H * (W - 1)); // 64 bits
+            let bit = 0;
+            for (let y = 0; y < H; y++) {
+                for (let x = 0; x < W - 1; x++) {
+                    const idx = (y * W + x) * 4;
+                    const left = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
+                    const right = 0.299 * data[idx + 4] + 0.587 * data[idx + 5] + 0.114 * data[idx + 6];
+                    hash[bit++] = left > right ? 1 : 0;
+                }
+            }
+            return hash;
+        }
+
+        function hammingDistance(a, b) {
+            let dist = 0;
+            for (let i = 0; i < a.length; i++) dist += a[i] !== b[i] ? 1 : 0;
+            return dist;
+        }
+
+        // =====================================================================
+        // AI ORCHESTRATOR
+        // =====================================================================
+
+        /**
+         * Run all AI analyses on a flat list of photo objects.
+         */
+        async function runAIAnalysis(allPhotos, onProgress) {
+            const BLUR_THRESHOLD = 80;
+            const SIMILAR_THRESHOLD = 10;
+
+            // 1. Warmup FaceAPI with UI feedback
+            // This might freeze the UI for a few seconds only ONCE
+            if (onProgress) onProgress('AIエンジン起動中...', 0);
+            await new Promise(r => setTimeout(r, 100)); // Allow UI to render
+            await ensureFaceApi();
+
+            // Compute hashes for all photos first (fast)
+            const hashes = [];
+            for (let i = 0; i < allPhotos.length; i++) {
+                try {
+                    const resized = createResizedCanvas(allPhotos[i].img);
+                    hashes.push(computeDHash(resized));
+                } catch (e) {
+                    hashes.push(new Uint8Array(64)); // dummy
+                    console.warn(`Hash failed for ${i}`, e);
+                }
+            }
+
+            // Detect similarity
+            const similar = new Set();
+            for (let i = 0; i < allPhotos.length; i++) {
+                for (let j = i + 1; j < allPhotos.length; j++) {
+                    if (hammingDistance(hashes[i], hashes[j]) <= SIMILAR_THRESHOLD) {
+                        similar.add(i);
+                        similar.add(j);
+                    }
+                }
+            }
+
+            // Per-photo analysis: SEQUENTIAL + TIMEOUT
+            // Processing one by one to ensure stability and prevent freezing
+            for (let i = 0; i < allPhotos.length; i++) {
+                const p = allPhotos[i];
+                const globalIdx = i;
+
+                // Update text BEFORE processing
+                onProgress(i + 1, allPhotos.length);
+
+                // Allow UI to render
+                await new Promise(r => setTimeout(r, 10));
+
+                try {
+                    // Wrap analysis in a Promise.race with timeout
+                    await Promise.race([
+                        (async () => {
+                            const resized = createResizedCanvas(p.img);
+
+                            // Blur
+                            const blurScore = detectBlur(resized);
+                            if (blurScore < BLUR_THRESHOLD) p.aiTags.add('ピンボケ');
+
+                            // Eye closed (most likely to hang)
+                            const eyeClosed = await detectEyeClosed(resized);
+                            if (eyeClosed) p.aiTags.add('半目');
+
+                            // Similarity
+                            if (similar.has(globalIdx)) p.aiTags.add('類似');
+                        })(),
+                        new Promise((_, reject) => setTimeout(() => reject(new Error('AI timeout')), 4000))
+                    ]);
+                } catch (e) {
+                    console.warn(`Skipping photo ${globalIdx} due to error/timeout:`, e);
+                }
+            }
+        }
+
+        // =====================================================================
+        // PREVIEW SELECT (now async with AI analysis)
+        // =====================================================================
+
+        async function previewSelect() {
+            const btn = document.getElementById('previewBtn');
+            /*
+             * 1. Open window IMMEDIATELY to avoid browser popup blockers.
+             * Values returned by async functions are not considered "user actions".
+             */
+            const newWin = window.open('', '_blank');
+            if (newWin) {
+                newWin.document.write(`
+                    <html>
+                        <head><title>PicCheck AI解析中...</title>
+                        <style>
+                            body{background:#0f1117;color:#e8eaf6;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;}
+                            .loader{border:4px solid #2e3250;border-top:4px solid #ff6b6b;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin-bottom:20px;}
+                            @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+                        </style>
+                        </head>
+                        <body>
+                            <div class="loader"></div>
+                            <div id="msg">AI解析を実行中です...<br>そのままお待ちください</div>
+                        </body>
+                    </html>`);
+            } else {
+                showToast('ポップアップがブロックされました。許可してください。');
+                return;
+            }
+
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = 'AI解析中...'; // Initial text
+            }
+
+            const totalPhotos = groups.reduce((s, g) => s + g.photos.length, 0);
+            if (totalPhotos === 0) {
+                showToast('写真がありません');
+                if (newWin) newWin.close();
+                if (btn) { btn.disabled = false; btn.textContent = 'セレクト画面をプレビュー →'; }
+                return;
+            }
+
+            try {
+                // Load and Analyze
+                const flatPhotos = [];
+
+                // 1. Identify which photos need analysis
+                for (let gi = 0; gi < groups.length; gi++) {
+                    for (let pi = 0; pi < groups[gi].photos.length; pi++) {
+                        const p = groups[gi].photos[pi];
+                        const item = {
+                            gi, pi, img: null,
+                            aiTags: p._aiTags ? new Set(p._aiTags) : new Set(),
+                            _needsLoad: !p._aiTags // Only load if no tags exist
+                        };
+                        flatPhotos.push(item);
+                    }
+                }
+
+                // 2. Load images ONLY for new targets
+                const analysisTargets = [];
+                for (const item of flatPhotos) {
+                    if (item._needsLoad) {
+                        try {
+                            const url = groups[item.gi].photos[item.pi].url;
+                            item.img = await loadImg(url);
+                            analysisTargets.push(item);
+                        } catch {
+                            item.img = null;
+                        }
+                    }
+                }
+
+                // 3. Run AI only on new valid targets
+                const validTargets = analysisTargets.filter(p => p.img !== null);
+
+                if (validTargets.length > 0) {
+                    await runAIAnalysis(validTargets, (done, total) => {
+                        const msg = `AI解析中… ${done} / ${total}枚`;
+                        if (btn) btn.textContent = msg;
+                        if (newWin && newWin.document.getElementById('msg')) {
+                            newWin.document.getElementById('msg').innerText = msg + '\n完了までお待ちください...';
+                        }
+                    });
+
+                    // Save results back to source photos
+                    for (const item of validTargets) {
+                        groups[item.gi].photos[item.pi]._aiTags = [...item.aiTags];
+                    }
+                }
+
+                if (btn) btn.textContent = '結果を準備中…';
+
+                // Save data and Navigate
+                _doPreviewSelect(newWin);
+
+            } catch (err) {
+                console.error('AI analysis error:', err);
+                showToast('AI解析でエラーが発生しました。スキップして続行します。');
+                if (newWin) _doPreviewSelect(newWin); // Try to proceed even on error
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'セレクト画面をプレビュー →';
+                }
+            }
+        }
+
+        // Convert blob URL to data URL thumbnail via canvas
+        function blobUrlToDataUrl(blobUrl, maxSize) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = function () {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        let w = img.naturalWidth, h = img.naturalHeight;
+                        if (w > maxSize || h > maxSize) {
+                            if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+                            else { w = Math.round(w * maxSize / h); h = maxSize; }
+                        }
+                        canvas.width = w;
+                        canvas.height = h;
+                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                        resolve(canvas.toDataURL('image/jpeg', 0.6));
+                    } catch (e) {
+                        console.warn('Canvas conversion failed:', e);
+                        resolve(''); // Return empty string on failure
+                    }
+                };
+                img.onerror = () => resolve('');
+                img.src = blobUrl;
+            });
+        }
+
+        async function _doPreviewSelect(targetWindow) {
+            // Show progress
+            const btn = document.getElementById('previewSelectBtn');
+            if (btn) btn.textContent = 'サムネイル生成中…';
+
+            // Build data with data URL thumbnails (not blob URLs)
+            const data = [];
+            for (let i = 0; i < groups.length; i++) {
+                const g = groups[i];
+                const photos = [];
+                for (let j = 0; j < g.photos.length; j++) {
+                    const p = g.photos[j];
+                    if (btn) btn.textContent = `サムネイル生成中… ${data.reduce((a, g2) => a + g2.photos.length, 0) + j + 1}枚目`;
+
+                    // Convert blob URL to portable data URL
+                    const dataUrl = await blobUrlToDataUrl(p.url, 300);
+
+                    photos.push({
+                        id: `${g.label.toLowerCase()}${j + 1}`,
+                        fname: p.file.name,
+                        url: dataUrl,
+                        ai: p._aiTags || []
+                    });
+                }
+                data.push({
+                    id: `g${i + 1}`,
+                    label: g.label,
+                    name: g.name || g.label,
+                    color: g.color,
+                    limit: parseInt(g.limit) || 1,
+                    photos: photos
+                });
+            }
+
+            if (btn) btn.textContent = '画面遷移中…';
+
+            // Save to localStorage (works on file:// unlike sessionStorage)
+            try {
+                localStorage.setItem('piccheck_groups', JSON.stringify(data));
+                console.log('Saved data to localStorage:', data.length, 'groups,',
+                    data.reduce((a, g) => a + g.photos.length, 0), 'photos');
+            } catch (e) {
+                console.warn('localStorage save failed (data too large?):', e);
+                // Try storing without images as last resort
+                try {
+                    const lite = data.map(g => ({ ...g, photos: g.photos.map(p => ({ ...p, url: '' })) }));
+                    localStorage.setItem('piccheck_groups', JSON.stringify(lite));
+                    console.log('Saved lite data (no thumbnails) to localStorage');
+                } catch (e2) {
+                    console.error('Even lite save failed:', e2);
+                }
+            }
+
+            // Navigate to selection screen
+            if (targetWindow && !targetWindow.closed) {
+                targetWindow.location.href = 'PicCheck_SelectScreen_1.html?from=upload';
+            } else {
+                window.open('PicCheck_SelectScreen_1.html?from=upload', '_blank');
+            }
+        }
+
+        // ===== TOAST =====
+        let toastTimer;
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+        }
+    </script>
+</body>
+
+</html>
