@@ -2688,6 +2688,7 @@
             <div class="photo-grid" id="grid-${g.id}"></div>
           `;
             container.appendChild(section);
+            console.log('[buildGroupUI] Created section', g.id, 'grid:', !!document.getElementById('grid-' + g.id));
           } catch (e) {
             console.error('[buildGroupUI] Error building group', g.id, e);
           }
