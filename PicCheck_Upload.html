@@ -1554,7 +1554,8 @@
 
             // Build destination group buttons
             const destButtons = groups.map((g, gi) => {
-                return `<button class="dest-btn" style="background:${g.color}" onclick="moveSelectedToGroup(${gi})">${g.label}</button>`;
+                const displayName = g.name && g.name !== g.label ? `${g.label}: ${g.name}` : g.label;
+                return `<button class="dest-btn" style="background:${g.color}" onclick="moveSelectedToGroup(${gi})">${displayName}</button>`;
             }).join('');
 
             bar.innerHTML = `
@@ -1590,7 +1591,11 @@
           <div class="group-card-header" onclick="toggleCard(${gi})">
             <div class="group-label-badge" style="background:${g.color}">${g.label}</div>
             <div class="group-name-wrap">
-              <span style="font-size:15px;font-weight:700;color:var(--text)">グループ ${g.label}</span>
+              <input class="group-name-input" id="gname-${gi}"
+                value="${g.name}"
+                placeholder="${g.label}"
+                onclick="event.stopPropagation()"
+                oninput="updateGroupName(${gi}, this.value)">
             </div>
             <div class="group-meta">
               <div class="group-photo-count">${g.photos.length}枚</div>
