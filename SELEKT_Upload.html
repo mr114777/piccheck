@@ -2204,11 +2204,19 @@
             }
         }
 
-        // Convert blob URL to data URL thumbnail via canvas
-        function blobUrlToDataUrl(blobUrl, maxSize) {
+        // Convert File object or blob URL to data URL thumbnail via canvas
+        // Uses File directly (more reliable than blob URLs which can be revoked)
+        function fileToDataUrl(fileOrBlobUrl, maxSize) {
             return new Promise((resolve) => {
+                // 5 second timeout to prevent hanging
+                const timeout = setTimeout(() => {
+                    console.warn('[Thumb] Timeout for:', typeof fileOrBlobUrl === 'string' ? fileOrBlobUrl : fileOrBlobUrl?.name);
+                    resolve('');
+                }, 5000);
+
                 const img = new Image();
                 img.onload = function () {
+                    clearTimeout(timeout);
                     try {
                         const canvas = document.createElement('canvas');
                         let w = img.naturalWidth, h = img.naturalHeight;
@@ -2219,37 +2227,61 @@
                         canvas.width = w;
                         canvas.height = h;
                         canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                        resolve(canvas.toDataURL('image/jpeg', 0.85));
+                        const result = canvas.toDataURL('image/jpeg', 0.85);
+                        URL.revokeObjectURL(img.src); // Clean up if we created a URL
+                        resolve(result);
                     } catch (e) {
-                        console.warn('Canvas conversion failed:', e);
-                        resolve(''); // Return empty string on failure
+                        console.warn('[Thumb] Canvas error:', e);
+                        resolve('');
                     }
                 };
-                img.onerror = () => resolve('');
-                img.src = blobUrl;
+                img.onerror = () => {
+                    clearTimeout(timeout);
+                    console.warn('[Thumb] Image load error');
+                    resolve('');
+                };
+
+                // Prefer File object over blob URL (blob URLs can expire)
+                if (fileOrBlobUrl instanceof File || fileOrBlobUrl instanceof Blob) {
+                    img.src = URL.createObjectURL(fileOrBlobUrl);
+                } else if (typeof fileOrBlobUrl === 'string' && fileOrBlobUrl) {
+                    img.src = fileOrBlobUrl;
+                } else {
+                    clearTimeout(timeout);
+                    resolve('');
+                }
             });
         }
 
         async function _doPreviewSelect(targetWindow) {
-            // Show progress
             const btn = document.getElementById('previewSelectBtn');
             if (btn) btn.textContent = 'サムネイル生成中…';
 
-            // Build data with data URL thumbnails (not blob URLs)
+            const totalPhotos = groups.reduce((s, g) => s + g.photos.length, 0);
+            console.log('[Preview] Starting thumbnail generation for', totalPhotos, 'photos');
+
+            // Build data with data URL thumbnails
             const data = [];
+            let processed = 0;
             for (let i = 0; i < groups.length; i++) {
                 const g = groups[i];
                 const photos = [];
                 for (let j = 0; j < g.photos.length; j++) {
-                    const p = g.photos[j];
-                    if (btn) btn.textContent = `サムネイル生成中… ${data.reduce((a, g2) => a + g2.photos.length, 0) + j + 1}枚目`;
+                    processed++;
+                    if (btn) btn.textContent = `サムネイル生成中… ${processed}/${totalPhotos}`;
 
-                    // Convert blob URL to portable data URL (high quality for viewing)
-                    const dataUrl = await blobUrlToDataUrl(p.url, 1200);
+                    const p = g.photos[j];
+                    let dataUrl = '';
+                    try {
+                        // Use File object directly (more reliable than blob URL)
+                        dataUrl = await fileToDataUrl(p.file || p.url, 1200);
+                    } catch (e) {
+                        console.warn(`[Preview] Thumb failed for ${p.file?.name || 'unknown'}:`, e);
+                    }
 
                     photos.push({
                         id: `${g.label.toLowerCase()}${j + 1}`,
-                        fname: p.file.name,
+                        fname: p.file ? p.file.name : `photo_${j + 1}.jpg`,
                         url: dataUrl,
                         ai: p._aiTags || []
                     });
@@ -2263,6 +2295,8 @@
                     photos: photos
                 });
             }
+
+            console.log('[Preview] Thumbnails done:', processed, 'photos');
 
             if (btn) btn.textContent = '画面遷移中…';
 
