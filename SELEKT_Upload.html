@@ -2355,9 +2355,9 @@
             const selectUrl = sessionId
                 ? `SELEKT_Select.html?session=${sessionId}`
                 : 'SELEKT_Select.html?from=upload';
-            const fullShareUrl = sessionId
-                ? `${window.location.origin}${window.location.pathname.replace(/[^\/]*$/, '')}${selectUrl}`
-                : null;
+            // Always use GitHub Pages URL for sharing (not file:// or localhost)
+            const SHARE_BASE = 'https://mr114777.github.io/piccheck/';
+            const fullShareUrl = sessionId ? `${SHARE_BASE}${selectUrl}` : null;
 
             // Show share dialog if cloud upload succeeded
             if (sessionId && fullShareUrl) {
