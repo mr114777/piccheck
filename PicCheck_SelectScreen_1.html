@@ -163,7 +163,7 @@
 
     /* Download Dropdown */
     .btn-download {
-      background: var(--surface2);
+      background: linear-gradient(135deg, var(--surface2), var(--surface3));
       color: var(--text);
       border: 1px solid var(--border);
       padding: 8px 16px;
@@ -173,11 +173,25 @@
       cursor: pointer;
       font-family: inherit;
       transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-download svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
     .btn-download:hover {
-      background: var(--surface3);
-      border-color: var(--border2);
+      background: linear-gradient(135deg, var(--surface3), var(--surface2));
+      border-color: var(--accent);
+      color: var(--accent);
     }
 
     .dl-menu {
@@ -188,34 +202,65 @@
       margin-top: 6px;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 6px;
-      min-width: 200px;
+      border-radius: 12px;
+      padding: 8px;
+      min-width: 260px;
       z-index: 1000;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
     }
 
     .dl-menu.open {
       display: block;
     }
 
-    .dl-menu button {
-      display: block;
-      width: 100%;
-      padding: 10px 14px;
-      background: none;
-      border: none;
-      color: var(--text);
-      font-size: 13px;
-      font-family: inherit;
-      text-align: left;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.15s;
+    .dl-menu-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 6px 10px 4px;
     }
 
-    .dl-menu button:hover {
+    .dl-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 4px;
+    }
+
+    .dl-row-label {
+      flex: 1;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      padding: 0 6px;
+      white-space: nowrap;
+    }
+
+    .dl-row-btn {
+      padding: 6px 10px;
       background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-sub);
+      font-size: 11px;
+      font-family: inherit;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .dl-row-btn:hover {
+      background: var(--surface3);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .dl-sep {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 4px 8px;
     }
 
     /* ===== MAIN LAYOUT ===== */
@@ -1991,16 +2036,49 @@
       <div class="topbar-divider"></div>
       <div class="dl-dropdown" style="position:relative">
         <button class="btn-download" onclick="toggleDlMenu()" id="dlBtn">
-          📥 ダウンロード ▼
+          <svg viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          DL ▾
         </button>
         <div class="dl-menu" id="dlMenu">
-          <button onclick="downloadPhotos('all','full')">📥 全部 (フルサイズ)</button>
-          <button onclick="downloadPhotos('ok','full')">✓ OKのみ (フルサイズ)</button>
-          <button onclick="downloadPhotos('ok+nearok','full')">△ ほぼOKも含む (フルサイズ)</button>
-          <hr style="border:none;border-top:1px solid var(--border);margin:4px 0">
-          <button onclick="downloadPhotos('all','sns')">📱 全部 (SNS用圧縮)</button>
-          <button onclick="downloadPhotos('ok','sns')">📱 OKのみ (SNS用圧縮)</button>
-          <button onclick="downloadPhotos('ok+nearok','sns')">📱 ほぼOKも含む (SNS用圧縮)</button>
+          <div class="dl-menu-label">フルサイズ（原寸）</div>
+          <div class="dl-row">
+            <span class="dl-row-label">全部</span>
+            <button class="dl-row-btn" onclick="downloadPhotos('all','full')">📦 DL</button>
+          </div>
+          <div class="dl-row">
+            <span class="dl-row-label">✓ OKのみ</span>
+            <button class="dl-row-btn" onclick="downloadPhotos('ok','full')">📦 DL</button>
+          </div>
+          <div class="dl-row">
+            <span class="dl-row-label">△ OK+ほぼOK</span>
+            <button class="dl-row-btn" onclick="downloadPhotos('ok+nearok','full')">📦 DL</button>
+          </div>
+          <div class="dl-row">
+            <span class="dl-row-label">✕ NGのみ</span>
+            <button class="dl-row-btn" onclick="downloadPhotos('ng','full')">📦 DL</button>
+          </div>
+          <hr class="dl-sep">
+          <div class="dl-menu-label">SNS用（1〜3MB圧縮）</div>
+          <div class="dl-row">
+            <span class="dl-row-label">全部</span>
+            <button class="dl-row-btn" onclick="downloadPhotos('all','sns')">📱 DL</button>
+          </div>
+          <div class="dl-row">
+            <span class="dl-row-label">✓ OKのみ</span>
+            <button class="dl-row-btn" onclick="downloadPhotos('ok','sns')">📱 DL</button>
+          </div>
+          <div class="dl-row">
+            <span class="dl-row-label">△ OK+ほぼOK</span>
+            <button class="dl-row-btn" onclick="downloadPhotos('ok+nearok','sns')">📱 DL</button>
+          </div>
+          <div class="dl-row">
+            <span class="dl-row-label">✕ NGのみ</span>
+            <button class="dl-row-btn" onclick="downloadPhotos('ng','sns')">📱 DL</button>
+          </div>
         </div>
       </div>
       <button class="btn-complete" onclick="openConfirm()">
