@@ -687,6 +687,59 @@
             background: rgba(255, 107, 107, 0.1);
         }
 
+        .group-photo-thumb.selected {
+            box-shadow: 0 0 0 3px #3BBFA5;
+            transform: scale(0.95);
+        }
+
+        .group-photo-thumb.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 20px;
+            height: 20px;
+            background: #3BBFA5;
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .selection-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            background: rgba(59, 191, 165, 0.15);
+            border: 1px solid #3BBFA5;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #3BBFA5;
+        }
+
+        .selection-bar button {
+            background: none;
+            border: 1px solid #3BBFA5;
+            color: #3BBFA5;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .selection-bar button:hover {
+            background: #3BBFA5;
+            color: white;
+        }
+
         .summary-bar {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -1390,11 +1443,39 @@
         }
 
         // --- RENDER STEP 3 ---
-        let _dragData = null; // { fromGroup, photoIndex }
+        let _dragData = null;
+        let _selectedPhotos = new Set(); // "groupIdx-photoIdx" keys
+
+        function _selKey(gi, pi) { return `${gi}-${pi}`; }
+
+        function clearSelection() {
+            _selectedPhotos.clear();
+            document.querySelectorAll('.group-photo-thumb.selected').forEach(el => el.classList.remove('selected'));
+            updateSelectionBar();
+        }
+
+        function updateSelectionBar() {
+            let bar = document.getElementById('selectionBar');
+            if (_selectedPhotos.size === 0) {
+                if (bar) bar.remove();
+                return;
+            }
+            if (!bar) {
+                bar = document.createElement('div');
+                bar.className = 'selection-bar';
+                bar.id = 'selectionBar';
+                const groupList = document.getElementById('groupList');
+                groupList.parentElement.insertBefore(bar, groupList);
+            }
+            bar.innerHTML = `📌 ${_selectedPhotos.size}枚を選択中 <button onclick="clearSelection()">選択解除</button>`;
+        }
 
         function renderGroupConfirm() {
             const list = document.getElementById('groupList');
             list.innerHTML = '';
+            _selectedPhotos.clear();
+            const bar = document.getElementById('selectionBar');
+            if (bar) bar.remove();
 
             const totalPhotos = groups.reduce((s, g) => s + g.photos.length, 0);
             const totalLimit = groups.reduce((s, g) => s + (parseInt(g.limit) || 0), 0);
@@ -1404,7 +1485,7 @@
 
             groups.forEach((g, gi) => {
                 const card = document.createElement('div');
-                card.className = 'group-card open'; // All open by default for drag-and-drop
+                card.className = 'group-card open';
                 card.innerHTML = `
           <div class="group-card-header" onclick="toggleCard(${gi})">
             <div class="group-label-badge" style="background:${g.color}">${g.label}</div>
@@ -1437,7 +1518,7 @@
         `;
                 list.appendChild(card);
 
-                // Setup drop target on the grid
+                // Setup drop target
                 const grid = card.querySelector(`#gphoto-${gi}`);
                 grid.addEventListener('dragover', (e) => {
                     e.preventDefault();
@@ -1450,7 +1531,13 @@
                     e.preventDefault();
                     grid.classList.remove('drag-over');
                     if (_dragData && _dragData.fromGroup !== gi) {
-                        movePhoto(_dragData.fromGroup, _dragData.photoIndex, gi);
+                        if (_selectedPhotos.size > 0 && _selectedPhotos.has(_selKey(_dragData.fromGroup, _dragData.photoIndex))) {
+                            // Move all selected photos
+                            moveSelectedPhotos(gi);
+                        } else {
+                            // Move single photo
+                            movePhoto(_dragData.fromGroup, _dragData.photoIndex, gi);
+                        }
                     }
                     _dragData = null;
                 });
@@ -1462,14 +1549,31 @@
                     thumb.draggable = true;
                     thumb.innerHTML = `<img src="${p.url}" alt="${p.file.name}" loading="lazy">`;
 
+                    // Click to toggle selection
+                    thumb.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const key = _selKey(gi, pi);
+                        if (_selectedPhotos.has(key)) {
+                            _selectedPhotos.delete(key);
+                            thumb.classList.remove('selected');
+                        } else {
+                            _selectedPhotos.add(key);
+                            thumb.classList.add('selected');
+                        }
+                        updateSelectionBar();
+                    });
+
                     thumb.addEventListener('dragstart', (e) => {
                         _dragData = { fromGroup: gi, photoIndex: pi };
                         thumb.classList.add('dragging');
                         e.dataTransfer.effectAllowed = 'move';
+                        // If dragging a selected photo, show count
+                        if (_selectedPhotos.size > 0 && _selectedPhotos.has(_selKey(gi, pi))) {
+                            e.dataTransfer.setData('text/plain', `${_selectedPhotos.size}枚移動`);
+                        }
                     });
                     thumb.addEventListener('dragend', () => {
                         thumb.classList.remove('dragging');
-                        // Clean up all drag-over states
                         document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
                     });
 
@@ -1482,13 +1586,46 @@
             if (fromGroupIdx === toGroupIdx) return;
             const photo = groups[fromGroupIdx].photos.splice(photoIdx, 1)[0];
             groups[toGroupIdx].photos.push(photo);
-            // Remove empty groups
             if (groups[fromGroupIdx].photos.length === 0) {
                 groups.splice(fromGroupIdx, 1);
                 reassignLabels();
             }
             renderGroupConfirm();
             showToast('写真を移動しました ✓');
+        }
+
+        function moveSelectedPhotos(toGroupIdx) {
+            // Collect selected photos grouped by source group (reverse order to avoid index shift)
+            const byGroup = {};
+            _selectedPhotos.forEach(key => {
+                const [gi, pi] = key.split('-').map(Number);
+                if (gi === toGroupIdx) return; // Skip if same group
+                if (!byGroup[gi]) byGroup[gi] = [];
+                byGroup[gi].push(pi);
+            });
+
+            let movedCount = 0;
+            // Process groups in reverse to avoid index shifting
+            const groupIndices = Object.keys(byGroup).map(Number).sort((a, b) => b - a);
+            for (const gi of groupIndices) {
+                // Sort photo indices in reverse
+                const indices = byGroup[gi].sort((a, b) => b - a);
+                for (const pi of indices) {
+                    const photo = groups[gi].photos.splice(pi, 1)[0];
+                    groups[toGroupIdx].photos.push(photo);
+                    movedCount++;
+                }
+            }
+
+            // Remove empty groups (reverse order)
+            for (let i = groups.length - 1; i >= 0; i--) {
+                if (groups[i].photos.length === 0) {
+                    groups.splice(i, 1);
+                }
+            }
+            reassignLabels();
+            renderGroupConfirm();
+            showToast(`${movedCount}枚を移動しました ✓`);
         }
 
         function addNewGroup() {
