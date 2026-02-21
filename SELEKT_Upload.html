@@ -1000,6 +1000,8 @@
         <div class="step-panel active" id="panel1">
             <div class="upload-zone" id="uploadZone">
                 <input type="file" id="fileInput" accept="image/jpeg,image/png,image/heic,image/heif" multiple>
+                <input type="file" id="folderInput" accept="image/jpeg,image/png,image/heic,image/heif" webkitdirectory
+                    multiple style="display:none;">
                 <div class="upload-icon"><svg width="56" height="56" viewBox="0 0 56 56" fill="none"
                         xmlns="http://www.w3.org/2000/svg">
                         <rect x="4" y="12" width="48" height="36" rx="6" stroke="rgba(255,255,255,0.3)"
@@ -1011,13 +1013,19 @@
                     </svg></div>
                 <div class="upload-title">写真をドラッグ＆ドロップ</div>
                 <div class="upload-sub">
-                    または下のボタンからファイルを選択<br>
+                    または下のボタンから選択<br>
                     JPG / PNG 対応 ・ 複数ファイル一括OK
                 </div>
-                <button class="upload-btn"
-                    onclick="document.getElementById('fileInput').click(); event.stopPropagation();">
-                    ファイルを選択
-                </button>
+                <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+                    <button class="upload-btn"
+                        onclick="document.getElementById('fileInput').click(); event.stopPropagation();">
+                        🖼️ ファイルを選択
+                    </button>
+                    <button class="upload-btn" style="background:rgba(255,255,255,0.08);"
+                        onclick="document.getElementById('folderInput').click(); event.stopPropagation();">
+                        📁 フォルダを選択
+                    </button>
+                </div>
             </div>
 
             <div class="preview-section" id="previewSection">
@@ -1161,15 +1169,21 @@
             handleFiles([...e.target.files]);
             e.target.value = '';
         });
+        document.getElementById('folderInput').addEventListener('change', e => {
+            handleFiles([...e.target.files]);
+            e.target.value = '';
+        });
 
         function handleFiles(files) {
             const imgs = files.filter(f => f.type.startsWith('image/'));
             imgs.forEach(f => {
                 if (uploadedFiles.find(u => u.file.name === f.name && u.file.size === f.size)) return;
                 const url = URL.createObjectURL(f);
-                uploadedFiles.push({ file: f, url, exif: null, faceData: null });
-                // Save original file to IndexedDB (background, non-blocking)
-                const photoId = f.name; // Use filename as key for now
+                // Store subfolder path for auto-grouping
+                const relPath = f.webkitRelativePath || '';
+                const subfolder = relPath ? relPath.split('/').slice(0, -1).pop() || '' : '';
+                uploadedFiles.push({ file: f, url, exif: null, faceData: null, subfolder });
+                const photoId = f.name;
                 saveOriginalFile(photoId, f).catch(e => console.warn('IndexedDB save failed:', e));
             });
             renderPreviews();
@@ -1268,14 +1282,36 @@
 
         // ===== SKIP GROUPING (single group) =====
         function skipGrouping() {
-            groups = [{
-                label: 'A',
-                name: 'A',
-                reason: '',
-                color: GROUP_COLORS[0],
-                limit: uploadedFiles.length,
-                photos: [...uploadedFiles]
-            }];
+            // Check if files have subfolder info for auto-grouping
+            const subfolders = new Set(uploadedFiles.map(f => f.subfolder).filter(Boolean));
+            if (subfolders.size > 1) {
+                // Auto-group by subfolder
+                const labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                let i = 0;
+                groups = [];
+                subfolders.forEach(folder => {
+                    const label = labels[i % labels.length];
+                    const photos = uploadedFiles.filter(f => f.subfolder === folder);
+                    groups.push({
+                        label,
+                        name: folder,
+                        reason: '',
+                        color: GROUP_COLORS[i % GROUP_COLORS.length],
+                        limit: photos.length,
+                        photos
+                    });
+                    i++;
+                });
+            } else {
+                groups = [{
+                    label: 'A',
+                    name: 'A',
+                    reason: '',
+                    color: GROUP_COLORS[0],
+                    limit: uploadedFiles.length,
+                    photos: [...uploadedFiles]
+                }];
+            }
             renderGroupConfirm();
             goToStep(3);
         }
@@ -1626,6 +1662,7 @@
                 placeholder="${g.label}"
                 onclick="event.stopPropagation()"
                 oninput="updateGroupName(${gi}, this.value)">
+              <span style="cursor:pointer;opacity:0.4;font-size:13px;margin-left:4px;" title="グループ名を編集" onclick="event.stopPropagation();document.getElementById('gname-${gi}').focus()">✏️</span>
             </div>
             <div class="group-meta">
               <div class="group-photo-count">${g.photos.length}枚</div>
