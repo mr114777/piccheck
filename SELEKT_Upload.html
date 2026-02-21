@@ -2192,12 +2192,11 @@
             }
 
             try {
-                _doPreviewSelect(newWin);
+                await _doPreviewSelect(newWin);
             } catch (err) {
                 console.error('Preview error:', err);
-                showToast('エラーが発生しました');
+                showToast('エラーが発生しました: ' + err.message);
                 if (newWin) newWin.close();
-            } finally {
                 if (btn) {
                     btn.disabled = false;
                     btn.textContent = 'セレクト画面をプレビュー →';
@@ -2361,7 +2360,6 @@
 
             // Show share dialog if cloud upload succeeded
             if (sessionId && fullShareUrl) {
-                // Show share URL modal
                 const overlay = document.createElement('div');
                 overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;';
                 overlay.innerHTML = `
@@ -2371,15 +2369,15 @@
                         <div style="font-size:13px;color:var(--text-sub);margin-bottom:20px;">
                             以下のURLを共有すると、他の人も写真を閲覧できます
                         </div>
-                        <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:16px;word-break:break-all;font-family:'Space Mono',monospace;font-size:12px;color:var(--text);text-align:left;">
+                        <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:16px;word-break:break-all;font-family:'Space Mono',monospace;font-size:12px;color:var(--text);text-align:left;" id="shareUrlText">
                             ${fullShareUrl}
                         </div>
                         <div style="display:flex;gap:10px;justify-content:center;">
-                            <button onclick="navigator.clipboard.writeText('${fullShareUrl}');this.textContent='✓ コピー済み';this.style.background='var(--green)'" 
+                            <button id="copyShareBtn"
                                 style="padding:12px 24px;background:var(--coral);color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">
                                 📋 URLをコピー
                             </button>
-                            <button onclick="this.closest('div[style*=fixed]').remove();${targetWindow && !targetWindow.closed ? `targetWindow.location.href='${selectUrl}'` : `window.open('${selectUrl}','_blank')`}" 
+                            <button id="goSelectBtn"
                                 style="padding:12px 24px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">
                                 セレクト画面へ →
                             </button>
@@ -2387,6 +2385,25 @@
                     </div>
                 `;
                 document.body.appendChild(overlay);
+
+                // Attach event listeners (proper JS, not inline onclick)
+                document.getElementById('copyShareBtn').addEventListener('click', function () {
+                    navigator.clipboard.writeText(fullShareUrl).then(() => {
+                        this.textContent = '✓ コピー済み';
+                        this.style.background = 'var(--green)';
+                    }).catch(() => {
+                        // Fallback: select text
+                        const range = document.createRange();
+                        range.selectNodeContents(document.getElementById('shareUrlText'));
+                        window.getSelection().removeAllRanges();
+                        window.getSelection().addRange(range);
+                        this.textContent = '選択済み（Ctrl+Cでコピー）';
+                    });
+                });
+                document.getElementById('goSelectBtn').addEventListener('click', function () {
+                    overlay.remove();
+                    window.open(fullShareUrl, '_blank');
+                });
             } else {
                 // No cloud session, navigate directly
                 if (targetWindow && !targetWindow.closed) {
