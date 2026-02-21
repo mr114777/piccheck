@@ -3585,13 +3585,13 @@
     }
 
     // ===== INIT =====
-    buildGroupUI();
-    renderAll();
-    GROUPS.forEach(g => updateGroupLimitBadge(g));
-    updateProgress();
-    updateStats();
-    renderSelectedList();
-    renderNGList();
+    try { buildGroupUI(); console.log('[INIT] buildGroupUI done'); } catch (e) { console.error('[INIT] buildGroupUI FAILED', e); }
+    try { renderAll(); console.log('[INIT] renderAll done'); } catch (e) { console.error('[INIT] renderAll FAILED', e); }
+    try { GROUPS.forEach(g => updateGroupLimitBadge(g)); console.log('[INIT] updateGroupLimitBadge done'); } catch (e) { console.error('[INIT] updateGroupLimitBadge FAILED', e); }
+    try { updateProgress(); } catch (e) { console.error('[INIT] updateProgress FAILED', e); }
+    try { updateStats(); } catch (e) { console.error('[INIT] updateStats FAILED', e); }
+    try { renderSelectedList(); } catch (e) { console.error('[INIT] renderSelectedList FAILED', e); }
+    try { renderNGList(); } catch (e) { console.error('[INIT] renderNGList FAILED', e); }
   </script>
 
   <!-- ===== MOBILE JS ===== -->
