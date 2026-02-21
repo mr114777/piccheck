@@ -2344,20 +2344,56 @@
                 // Save session ID
                 localStorage.setItem('selekt_sessionId', sessionId);
 
+                if (btn) btn.textContent = 'アップロード完了！';
+
             } catch (cloudErr) {
                 console.warn('[SELEKT] Cloud upload failed, using local mode:', cloudErr);
                 showToast('クラウドアップロード失敗。ローカルモードで続行します');
             }
 
-            // Navigate to selection screen
+            // Build the select URL
             const selectUrl = sessionId
                 ? `SELEKT_Select.html?session=${sessionId}`
                 : 'SELEKT_Select.html?from=upload';
+            const fullShareUrl = sessionId
+                ? `${window.location.origin}${window.location.pathname.replace(/[^\/]*$/, '')}${selectUrl}`
+                : null;
 
-            if (targetWindow && !targetWindow.closed) {
-                targetWindow.location.href = selectUrl;
+            // Show share dialog if cloud upload succeeded
+            if (sessionId && fullShareUrl) {
+                // Show share URL modal
+                const overlay = document.createElement('div');
+                overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;';
+                overlay.innerHTML = `
+                    <div style="background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:32px;max-width:500px;width:90%;text-align:center;">
+                        <div style="font-size:32px;margin-bottom:12px;">✅</div>
+                        <div style="font-size:18px;font-weight:700;margin-bottom:8px;">クラウドアップロード完了！</div>
+                        <div style="font-size:13px;color:var(--text-sub);margin-bottom:20px;">
+                            以下のURLを共有すると、他の人も写真を閲覧できます
+                        </div>
+                        <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:16px;word-break:break-all;font-family:'Space Mono',monospace;font-size:12px;color:var(--text);text-align:left;">
+                            ${fullShareUrl}
+                        </div>
+                        <div style="display:flex;gap:10px;justify-content:center;">
+                            <button onclick="navigator.clipboard.writeText('${fullShareUrl}');this.textContent='✓ コピー済み';this.style.background='var(--green)'" 
+                                style="padding:12px 24px;background:var(--coral);color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">
+                                📋 URLをコピー
+                            </button>
+                            <button onclick="this.closest('div[style*=fixed]').remove();${targetWindow && !targetWindow.closed ? `targetWindow.location.href='${selectUrl}'` : `window.open('${selectUrl}','_blank')`}" 
+                                style="padding:12px 24px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">
+                                セレクト画面へ →
+                            </button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
             } else {
-                window.open(selectUrl, '_blank');
+                // No cloud session, navigate directly
+                if (targetWindow && !targetWindow.closed) {
+                    targetWindow.location.href = selectUrl;
+                } else {
+                    window.open(selectUrl, '_blank');
+                }
             }
         }
 
