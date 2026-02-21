@@ -3293,6 +3293,7 @@
         // Click to cycle zoom
         container.addEventListener('click', function _clickZoom(e) {
           if (e.target.closest('.zoom-indicator')) return;
+          if (_didDrag) { _didDrag = false; return; }
           const idx = ZOOM_LEVELS.indexOf(_zoomLevel);
           _zoomLevel = ZOOM_LEVELS[(idx + 1) % ZOOM_LEVELS.length];
           _applyZoom(container, imgEl, e.clientX, e.clientY);
@@ -3313,10 +3314,32 @@
           _applyZoom(container, imgEl, e.clientX, e.clientY);
         }, { passive: false });
 
-        // Mouse move panning when zoomed
-        container.addEventListener('mousemove', function _panMove(e) {
+        // Drag panning when zoomed (only while mouse button held)
+        let _isDragging = false;
+        let _didDrag = false;
+
+        container.addEventListener('mousedown', function (e) {
           if (_zoomLevel <= 1) return;
+          _isDragging = true;
+          _didDrag = false;
+          container.classList.add('zoomed-dragging');
+          e.preventDefault();
+        });
+
+        container.addEventListener('mousemove', function (e) {
+          if (!_isDragging || _zoomLevel <= 1) return;
+          _didDrag = true;
           _panToPoint(container, imgEl, e.clientX, e.clientY);
+        });
+
+        container.addEventListener('mouseup', function () {
+          _isDragging = false;
+          container.classList.remove('zoomed-dragging');
+        });
+
+        container.addEventListener('mouseleave', function () {
+          _isDragging = false;
+          container.classList.remove('zoomed-dragging');
         });
 
       } else {
