@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PicCheck — 写真セレクト</title>
+  <title>SELEKT — 写真セレクト</title>
   <link
     href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap"
     rel="stylesheet">
@@ -2018,7 +2018,7 @@
 
   <!-- ===== TOP BAR ===== -->
   <div class="topbar">
-    <div class="logo">Pic<span>Check</span></div>
+    <div class="logo">SEL<span>EKT</span></div>
     <div class="topbar-divider"></div>
     <div class="session-name">
       <strong>夏コスプレ撮影会 #2025-08</strong>
@@ -2463,24 +2463,24 @@
       let raw = null;
 
       // 1. Check direct injection (window property, set before navigation)
-      if (window.PICCHECK_DATA) {
-        raw = window.PICCHECK_DATA;
-        console.log('[loadGroupData] Source: window.PICCHECK_DATA');
+      if (window.SELEKT_DATA) {
+        raw = window.SELEKT_DATA;
+        console.log('[loadGroupData] Source: window.SELEKT_DATA');
       }
 
       // 2. Check opener (for window.open scenarios)
       if (!raw && window.opener) {
         try {
-          if (window.opener.PICCHECK_DATA) {
-            raw = window.opener.PICCHECK_DATA;
-            console.log('[loadGroupData] Source: opener.PICCHECK_DATA');
+          if (window.opener.SELEKT_DATA) {
+            raw = window.opener.SELEKT_DATA;
+            console.log('[loadGroupData] Source: opener.SELEKT_DATA');
           }
         } catch (e) { /* cross-origin error, ignore */ }
       }
 
       // 3. Check localStorage (primary storage for file:// protocol)
       if (!raw) {
-        const stored = localStorage.getItem('piccheck_groups');
+        const stored = localStorage.getItem('selekt_groups');
         if (stored) {
           try {
             raw = JSON.parse(stored);
@@ -2493,7 +2493,7 @@
 
       // 4. Check sessionStorage (secondary fallback)
       if (!raw) {
-        const stored = sessionStorage.getItem('piccheck_groups');
+        const stored = sessionStorage.getItem('selekt_groups');
         if (stored) {
           try {
             raw = JSON.parse(stored);
@@ -2673,22 +2673,22 @@
     let GROUPS = _imported || JSON.parse(JSON.stringify(DEMO_DATA));
 
     // Support Data Receive via Opener (Pull)
-    if (!isPreviewMode && window.opener && window.opener.PICCHECK_DATA) {
+    if (!isPreviewMode && window.opener && window.opener.SELEKT_DATA) {
       try {
-        const d = window.opener.PICCHECK_DATA;
+        const d = window.opener.SELEKT_DATA;
         if (d && Array.isArray(d.groups)) {
           GROUPS = d.groups;
-          console.log('Loaded data from opener.PICCHECK_DATA');
+          console.log('Loaded data from opener.SELEKT_DATA');
         } else if (Array.isArray(d)) {
           GROUPS = d;
-          console.log('Loaded data array from opener.PICCHECK_DATA');
+          console.log('Loaded data array from opener.SELEKT_DATA');
         }
       } catch (e) { console.error('Opener data load failed:', e); }
     }
 
     // Support Data Receive via postMessage (Push)
     window.addEventListener('message', (event) => {
-      if (event.data && event.data.type === 'PICCHECK_DATA') {
+      if (event.data && event.data.type === 'SELEKT_DATA') {
         const d = event.data.data;
         if (d && Array.isArray(d.groups)) {
           window.setGroupData(d.groups);
@@ -3708,7 +3708,7 @@
     }
 
     // ===== DOWNLOAD =====
-    const DL_DB_NAME = 'PicCheckDB';
+    const DL_DB_NAME = 'SelektDB';
     const DL_STORE_NAME = 'originalPhotos';
 
     function dlOpenDB() {
@@ -3920,7 +3920,7 @@
     // ===== INDEXEDDB READER =====
     function openDB() {
       return new Promise((resolve, reject) => {
-        const req = indexedDB.open('PicCheckDB', 1);
+        const req = indexedDB.open('SelektDB', 1);
         req.onupgradeneeded = (e) => {
           const db = e.target.result;
           if (!db.objectStoreNames.contains('originalPhotos')) {
@@ -4020,7 +4020,7 @@
       const modeLabel = mode === 'sns' ? '_SNS圧縮' : '';
       const a = document.createElement('a');
       a.href = URL.createObjectURL(content);
-      a.download = `PicCheck_${filterLabel}${modeLabel}_${photos.length}枚.zip`;
+      a.download = `SELEKT_${filterLabel}${modeLabel}_${photos.length}枚.zip`;
       a.click();
       URL.revokeObjectURL(a.href);
       showToast(`${photos.length}枚のダウンロード完了 ✓`);

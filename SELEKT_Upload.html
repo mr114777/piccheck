@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PicCheck — 写真アップロード</title>
+    <title>SELEKT — 写真アップロード</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -969,7 +969,7 @@
 
     <!-- TOP BAR -->
     <div class="topbar">
-        <div class="logo">Pic<span>Check</span></div>
+        <div class="logo">SEL<span>EKT</span></div>
         <div class="topbar-divider"></div>
         <div class="topbar-title">写真アップロード &amp; グループ設定</div>
     </div>
@@ -1108,7 +1108,7 @@
         const LABELS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
         // ===== IndexedDB for Original Photos =====
-        const DB_NAME = 'PicCheckDB';
+        const DB_NAME = 'SelektDB';
         const STORE_NAME = 'originalPhotos';
 
         function openDB() {
@@ -2152,7 +2152,7 @@
             if (newWin) {
                 newWin.document.write(`
                     <html>
-                        <head><title>PicCheck 準備中...</title>
+                        <head><title>SELEKT 準備中...</title>
                         <style>
                             body{background:#0f1117;color:#e8eaf6;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;}
                             .loader{border:4px solid #2e3250;border-top:4px solid #ff6b6b;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin-bottom:20px;}
@@ -2260,14 +2260,14 @@
 
             // Save to localStorage (works on file:// unlike sessionStorage)
             try {
-                localStorage.setItem('piccheck_groups', JSON.stringify(data));
+                localStorage.setItem('selekt_groups', JSON.stringify(data));
                 console.log('Saved data to localStorage:', data.length, 'groups,',
                     data.reduce((a, g) => a + g.photos.length, 0), 'photos');
             } catch (e) {
                 console.warn('localStorage save failed (data too large?):', e);
                 try {
                     const lite = data.map(g => ({ ...g, photos: g.photos.map(p => ({ ...p, url: '' })) }));
-                    localStorage.setItem('piccheck_groups', JSON.stringify(lite));
+                    localStorage.setItem('selekt_groups', JSON.stringify(lite));
                     console.log('Saved lite data (no thumbnails) to localStorage');
                 } catch (e2) {
                     console.error('Even lite save failed:', e2);
@@ -2342,8 +2342,8 @@
 
             // Navigate to selection screen
             const selectUrl = sessionId
-                ? `PicCheck_SelectScreen_1.html?session=${sessionId}`
-                : 'PicCheck_SelectScreen_1.html?from=upload';
+                ? `SELEKT_Select.html?session=${sessionId}`
+                : 'SELEKT_Select.html?from=upload';
 
             if (targetWindow && !targetWindow.closed) {
                 targetWindow.location.href = selectUrl;
