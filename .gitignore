@@ -10,6 +10,8 @@ debug_ai_test.html
 # System files
 .DS_Store
 .gemini/
+.wrangler/
+node_modules/
 
 # Spec docs (Japanese)
 *.md
