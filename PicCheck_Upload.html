@@ -627,7 +627,66 @@
             font-size: 14px;
         }
 
-        /* ===== SUMMARY BAR ===== */
+        /* Drag & Drop styles */
+        .group-photo-thumb[draggable="true"] {
+            cursor: grab;
+            transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+        }
+
+        .group-photo-thumb[draggable="true"]:hover {
+            box-shadow: 0 0 0 2px var(--coral);
+            transform: scale(1.05);
+        }
+
+        .group-photo-thumb.dragging {
+            opacity: 0.3;
+            transform: scale(0.9);
+        }
+
+        .group-photos-grid.drag-over {
+            background: rgba(255, 107, 107, 0.1);
+            border: 2px dashed var(--coral);
+            border-radius: 8px;
+            min-height: 60px;
+        }
+
+        .btn-add-group {
+            width: 100%;
+            padding: 16px;
+            background: var(--surface);
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            color: var(--text-sub);
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+
+        .btn-add-group:hover {
+            border-color: var(--coral);
+            color: var(--coral);
+            background: rgba(255, 107, 107, 0.05);
+        }
+
+        .btn-delete-group {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: all 0.15s;
+        }
+
+        .btn-delete-group:hover {
+            color: var(--coral);
+            background: rgba(255, 107, 107, 0.1);
+        }
+
         .summary-bar {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -884,7 +943,7 @@
         <div class="step-panel" id="panel3">
             <div class="group-confirm-header">
                 <div class="group-confirm-title">グループを確認してください</div>
-                <div class="group-confirm-sub">グループ名をクリックして編集できます。選択枚数制限も設定してください。</div>
+                <div class="group-confirm-sub">写真をドラッグ&ドロップでグループ間を移動できます</div>
             </div>
 
             <div class="summary-bar" id="summaryBar">
@@ -903,6 +962,7 @@
             </div>
 
             <div class="group-list" id="groupList"></div>
+            <button class="btn-add-group" onclick="addNewGroup()">＋ 新しいグループを追加</button>
 
             <div class="action-bar">
                 <button class="btn-secondary" onclick="goToStep(1)">← やり直す</button>
@@ -1067,24 +1127,24 @@
 
             // Step A: Read EXIF
             await readAllExif();
-            setProgress(20, '顔検出モデルを準備中...');
+            setProgress(15, '顔検出モデルを準備中...');
 
-            // Step B: Load face-api models (tiny model from CDN)
+            // Step B: Load face-api models (face detection + landmarks + recognition)
             await loadFaceApi();
-            setProgress(40, '顔を検出中...');
+            // Progress 25-40 is set inside loadFaceApi/detectAllFaces
 
-            // Step C: Detect faces
+            // Step C: Detect faces + extract descriptors
             await detectAllFaces();
-            setProgress(65, '色を解析中...');
+            setProgress(70, '色を解析中...');
 
             // Step D: Color analysis
             await analyzeColors();
-            setProgress(85, 'グループを作成中...');
+            setProgress(85, '人物・構図でグループ化中...');
 
-            // Step E: Group
+            // Step E: Group by person × shot type
             await new Promise(r => setTimeout(r, 300));
             groups = buildGroups();
-            setProgress(100, 'グループ化完了！');
+            setProgress(100, `${groups.length}グループに分類完了！`);
 
             await new Promise(r => setTimeout(r, 600));
             renderGroupConfirm();
@@ -1131,28 +1191,54 @@
             if (faceApiReady) return;
             try {
                 const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model';
-                await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+                setProgress(25, '顔検出モデルを読み込み中...');
+                await Promise.all([
+                    faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+                    faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+                    faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
+                ]);
                 faceApiReady = true;
+                console.log('[FaceAPI] Models loaded: tinyFaceDetector + faceLandmark68Net + faceRecognitionNet');
             } catch (e) {
                 console.warn('face-api load failed, skipping face detection:', e);
             }
         }
 
         async function detectAllFaces() {
-            for (const item of uploadedFiles) {
+            const opts = new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.4 });
+            for (let i = 0; i < uploadedFiles.length; i++) {
+                const item = uploadedFiles[i];
+                setProgress(40 + Math.round(25 * i / uploadedFiles.length), `顔を検出中... ${i + 1}/${uploadedFiles.length}`);
                 try {
                     if (!faceApiReady) { item.faceData = null; continue; }
                     const img = await loadImage(item.url);
-                    const detections = await faceapi.detectAllFaces(img, new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.4 }));
                     const imgArea = img.width * img.height;
-                    const maxFaceArea = detections.length > 0
-                        ? Math.max(...detections.map(d => d.box.width * d.box.height))
-                        : 0;
-                    item.faceData = {
-                        count: detections.length,
-                        maxFaceRatio: imgArea > 0 ? maxFaceArea / imgArea : 0
-                    };
-                } catch { item.faceData = null; }
+
+                    // Detect with landmarks + descriptor
+                    const detections = await faceapi
+                        .detectAllFaces(img, opts)
+                        .withFaceLandmarks()
+                        .withFaceDescriptors();
+
+                    if (detections.length > 0) {
+                        // Pick the largest face
+                        let maxIdx = 0, maxArea = 0;
+                        detections.forEach((d, idx) => {
+                            const area = d.detection.box.width * d.detection.box.height;
+                            if (area > maxArea) { maxArea = area; maxIdx = idx; }
+                        });
+                        item.faceData = {
+                            count: detections.length,
+                            maxFaceRatio: imgArea > 0 ? maxArea / imgArea : 0,
+                            descriptor: detections[maxIdx].descriptor  // Float32Array[128]
+                        };
+                    } else {
+                        item.faceData = { count: 0, maxFaceRatio: 0, descriptor: null };
+                    }
+                } catch (e) {
+                    console.warn('Face detection failed for', item.file.name, e);
+                    item.faceData = null;
+                }
             }
         }
 
@@ -1196,85 +1282,116 @@
             );
         }
 
-        // --- BUILD GROUPS ---
+        // --- FACE DESCRIPTOR DISTANCE ---
+        function descriptorDist(d1, d2) {
+            if (!d1 || !d2) return Infinity;
+            let sum = 0;
+            for (let i = 0; i < d1.length; i++) {
+                sum += (d1[i] - d2[i]) * (d1[i] - d2[i]);
+            }
+            return Math.sqrt(sum);
+        }
+
+        // --- SHOT TYPE CLASSIFICATION ---
+        function classifyShotType(faceRatio) {
+            if (faceRatio > 0.06) return '寄り';         // Face > 6% of image → close-up
+            if (faceRatio > 0.015) return 'バストアップ';  // 1.5% ~ 6% → bust
+            return '全身';                                // < 1.5% → full body
+        }
+
+        // --- PERSON CLUSTERING ---
+        function clusterByPerson(photos) {
+            // Greedy clustering: assign each photo to an existing cluster
+            // if face descriptor distance < threshold, else create new cluster
+            const THRESHOLD = 0.55;
+            const clusters = []; // [ { centroid: Float32Array, photos: [] } ]
+
+            for (const p of photos) {
+                const desc = p.faceData?.descriptor;
+                if (!desc) {
+                    // No face detected → put in "no-face" cluster (index -1)
+                    let nofaceCluster = clusters.find(c => c.personId === -1);
+                    if (!nofaceCluster) {
+                        nofaceCluster = { personId: -1, centroid: null, photos: [] };
+                        clusters.push(nofaceCluster);
+                    }
+                    nofaceCluster.photos.push(p);
+                    continue;
+                }
+
+                // Find closest cluster
+                let bestIdx = -1, bestDist = Infinity;
+                clusters.forEach((c, idx) => {
+                    if (c.personId === -1) return;
+                    const dist = descriptorDist(desc, c.centroid);
+                    if (dist < bestDist) { bestDist = dist; bestIdx = idx; }
+                });
+
+                if (bestIdx >= 0 && bestDist < THRESHOLD) {
+                    clusters[bestIdx].photos.push(p);
+                } else {
+                    // New person cluster
+                    clusters.push({
+                        personId: clusters.filter(c => c.personId >= 0).length,
+                        centroid: desc,
+                        photos: [p]
+                    });
+                }
+            }
+            return clusters;
+        }
+
+        // --- BUILD GROUPS (person × shot type) ---
         function buildGroups() {
             if (uploadedFiles.length === 0) return [];
 
+            // Step 1: Cluster by person
+            const personClusters = clusterByPerson(uploadedFiles);
+            console.log('[Grouping]', personClusters.length, 'person clusters');
+
+            // Step 2: Subdivide each person cluster by shot type
             const result = [];
-            let currentGroup = [uploadedFiles[0]];
+            personClusters.forEach((cluster) => {
+                const byType = {};
+                cluster.photos.forEach(p => {
+                    const ratio = p.faceData?.maxFaceRatio || 0;
+                    const type = classifyShotType(ratio);
+                    if (!byType[type]) byType[type] = [];
+                    byType[type].push(p);
+                });
 
-            for (let i = 1; i < uploadedFiles.length; i++) {
-                const prev = uploadedFiles[i - 1];
-                const curr = uploadedFiles[i];
-                let shouldSplit = false;
-                let splitReason = '';
-
-                // 1. Time gap > 15 min
-                const tPrev = prev.exif?.DateTimeOriginal || prev.exif?.CreateDate;
-                const tCurr = curr.exif?.DateTimeOriginal || curr.exif?.CreateDate;
-                if (tPrev && tCurr) {
-                    const diffMin = (new Date(tCurr) - new Date(tPrev)) / 60000;
-                    if (diffMin > 15) { shouldSplit = true; splitReason = 'time'; }
+                // Create a group for each (person, shotType) combo
+                const personLabel = cluster.personId === -1 ? 'その他' : `人物${cluster.personId + 1}`;
+                for (const [shotType, photos] of Object.entries(byType)) {
+                    result.push({
+                        photos,
+                        personLabel,
+                        shotType,
+                        personId: cluster.personId
+                    });
                 }
+            });
 
-                // 2. Face ratio change > 25%
-                if (!shouldSplit && prev.faceData && curr.faceData) {
-                    const diff = Math.abs(prev.faceData.maxFaceRatio - curr.faceData.maxFaceRatio);
-                    if (diff > 0.25) { shouldSplit = true; splitReason = 'angle'; }
-                }
-
-                // 3. Color change (costume)
-                if (!shouldSplit) {
-                    const dist = colorDist(prev.avgColor, curr.avgColor);
-                    if (dist > 45) { shouldSplit = true; splitReason = 'costume'; }
-                }
-
-                if (shouldSplit) {
-                    result.push({ photos: currentGroup, splitReason: splitReason });
-                    currentGroup = [curr];
-                } else {
-                    currentGroup.push(curr);
-                }
-            }
-            result.push({ photos: currentGroup, splitReason: '' });
+            // Sort: by personId then shot type
+            result.sort((a, b) => {
+                if (a.personId !== b.personId) return a.personId - b.personId;
+                const order = { '全身': 0, 'バストアップ': 1, '寄り': 2 };
+                return (order[a.shotType] || 0) - (order[b.shotType] || 0);
+            });
 
             // Assign labels, names, colors
             return result.map((g, i) => {
                 const label = LABELS[i] || String(i + 1);
                 const color = GROUP_COLORS[i % GROUP_COLORS.length];
-                const { name, reason } = inferGroupName(g.photos, g.splitReason, i);
+                const name = `${g.personLabel} ${g.shotType}`;
                 const defaultLimit = Math.max(1, Math.ceil(g.photos.length * 0.4));
-                return { label, name, reason, color, limit: defaultLimit, photos: g.photos };
+                return { label, name, reason: `${g.personLabel}の${g.shotType}カット`, color, limit: defaultLimit, photos: g.photos };
             });
         }
 
-        function inferGroupName(photos, splitReason, idx) {
-            // Compute average face ratio for this group
-            const facedPhotos = photos.filter(p => p.faceData && p.faceData.count > 0);
-            const avgRatio = facedPhotos.length > 0
-                ? facedPhotos.reduce((s, p) => s + p.faceData.maxFaceRatio, 0) / facedPhotos.length
-                : null;
-            const multiface = photos.some(p => p.faceData && p.faceData.count >= 2);
-
-            if (splitReason === 'costume') {
-                return { name: idx === 0 ? 'メインコスチューム' : `衣装チェンジ後`, reason: '👗 衣装の色が大きく変化しました' };
-            }
-            if (multiface) {
-                return { name: 'グループショット', reason: '👥 複数人が検出されました' };
-            }
-            if (avgRatio !== null) {
-                if (avgRatio > 0.30) return { name: 'アップカット', reason: '🔍 顔が大きく映っています（アップ）' };
-                if (avgRatio > 0.12) return { name: 'バストアップ', reason: '📷 バストアップの構図です' };
-                if (avgRatio < 0.05 && facedPhotos.length > 0) return { name: '引きショット', reason: '🌄 全身・引きの構図です' };
-            }
-            if (splitReason === 'time') {
-                return { name: '', reason: '⏱ 撮影時刻が15分以上空きました' };
-            }
-            // Cannot determine
-            return { name: '', reason: '🤖 自動判定できませんでした' };
-        }
-
         // --- RENDER STEP 3 ---
+        let _dragData = null; // { fromGroup, photoIndex }
+
         function renderGroupConfirm() {
             const list = document.getElementById('groupList');
             list.innerHTML = '';
@@ -1287,17 +1404,17 @@
 
             groups.forEach((g, gi) => {
                 const card = document.createElement('div');
-                card.className = 'group-card';
+                card.className = 'group-card open'; // All open by default for drag-and-drop
                 card.innerHTML = `
           <div class="group-card-header" onclick="toggleCard(${gi})">
             <div class="group-label-badge" style="background:${g.color}">${g.label}</div>
             <div class="group-name-wrap">
               <input class="group-name-input" id="gname-${gi}"
                 value="${g.name}"
-                placeholder="グループ名（空白でアルファベットのみ）"
+                placeholder="グループ名"
                 onclick="event.stopPropagation()"
                 oninput="updateGroupName(${gi}, this.value)">
-              <div class="group-name-placeholder">${g.reason}</div>
+              <div class="group-name-placeholder">${g.reason || ''}</div>
             </div>
             <div class="group-meta">
               <div class="group-photo-count">${g.photos.length}枚</div>
@@ -1309,27 +1426,103 @@
                   oninput="updateGroupLimit(${gi}, this.value)">
                 <span class="group-limit-unit">枚</span>
               </div>
+              ${groups.length > 1 ? `<button class="btn-delete-group" onclick="event.stopPropagation();deleteGroup(${gi})" title="グループ削除">🗑</button>` : ''}
               <div class="group-toggle">▾</div>
             </div>
           </div>
           <div class="group-card-photos">
-            <div class="group-reason">
-              <span class="group-reason-icon"></span>
-              <span>${g.reason}</span>
-            </div>
-            <div class="group-photos-grid" id="gphoto-${gi}"></div>
+            <div class="group-photos-grid" id="gphoto-${gi}"
+              data-group="${gi}"></div>
           </div>
         `;
                 list.appendChild(card);
 
-                // Render thumbnails
+                // Setup drop target on the grid
                 const grid = card.querySelector(`#gphoto-${gi}`);
-                g.photos.forEach(p => {
+                grid.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    grid.classList.add('drag-over');
+                });
+                grid.addEventListener('dragleave', () => {
+                    grid.classList.remove('drag-over');
+                });
+                grid.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    grid.classList.remove('drag-over');
+                    if (_dragData && _dragData.fromGroup !== gi) {
+                        movePhoto(_dragData.fromGroup, _dragData.photoIndex, gi);
+                    }
+                    _dragData = null;
+                });
+
+                // Render draggable thumbnails
+                g.photos.forEach((p, pi) => {
                     const thumb = document.createElement('div');
                     thumb.className = 'group-photo-thumb';
+                    thumb.draggable = true;
                     thumb.innerHTML = `<img src="${p.url}" alt="${p.file.name}" loading="lazy">`;
+
+                    thumb.addEventListener('dragstart', (e) => {
+                        _dragData = { fromGroup: gi, photoIndex: pi };
+                        thumb.classList.add('dragging');
+                        e.dataTransfer.effectAllowed = 'move';
+                    });
+                    thumb.addEventListener('dragend', () => {
+                        thumb.classList.remove('dragging');
+                        // Clean up all drag-over states
+                        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+                    });
+
                     grid.appendChild(thumb);
                 });
+            });
+        }
+
+        function movePhoto(fromGroupIdx, photoIdx, toGroupIdx) {
+            if (fromGroupIdx === toGroupIdx) return;
+            const photo = groups[fromGroupIdx].photos.splice(photoIdx, 1)[0];
+            groups[toGroupIdx].photos.push(photo);
+            // Remove empty groups
+            if (groups[fromGroupIdx].photos.length === 0) {
+                groups.splice(fromGroupIdx, 1);
+                reassignLabels();
+            }
+            renderGroupConfirm();
+            showToast('写真を移動しました ✓');
+        }
+
+        function addNewGroup() {
+            const idx = groups.length;
+            const label = LABELS[idx] || String(idx + 1);
+            groups.push({
+                label: label,
+                name: '新しいグループ',
+                reason: '',
+                color: GROUP_COLORS[idx % GROUP_COLORS.length],
+                limit: 1,
+                photos: []
+            });
+            renderGroupConfirm();
+            showToast('グループを追加しました');
+        }
+
+        function deleteGroup(gi) {
+            if (groups.length <= 1) return;
+            const removedPhotos = groups[gi].photos;
+            groups.splice(gi, 1);
+            // Distribute orphan photos to the first remaining group
+            if (removedPhotos.length > 0) {
+                groups[0].photos.push(...removedPhotos);
+            }
+            reassignLabels();
+            renderGroupConfirm();
+            showToast('グループを削除しました');
+        }
+
+        function reassignLabels() {
+            groups.forEach((g, i) => {
+                g.label = LABELS[i] || String(i + 1);
+                g.color = GROUP_COLORS[i % GROUP_COLORS.length];
             });
         }
 
@@ -1352,7 +1545,7 @@
             document.getElementById('sumLimit').textContent = totalLimit;
         }
 
-        // ===== SHARE =====
+
         function openShare() {
             // Generate a fake share URL (in real app, this would be a Supabase-backed URL)
             const sessionId = Math.random().toString(36).slice(2, 10).toUpperCase();
