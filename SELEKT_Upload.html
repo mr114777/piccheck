@@ -64,13 +64,14 @@
 
         .logo {
             font-size: 18px;
-            font-weight: 700;
-            color: var(--coral);
-            letter-spacing: -0.5px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
         .logo span {
-            color: var(--text);
+            color: rgba(255, 255, 255, 0.5);
         }
 
         .topbar-divider {
@@ -983,7 +984,7 @@
         <div class="step-line" id="stepLine1"></div>
         <div class="step" id="stepInd2">
             <div class="step-num">2</div>
-            <div class="step-label">AI グループ化</div>
+            <div class="step-label">グループ設定</div>
         </div>
         <div class="step-line" id="stepLine2"></div>
         <div class="step" id="stepInd3">
@@ -999,7 +1000,15 @@
         <div class="step-panel active" id="panel1">
             <div class="upload-zone" id="uploadZone">
                 <input type="file" id="fileInput" accept="image/jpeg,image/png,image/heic,image/heif" multiple>
-                <div class="upload-icon">📷</div>
+                <div class="upload-icon"><svg width="56" height="56" viewBox="0 0 56 56" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <rect x="4" y="12" width="48" height="36" rx="6" stroke="rgba(255,255,255,0.3)"
+                            stroke-width="2" />
+                        <circle cx="28" cy="30" r="10" stroke="rgba(255,255,255,0.5)" stroke-width="2" />
+                        <circle cx="28" cy="30" r="5" fill="rgba(255,255,255,0.15)" />
+                        <rect x="38" y="16" width="8" height="4" rx="1" fill="rgba(255,255,255,0.2)" />
+                        <path d="M24 8h8l3 4H21l3-4z" fill="rgba(255,255,255,0.2)" />
+                    </svg></div>
                 <div class="upload-title">写真をドラッグ＆ドロップ</div>
                 <div class="upload-sub">
                     または下のボタンからファイルを選択<br>
