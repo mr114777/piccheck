@@ -2548,130 +2548,34 @@
     const _imported = loadGroupData();
     const isPreviewMode = !!_imported;
 
-    // Default Demo Data
-    const DEMO_DATA = [
-      {
-        id: 'g1', label: 'A', name: 'グループ A', color: '#FF6B6B', limit: 5,
-        photos: [
-          { id: 'a1', fname: 'LINE_ALBUM_2026.2.17_260219_1.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_1.jpg', ai: [] },
-          { id: 'a2', fname: 'LINE_ALBUM_2026.2.17_260219_2.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_2.jpg', ai: [] },
-          { id: 'a3', fname: 'LINE_ALBUM_2026.2.17_260219_3.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_3.jpg', ai: [] },
-          { id: 'a4', fname: 'LINE_ALBUM_2026.2.17_260219_4.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_4.jpg', ai: [] },
-          { id: 'a5', fname: 'LINE_ALBUM_2026.2.17_260219_5.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_5.jpg', ai: [] },
-          { id: 'a6', fname: 'LINE_ALBUM_2026.2.17_260219_6.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_6.jpg', ai: [] },
-          { id: 'a7', fname: 'LINE_ALBUM_2026.2.17_260219_7.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_7.jpg', ai: [] },
-          { id: 'a8', fname: 'LINE_ALBUM_2026.2.17_260219_8.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_8.jpg', ai: [] },
-          { id: 'a9', fname: 'LINE_ALBUM_2026.2.17_260219_9.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_9.jpg', ai: [] },
-          { id: 'a10', fname: 'LINE_ALBUM_2026.2.17_260219_10.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_10.jpg', ai: [] },
-          { id: 'a11', fname: 'LINE_ALBUM_2026.2.17_260219_11.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_11.jpg', ai: [] },
-          { id: 'a12', fname: 'LINE_ALBUM_2026.2.17_260219_12.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_12.jpg', ai: [] },
-          { id: 'a13', fname: 'LINE_ALBUM_2026.2.17_260219_13.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_13.jpg', ai: [] },
-          { id: 'a14', fname: 'LINE_ALBUM_2026.2.17_260219_14.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_14.jpg', ai: [] },
-          { id: 'a15', fname: 'LINE_ALBUM_2026.2.17_260219_15.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_15.jpg', ai: [] },
-        ]
-      },
-
-      {
-        id: 'g2', label: 'B', name: 'グループ B', color: '#3BBFA5', limit: 5,
-        photos: [
-          { id: 'b1', fname: 'LINE_ALBUM_2026.2.17_260219_16.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_16.jpg', ai: [] },
-          { id: 'b2', fname: 'LINE_ALBUM_2026.2.17_260219_17.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_17.jpg', ai: [] },
-          { id: 'b3', fname: 'LINE_ALBUM_2026.2.17_260219_18.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_18.jpg', ai: [] },
-          { id: 'b4', fname: 'LINE_ALBUM_2026.2.17_260219_19.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_19.jpg', ai: [] },
-          { id: 'b5', fname: 'LINE_ALBUM_2026.2.17_260219_20.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_20.jpg', ai: [] },
-          { id: 'b6', fname: 'LINE_ALBUM_2026.2.17_260219_21.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_21.jpg', ai: [] },
-          { id: 'b7', fname: 'LINE_ALBUM_2026.2.17_260219_22.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_22.jpg', ai: [] },
-          { id: 'b8', fname: 'LINE_ALBUM_2026.2.17_260219_23.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_23.jpg', ai: [] },
-          { id: 'b9', fname: 'LINE_ALBUM_2026.2.17_260219_24.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_24.jpg', ai: [] },
-          { id: 'b10', fname: 'LINE_ALBUM_2026.2.17_260219_25.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_25.jpg', ai: [] },
-          { id: 'b11', fname: 'LINE_ALBUM_2026.2.17_260219_26.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_26.jpg', ai: [] },
-          { id: 'b12', fname: 'LINE_ALBUM_2026.2.17_260219_27.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_27.jpg', ai: [] },
-          { id: 'b13', fname: 'LINE_ALBUM_2026.2.17_260219_28.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_28.jpg', ai: [] },
-          { id: 'b14', fname: 'LINE_ALBUM_2026.2.17_260219_29.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_29.jpg', ai: [] },
-          { id: 'b15', fname: 'LINE_ALBUM_2026.2.17_260219_30.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_30.jpg', ai: [] },
-        ]
-      },
-      {
-        id: 'g3', label: 'C', name: 'グループ C', color: '#9B7FE8', limit: 5,
-        photos: [
-          { id: 'c1', fname: 'LINE_ALBUM_2026.2.17_260219_31.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_31.jpg', ai: [] },
-          { id: 'c2', fname: 'LINE_ALBUM_2026.2.17_260219_32.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_32.jpg', ai: [] },
-          { id: 'c3', fname: 'LINE_ALBUM_2026.2.17_260219_33.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_33.jpg', ai: [] },
-          { id: 'c4', fname: 'LINE_ALBUM_2026.2.17_260219_34.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_34.jpg', ai: [] },
-          { id: 'c5', fname: 'LINE_ALBUM_2026.2.17_260219_35.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_35.jpg', ai: [] },
-          { id: 'c6', fname: 'LINE_ALBUM_2026.2.17_260219_36.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_36.jpg', ai: [] },
-          { id: 'c7', fname: 'LINE_ALBUM_2026.2.17_260219_37.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_37.jpg', ai: [] },
-          { id: 'c8', fname: 'LINE_ALBUM_2026.2.17_260219_38.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_38.jpg', ai: [] },
-          { id: 'c9', fname: 'LINE_ALBUM_2026.2.17_260219_39.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_39.jpg', ai: [] },
-          { id: 'c10', fname: 'LINE_ALBUM_2026.2.17_260219_40.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_40.jpg', ai: [] },
-          { id: 'c11', fname: 'LINE_ALBUM_2026.2.17_260219_41.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_41.jpg', ai: [] },
-          { id: 'c12', fname: 'LINE_ALBUM_2026.2.17_260219_42.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_42.jpg', ai: [] },
-          { id: 'c13', fname: 'LINE_ALBUM_2026.2.17_260219_43.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_43.jpg', ai: [] },
-          { id: 'c14', fname: 'LINE_ALBUM_2026.2.17_260219_44.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_44.jpg', ai: [] },
-          { id: 'c15', fname: 'LINE_ALBUM_2026.2.17_260219_45.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_45.jpg', ai: [] },
-        ]
-      },
-      {
-        id: 'g4', label: 'D', name: 'グループ D', color: '#4A9EE0', limit: 5,
-        photos: [
-          { id: 'd1', fname: 'LINE_ALBUM_2026.2.17_260219_46.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_46.jpg', ai: [] },
-          { id: 'd2', fname: 'LINE_ALBUM_2026.2.17_260219_47.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_47.jpg', ai: [] },
-          { id: 'd3', fname: 'LINE_ALBUM_2026.2.17_260219_48.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_48.jpg', ai: [] },
-          { id: 'd4', fname: 'LINE_ALBUM_2026.2.17_260219_49.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_49.jpg', ai: [] },
-          { id: 'd5', fname: 'LINE_ALBUM_2026.2.17_260219_50.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_50.jpg', ai: [] },
-          { id: 'd6', fname: 'LINE_ALBUM_2026.2.17_260219_51.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_51.jpg', ai: [] },
-          { id: 'd7', fname: 'LINE_ALBUM_2026.2.17_260219_52.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_52.jpg', ai: [] },
-          { id: 'd8', fname: 'LINE_ALBUM_2026.2.17_260219_53.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_53.jpg', ai: [] },
-          { id: 'd9', fname: 'LINE_ALBUM_2026.2.17_260219_54.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_54.jpg', ai: [] },
-          { id: 'd10', fname: 'LINE_ALBUM_2026.2.17_260219_55.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_55.jpg', ai: [] },
-          { id: 'd11', fname: 'LINE_ALBUM_2026.2.17_260219_56.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_56.jpg', ai: [] },
-          { id: 'd12', fname: 'LINE_ALBUM_2026.2.17_260219_57.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_57.jpg', ai: [] },
-          { id: 'd13', fname: 'LINE_ALBUM_2026.2.17_260219_58.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_58.jpg', ai: [] },
-          { id: 'd14', fname: 'LINE_ALBUM_2026.2.17_260219_59.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_59.jpg', ai: [] },
-          { id: 'd15', fname: 'LINE_ALBUM_2026.2.17_260219_60.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_60.jpg', ai: [] },
-        ]
-      },
-      {
-        id: 'g5', label: 'E', name: 'グループ E', color: '#F5C842', limit: 5,
-        photos: [
-          { id: 'e1', fname: 'LINE_ALBUM_2026.2.17_260219_61.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_61.jpg', ai: [] },
-          { id: 'e2', fname: 'LINE_ALBUM_2026.2.17_260219_62.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_62.jpg', ai: [] },
-          { id: 'e3', fname: 'LINE_ALBUM_2026.2.17_260219_63.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_63.jpg', ai: [] },
-          { id: 'e4', fname: 'LINE_ALBUM_2026.2.17_260219_64.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_64.jpg', ai: [] },
-          { id: 'e5', fname: 'LINE_ALBUM_2026.2.17_260219_65.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_65.jpg', ai: [] },
-          { id: 'e6', fname: 'LINE_ALBUM_2026.2.17_260219_66.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_66.jpg', ai: [] },
-          { id: 'e7', fname: 'LINE_ALBUM_2026.2.17_260219_67.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_67.jpg', ai: [] },
-          { id: 'e8', fname: 'LINE_ALBUM_2026.2.17_260219_68.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_68.jpg', ai: [] },
-          { id: 'e9', fname: 'LINE_ALBUM_2026.2.17_260219_69.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_69.jpg', ai: [] },
-          { id: 'e10', fname: 'LINE_ALBUM_2026.2.17_260219_70.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_70.jpg', ai: [] },
-          { id: 'e11', fname: 'LINE_ALBUM_2026.2.17_260219_71.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_71.jpg', ai: [] },
-          { id: 'e12', fname: 'LINE_ALBUM_2026.2.17_260219_72.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_72.jpg', ai: [] },
-          { id: 'e13', fname: 'LINE_ALBUM_2026.2.17_260219_73.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_73.jpg', ai: [] },
-          { id: 'e14', fname: 'LINE_ALBUM_2026.2.17_260219_74.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_74.jpg', ai: [] },
-          { id: 'e15', fname: 'LINE_ALBUM_2026.2.17_260219_75.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_75.jpg', ai: [] },
-        ]
-      },
-      {
-        id: 'g6', label: 'F', name: 'グループ F', color: '#F06292', limit: 4,
-        photos: [
-          { id: 'f1', fname: 'LINE_ALBUM_2026.2.17_260219_76.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_76.jpg', ai: [] },
-          { id: 'f2', fname: 'LINE_ALBUM_2026.2.17_260219_77.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_77.jpg', ai: [] },
-          { id: 'f3', fname: 'LINE_ALBUM_2026.2.17_260219_78.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_78.jpg', ai: [] },
-          { id: 'f4', fname: 'LINE_ALBUM_2026.2.17_260219_79.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_79.jpg', ai: [] },
-          { id: 'f5', fname: 'LINE_ALBUM_2026.2.17_260219_80.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_80.jpg', ai: [] },
-          { id: 'f6', fname: 'LINE_ALBUM_2026.2.17_260219_81.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_81.jpg', ai: [] },
-          { id: 'f7', fname: 'LINE_ALBUM_2026.2.17_260219_82.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_82.jpg', ai: [] },
-          { id: 'f8', fname: 'LINE_ALBUM_2026.2.17_260219_83.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_83.jpg', ai: [] },
-          { id: 'f9', fname: 'LINE_ALBUM_2026.2.17_260219_84.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_84.jpg', ai: [] },
-          { id: 'f10', fname: 'LINE_ALBUM_2026.2.17_260219_85.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_85.jpg', ai: [] },
-          { id: 'f11', fname: 'LINE_ALBUM_2026.2.17_260219_86.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_86.jpg', ai: [] },
-          { id: 'f12', fname: 'LINE_ALBUM_2026.2.17_260219_87.jpg', url: 'thumbs/LINE_ALBUM_2026.2.17_260219_87.jpg', ai: [] },
-        ]
-      }
-    ];
+    // Default: empty (no demo data — user must upload or use a session link)
+    const DEMO_DATA = [];
 
     // Initialize Global Groups
     let GROUPS = _imported || JSON.parse(JSON.stringify(DEMO_DATA));
+
+    // Show welcome screen if no data loaded and no session pending
+    if (!_imported && !new URLSearchParams(window.location.search).get('session')) {
+      setTimeout(() => {
+        const content = document.querySelector('.content');
+        if (content) {
+          content.innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:70vh;text-align:center;gap:20px;">
+              <div style="font-size:56px;opacity:0.3;">📸</div>
+              <div style="font-size:22px;font-weight:700;color:var(--text);">写真がありません</div>
+              <div style="font-size:14px;color:var(--text-sub);max-width:400px;line-height:1.8;">
+                セレクト画面を使うには、まずアップロード画面から写真をアップロードしてください。<br>
+                または、共有URLでこのページを開いてください。
+              </div>
+              <a href="SELEKT_Upload.html" 
+                style="display:inline-block;padding:14px 32px;background:var(--coral);color:white;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;font-family:inherit;transition:opacity 0.2s;">
+                📤 アップロード画面へ
+              </a>
+            </div>
+          `;
+        }
+      }, 100);
+    }
 
     // Support Data Receive via Opener (Pull)
     if (!isPreviewMode && window.opener && window.opener.SELEKT_DATA) {
