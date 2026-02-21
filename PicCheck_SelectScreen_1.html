@@ -2261,6 +2261,14 @@
       </div>
       <button class="modal-nav modal-nav-prev" id="modalPrev" onclick="modalNav(-1)">‹</button>
       <div class="modal-photo-img" id="modalImg"></div>
+      <div id="modalQualityBar"
+        style="text-align:center;padding:6px 16px;font-size:11px;color:var(--text-dim);display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;">
+        <span id="modalQualityNotice">⚡ プレビュー用に画質を落としています</span>
+        <button id="modalFullsizeBtn" onclick="loadFullSize()"
+          style="background:var(--surface3);border:1px solid var(--border2);color:var(--text-sub);font-size:11px;padding:3px 10px;border-radius:6px;cursor:pointer;">
+          🔍 フルサイズで表示
+        </button>
+      </div>
       <button class="modal-nav modal-nav-next" id="modalNext" onclick="modalNav(1)">›</button>
       <button class="modal-close" onclick="closeModal()">✕</button>
       <div class="modal-actions">
@@ -3264,22 +3272,50 @@
           _panToPoint(container, imgEl, e.clientX, e.clientY);
         });
 
-        // Try to load full-res from IndexedDB
-        if (photo.fname) {
-          getOriginalFile(photo.fname).then(blob => {
-            if (blob) {
-              const fullUrl = URL.createObjectURL(blob);
-              imgEl.src = fullUrl;
-              console.log('[Modal] Loaded full-res:', photo.fname);
-            }
-          }).catch(() => { });
-        }
       } else {
         container.style.background = photo.bg;
         container.textContent = photo.emoji;
         container.style.fontSize = '120px';
       }
       container.style.borderColor = group.color;
+
+      // Reset quality bar
+      const notice = document.getElementById('modalQualityNotice');
+      const btn = document.getElementById('modalFullsizeBtn');
+      if (notice) notice.textContent = '⚡ プレビュー用に画質を落としています';
+      if (btn) { btn.textContent = '🔍 フルサイズで表示'; btn.disabled = false; btn.style.display = ''; }
+
+      let _modalIsFullSize = false;
+
+      function loadFullSize() {
+        if (!modalPhoto || !modalPhoto.fname) return;
+        const notice = document.getElementById('modalQualityNotice');
+        const btn = document.getElementById('modalFullsizeBtn');
+        const imgEl = document.querySelector('#modalImg img');
+        if (!imgEl) return;
+
+        // Show loading state
+        if (notice) notice.textContent = '⏳ フルサイズ読み込み中...（少し時間がかかる場合があります）';
+        if (btn) { btn.disabled = true; btn.textContent = '読み込み中...'; }
+
+        getOriginalFile(modalPhoto.fname).then(blob => {
+          if (blob) {
+            const fullUrl = URL.createObjectURL(blob);
+            imgEl.src = fullUrl;
+            _modalIsFullSize = true;
+            if (notice) notice.textContent = '✅ フルサイズ表示中';
+            if (btn) btn.style.display = 'none';
+            console.log('[Modal] Loaded full-res:', modalPhoto.fname);
+          } else {
+            if (notice) notice.textContent = '⚠️ 元画像が見つかりません（プレビュー表示中）';
+            if (btn) { btn.disabled = false; btn.textContent = '🔍 再試行'; }
+          }
+        }).catch(() => {
+          if (notice) notice.textContent = '⚠️ 読み込みエラー（プレビュー表示中）';
+          if (btn) { btn.disabled = false; btn.textContent = '🔍 再試行'; }
+        });
+      }
+      window.loadFullSize = loadFullSize;
 
       // Meta
       document.getElementById('modalFname').textContent = photo.fname;
