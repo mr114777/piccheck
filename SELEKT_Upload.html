@@ -2157,49 +2157,27 @@
 
         async function previewSelect() {
             const btn = document.getElementById('previewBtn');
-            const newWin = window.open('', '_blank');
-            if (newWin) {
-                newWin.document.write(`
-                    <html>
-                        <head><title>SELEKT 準備中...</title>
-                        <style>
-                            body{background:#0f1117;color:#e8eaf6;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;}
-                            .loader{border:4px solid #2e3250;border-top:4px solid #ff6b6b;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin-bottom:20px;}
-                            @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-                        </style>
-                        </head>
-                        <body>
-                            <div class="loader"></div>
-                            <div id="msg">サムネイルを生成中です...<br>そのままお待ちください</div>
-                        </body>
-                    </html>`);
-            } else {
-                showToast('ポップアップがブロックされました。許可してください。');
+
+            const totalPhotos = groups.reduce((s, g) => s + g.photos.length, 0);
+            if (totalPhotos === 0) {
+                showToast('写真がありません');
                 return;
             }
 
             if (btn) {
                 btn.disabled = true;
-                btn.textContent = 'サムネイル生成中...';
-            }
-
-            const totalPhotos = groups.reduce((s, g) => s + g.photos.length, 0);
-            if (totalPhotos === 0) {
-                showToast('写真がありません');
-                if (newWin) newWin.close();
-                if (btn) { btn.disabled = false; btn.textContent = 'セレクト画面をプレビュー →'; }
-                return;
+                btn.textContent = 'サムネイル生成中…';
             }
 
             try {
-                await _doPreviewSelect(newWin);
+                await _doPreviewSelect(null);
             } catch (err) {
                 console.error('Preview error:', err);
                 showToast('エラーが発生しました: ' + err.message);
-                if (newWin) newWin.close();
+            } finally {
                 if (btn) {
                     btn.disabled = false;
-                    btn.textContent = 'セレクト画面をプレビュー →';
+                    btn.textContent = 'プレビュー & セレクト →';
                 }
             }
         }
@@ -2254,7 +2232,7 @@
         }
 
         async function _doPreviewSelect(targetWindow) {
-            const btn = document.getElementById('previewSelectBtn');
+            const btn = document.getElementById('previewBtn');
             if (btn) btn.textContent = 'サムネイル生成中…';
 
             const totalPhotos = groups.reduce((s, g) => s + g.photos.length, 0);
