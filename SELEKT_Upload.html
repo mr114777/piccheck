@@ -1081,25 +1081,13 @@
             <div class="action-bar">
                 <button class="btn-secondary" onclick="goToStep(1)">← やり直す</button>
                 <button class="btn-undo" id="undoBtn" disabled onclick="undo()">↩ 元に戻す</button>
-                <button class="btn-primary" onclick="openShare()">
-                    共有リンクを発行 →
+                <button class="btn-primary" id="previewBtn" onclick="previewSelect()">
+                    共有リンクを発行 & セレクト →
                 </button>
             </div>
         </div>
 
     </div><!-- /main -->
-
-    <!-- SHARE MODAL -->
-    <div class="share-overlay" id="shareOverlay" onclick="closeShare(event)">
-        <div class="share-modal">
-            <div class="share-icon">🔗</div>
-            <div class="share-title">共有リンクを発行しました</div>
-            <div class="share-sub">このリンクをモデルに送ってください。<br>アカウント不要でセレクトできます。</div>
-            <div class="share-link-box" id="shareLinkBox"></div>
-            <button class="share-copy-btn" onclick="copyLink()">リンクをコピー</button>
-            <button id="previewBtn" class="share-preview-btn" onclick="previewSelect()">セレクト画面をプレビュー →</button>
-        </div>
-    </div>
 
     <!-- TOAST -->
     <div class="toast" id="toast"></div>
@@ -1831,24 +1819,8 @@
         }
 
 
-        function openShare() {
-            // Generate a fake share URL (in real app, this would be a Supabase-backed URL)
-            const sessionId = Math.random().toString(36).slice(2, 10).toUpperCase();
-            const url = `${location.origin}/select/${sessionId}`;
-            document.getElementById('shareLinkBox').textContent = url;
-            document.getElementById('shareOverlay').classList.add('open');
-        }
-
-        function closeShare(e) {
-            if (e.target === document.getElementById('shareOverlay')) {
-                document.getElementById('shareOverlay').classList.remove('open');
-            }
-        }
-
-        function copyLink() {
-            const text = document.getElementById('shareLinkBox').textContent;
-            navigator.clipboard.writeText(text).then(() => showToast('リンクをコピーしました ✓'));
-        }
+        // Share functions (consolidated — cloud upload handles everything)
+        // openShare / closeShare / copyLink removed — now handled by previewSelect()
 
         // =====================================================================
         // AI DETECTION UTILITIES
