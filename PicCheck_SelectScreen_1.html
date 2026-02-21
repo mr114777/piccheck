@@ -2763,6 +2763,7 @@
         const card = buildCard(photo, group);
         grid.appendChild(card);
       });
+      console.log('[renderGroup]', group.id, 'rendered', photos.length, 'photos');
 
       grid.className = 'photo-grid' + (state.gridSize === 'large' ? ' large' : state.gridSize === 'small' ? ' small' : '');
     }
