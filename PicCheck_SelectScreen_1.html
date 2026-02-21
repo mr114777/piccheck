@@ -3628,66 +3628,7 @@
       return results;
     }
 
-    async function downloadPhotos(filter) {
-      document.getElementById('dlMenu').classList.remove('open');
-
-      const targets = getFilteredPhotos(filter);
-      if (targets.length === 0) {
-        showToast('対象の写真がありません', 'orange');
-        return;
-      }
-
-      const dlBtn = document.getElementById('dlBtn');
-      const origText = dlBtn.textContent;
-      dlBtn.disabled = true;
-      dlBtn.textContent = `準備中... 0/${targets.length}`;
-
-      try {
-        const zip = new JSZip();
-        let count = 0;
-
-        for (const { photo, group } of targets) {
-          count++;
-          dlBtn.textContent = `準備中... ${count}/${targets.length}`;
-
-          // Try IndexedDB first (full resolution)
-          let blob = await dlGetFile(photo.fname);
-          if (!blob && photo.url && photo.url.startsWith('data:')) {
-            // Fallback: convert data URL to blob
-            const res = await fetch(photo.url);
-            blob = await res.blob();
-          }
-
-          if (blob) {
-            const folderName = `${group.label}_${group.name}`;
-            zip.file(`${folderName}/${photo.fname}`, blob);
-          }
-        }
-
-        dlBtn.textContent = 'ZIP生成中...';
-        const content = await zip.generateAsync({ type: 'blob' }, (metadata) => {
-          dlBtn.textContent = `ZIP生成中... ${Math.round(metadata.percent)}%`;
-        });
-
-        // Download
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(content);
-        const filterLabel = { all: '全部', ok: 'OK', 'ok+nearok': 'OK+ほぼOK', ng: 'NG' }[filter] || filter;
-        a.download = `PicCheck_${filterLabel}_${targets.length}枚.zip`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(a.href);
-
-        showToast(`${targets.length}枚をダウンロードしました`, 'green');
-      } catch (e) {
-        console.error('Download failed:', e);
-        showToast('ダウンロードに失敗しました', 'red');
-      } finally {
-        dlBtn.disabled = false;
-        dlBtn.textContent = origText;
-      }
-    }
+    // downloadPhotos is defined in the second script block
 
     // ===== INIT =====
     buildGroupUI();
@@ -3869,13 +3810,14 @@
 
     // ===== DOWNLOAD PHOTOS =====
     async function downloadPhotos(filter, mode) {
-      document.getElementById('dlMenu').style.display = 'none';
+      const dlMenu = document.getElementById('dlMenu');
+      if (dlMenu) { dlMenu.style.display = 'none'; dlMenu.classList.remove('open'); }
 
       // Collect all photos across groups
       const allPhotos = [];
       GROUPS.forEach(g => {
         g.photos.forEach(p => {
-          allPhotos.push({ ...p, groupLabel: g.label, status: photoStatus[p.id] || 'unset' });
+          allPhotos.push({ ...p, groupLabel: g.label, groupName: g.name, status: getStatus(p.id) || 'unset' });
         });
       });
 
