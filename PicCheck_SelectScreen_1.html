@@ -3583,13 +3583,8 @@
       }
     }
 
-    // ===== INIT =====
-    renderAll();
-    GROUPS.forEach(g => updateGroupLimitBadge(g));
-    updateProgress();
-    updateStats();
-    renderSelectedList();
-    renderNGList();
+    // Note: Init is done in second script block after all functions defined
+    // buildGroupUI() + renderAll() called there
   </script>
 
   <!-- ===== MOBILE JS ===== -->
@@ -3721,6 +3716,11 @@
     // Init: build group UI and render all photos
     buildGroupUI();
     renderAll();
+    GROUPS.forEach(g => { if (typeof updateGroupLimitBadge === 'function') updateGroupLimitBadge(g); });
+    if (typeof updateProgress === 'function') updateProgress();
+    if (typeof updateStats === 'function') updateStats();
+    if (typeof renderSelectedList === 'function') renderSelectedList();
+    if (typeof renderNGList === 'function') renderNGList();
 
     // ===== DOWNLOAD DROPDOWN =====
     function toggleDlMenu() {
