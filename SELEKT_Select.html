@@ -2022,7 +2022,7 @@
     <div class="logo">SEL<span>EKT</span></div>
     <div class="topbar-divider"></div>
     <div class="session-name">
-      <strong id="sessionTitle">撮影会</strong>
+      <strong id="sessionTitle"></strong>
       <span id="sessionPhotographer" style="color:var(--text-dim);margin-left:8px;font-size:11px"></span>
     </div>
     <div class="topbar-right">
@@ -2453,9 +2453,15 @@
           window._selektSessionId = sessionId;
 
           // Update session title and photographer in topbar
-          if (meta.title) {
-            const titleEl = document.getElementById('sessionTitle');
-            if (titleEl) titleEl.textContent = meta.title;
+          const titleEl = document.getElementById('sessionTitle');
+          if (titleEl) {
+            if (meta.title) {
+              titleEl.textContent = meta.title;
+            } else if (meta.createdAt) {
+              // No title set — show creation date
+              const d = new Date(meta.createdAt);
+              titleEl.innerHTML = `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} <span style="font-weight:400;font-size:11px;color:var(--text-dim);margin-left:4px;">（作成日）</span>`;
+            }
           }
           if (meta.photographer) {
             const photoEl = document.getElementById('sessionPhotographer');
