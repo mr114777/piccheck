@@ -2266,7 +2266,7 @@
         <span id="modalQualityNotice">⚡ プレビュー用に画質を落としています</span>
         <button id="modalFullsizeBtn" onclick="loadFullSize()"
           style="background:var(--surface3);border:1px solid var(--border2);color:var(--text-sub);font-size:11px;padding:3px 10px;border-radius:6px;cursor:pointer;">
-          🔍 フルサイズで表示（全体）
+          📷 高画質モードに切替
         </button>
       </div>
       <button class="modal-nav modal-nav-next" id="modalNext" onclick="modalNav(1)">›</button>
@@ -3249,11 +3249,11 @@
       const notice = document.getElementById('modalQualityNotice');
       const btn = document.getElementById('modalFullsizeBtn');
       if (_fullSizeMode) {
-        if (notice) notice.textContent = '⏳ フルサイズ読み込み中...';
-        if (btn) { btn.textContent = '⚡ プレビューに戻す'; btn.disabled = false; btn.style.display = ''; }
+        if (notice) notice.textContent = '⏳ 高画質で読み込み中...';
+        if (btn) { btn.textContent = '⚡ 通常画質に戻す'; btn.disabled = false; btn.style.display = ''; }
       } else {
         if (notice) notice.textContent = '⚡ プレビュー用に画質を落としています';
-        if (btn) { btn.textContent = '🔍 フルサイズで表示（全体）'; btn.disabled = false; btn.style.display = ''; }
+        if (btn) { btn.textContent = '📷 高画質モードに切替'; btn.disabled = false; btn.style.display = ''; }
       }
     }
 
@@ -3263,13 +3263,13 @@
       const imgEl = document.querySelector('#modalImg img');
       if (!imgEl) return;
 
-      if (notice) notice.textContent = '⏳ フルサイズ読み込み中...（少し時間がかかる場合があります）';
+      if (notice) notice.textContent = '⏳ 高画質で読み込み中...（少し時間がかかる場合があります）';
 
       getOriginalFile(modalPhoto.fname).then(blob => {
         if (blob) {
           const fullUrl = URL.createObjectURL(blob);
           imgEl.src = fullUrl;
-          if (notice) notice.textContent = '✅ フルサイズ表示中';
+          if (notice) notice.textContent = '✅ 高画質（オリジナル）で表示中';
         } else {
           if (notice) notice.textContent = '⚠️ 元画像が見つかりません';
         }
