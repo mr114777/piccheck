@@ -1261,7 +1261,7 @@
         function skipGrouping() {
             groups = [{
                 label: 'A',
-                name: '全写真',
+                name: 'A',
                 reason: '',
                 color: GROUP_COLORS[0],
                 limit: Math.max(1, Math.ceil(uploadedFiles.length * 0.4)),
@@ -1489,9 +1489,9 @@
             return result.map((g, i) => {
                 const label = LABELS[i] || String(i + 1);
                 const color = GROUP_COLORS[i % GROUP_COLORS.length];
-                const name = `${g.personLabel} ${g.shotType}`;
+                const name = label;
                 const defaultLimit = Math.max(1, Math.ceil(g.photos.length * 0.4));
-                return { label, name, reason: `${g.personLabel}の${g.shotType}カット`, color, limit: defaultLimit, photos: g.photos };
+                return { label, name, reason: '', color, limit: defaultLimit, photos: g.photos };
             });
         }
 
@@ -1554,7 +1554,7 @@
 
             // Build destination group buttons
             const destButtons = groups.map((g, gi) => {
-                return `<button class="dest-btn" style="background:${g.color}" onclick="moveSelectedToGroup(${gi})">${g.label}: ${g.name}</button>`;
+                return `<button class="dest-btn" style="background:${g.color}" onclick="moveSelectedToGroup(${gi})">${g.label}</button>`;
             }).join('');
 
             bar.innerHTML = `
@@ -1590,12 +1590,7 @@
           <div class="group-card-header" onclick="toggleCard(${gi})">
             <div class="group-label-badge" style="background:${g.color}">${g.label}</div>
             <div class="group-name-wrap">
-              <input class="group-name-input" id="gname-${gi}"
-                value="${g.name}"
-                placeholder="グループ名"
-                onclick="event.stopPropagation()"
-                oninput="updateGroupName(${gi}, this.value)">
-              <div class="group-name-placeholder">${g.reason || ''}</div>
+              <span style="font-size:15px;font-weight:700;color:var(--text)">グループ ${g.label}</span>
             </div>
             <div class="group-meta">
               <div class="group-photo-count">${g.photos.length}枚</div>
@@ -1750,7 +1745,7 @@
             const label = LABELS[idx] || String(idx + 1);
             groups.push({
                 label: label,
-                name: '新しいグループ',
+                name: label,
                 reason: '',
                 color: GROUP_COLORS[idx % GROUP_COLORS.length],
                 limit: 1,
