@@ -2055,7 +2055,7 @@
             <button class="dl-row-btn" onclick="downloadPhotos('ok','full')">📦 DL</button>
           </div>
           <div class="dl-row">
-            <span class="dl-row-label">△ OK+ほぼOK</span>
+            <span class="dl-row-label">△ OK+保留</span>
             <button class="dl-row-btn" onclick="downloadPhotos('ok+nearok','full')">📦 DL</button>
           </div>
           <div class="dl-row">
@@ -2073,7 +2073,7 @@
             <button class="dl-row-btn" onclick="downloadPhotos('ok','sns')">📱 DL</button>
           </div>
           <div class="dl-row">
-            <span class="dl-row-label">△ OK+ほぼOK</span>
+            <span class="dl-row-label">△ OK+保留</span>
             <button class="dl-row-btn" onclick="downloadPhotos('ok+nearok','sns')">📱 DL</button>
           </div>
           <div class="dl-row">
@@ -2115,7 +2115,7 @@
         </button>
         <button class="filter-btn" onclick="setFilter('nearok', this)">
           <span class="filter-dot" style="background:var(--yellow)"></span>
-          ほぼOK
+          保留
           <span class="filter-count" id="cnt-nearok">0</span>
         </button>
         <button class="filter-btn" onclick="setFilter('ng', this)">
@@ -2172,7 +2172,7 @@
       <div class="toolbar">
         <div>
           <span class="toolbar-title">写真にステータスをつけてください</span>
-          <span class="toolbar-sub">OK / ほぼOK / NG で判定</span>
+          <span class="toolbar-sub">OK / 保留 / NG で判定</span>
         </div>
         <div class="toolbar-right">
           <button class="tb-btn" onclick="toggleGridSize()">
@@ -2188,7 +2188,7 @@
       <div class="bulk-bar">
         <span class="bulk-label">全体：</span>
         <button class="bulk-btn bulk-btn-ok" onclick="bulkSetAll('ok')">✓ 全てOK</button>
-        <button class="bulk-btn bulk-btn-nearok" onclick="bulkSetAll('nearok')">△ 全てほぼOK</button>
+        <button class="bulk-btn bulk-btn-nearok" onclick="bulkSetAll('nearok')">△ 全て保留</button>
         <button class="bulk-btn bulk-btn-ng" onclick="bulkSetAll('ng')">✕ 全てNG</button>
         <div class="bulk-sep"></div>
         <button class="bulk-btn bulk-btn-reset" onclick="bulkSetAll(null)">リセット</button>
@@ -2221,12 +2221,12 @@
 
       <div class="rp-section">
         <div class="rp-label" style="display:flex;justify-content:space-between">
-          <span>ほぼOK 一覧</span>
+          <span>保留 一覧</span>
           <span style="color:var(--yellow);font-family:'Space Mono',monospace" id="nearokCountBadge">0</span>
         </div>
         <div id="nearokList">
           <div style="font-size:12px;color:var(--text-dim);text-align:center;padding:12px 0">
-            ほぼOK はありません
+            保留 はありません
           </div>
         </div>
       </div>
@@ -2354,7 +2354,7 @@
         <button class="modal-btn" id="modalOkBtn" style="background:var(--green);color:white"
           onclick="modalAction('ok')">✓ OK</button>
         <button class="modal-btn" id="modalNearokBtn" style="background:var(--yellow);color:#111"
-          onclick="modalAction('nearok')">△ ほぼOK</button>
+          onclick="modalAction('nearok')">△ 保留</button>
         <button class="modal-btn" id="modalNgBtn" style="background:var(--coral);color:white"
           onclick="modalAction('ng')">✕ NG</button>
         <button class="modal-btn" style="background:var(--surface3);color:var(--text)"
@@ -2397,7 +2397,7 @@
     <div class="group-reset-box">
       <div style="font-size:28px;margin-bottom:10px">⚠️</div>
       <div style="font-size:16px;font-weight:700;margin-bottom:8px">グループのデータをリセットしますか？</div>
-      <div style="font-size:13px;color:var(--text-sub);margin-bottom:18px" id="groupResetDesc">このグループの OK / ほぼOK / NG
+      <div style="font-size:13px;color:var(--text-sub);margin-bottom:18px" id="groupResetDesc">このグループの OK / 保留 / NG
         全ての判定が消えます。</div>
       <div style="display:flex;gap:10px;justify-content:center">
         <button class="group-reset-btn" style="background:var(--surface3);color:var(--text)"
@@ -2415,7 +2415,7 @@
   <div class="kbd-hint">
     <span><span class="kbd">←</span><span class="kbd">→</span> 移動</span>
     <span><span class="kbd">O</span> OK</span>
-    <span><span class="kbd">H</span> ほぼOK</span>
+    <span><span class="kbd">H</span> 保留</span>
     <span><span class="kbd">N</span> NG</span>
     <span><span class="kbd">ESC</span> 閉じる</span>
   </div>
@@ -2719,7 +2719,7 @@
               <div class="group-meta" id="gmeta-${g.id}">${g.photos.length}枚</div>
               <div class="group-bulk-btns">
                 <button class="group-bulk-btn gbtn-ok" onclick="bulkSetGroup('${g.id}','ok')">全OK</button>
-                <button class="group-bulk-btn gbtn-nearok" onclick="bulkSetGroup('${g.id}','nearok')">全ほぼOK</button>
+                <button class="group-bulk-btn gbtn-nearok" onclick="bulkSetGroup('${g.id}','nearok')">全保留</button>
                 <button class="group-bulk-btn gbtn-ng" onclick="bulkSetGroup('${g.id}','ng')">全NG</button>
                 <button class="group-bulk-btn gbtn-reset" onclick="confirmGroupReset('${g.id}')">リセット</button>
               </div>
@@ -2922,7 +2922,7 @@
         showToast('ステータスを解除しました', '');
       } else {
         state.status.set(photoId, newStatus);
-        const msgs = { ok: 'OK ✓', nearok: 'ほぼOK △ — 修正してOKに', ng: 'NG ✕' };
+        const msgs = { ok: 'OK ✓', nearok: '保留 △ — 修正してOKに', ng: 'NG ✕' };
         const colors = { ok: 'green', nearok: 'yellow', ng: 'coral' };
         showToast(msgs[newStatus], colors[newStatus]);
       }
@@ -2938,7 +2938,7 @@
         });
       });
       GROUPS.forEach(g => refreshUI(g));
-      const msgs = { ok: '全写真を OK に設定しました', nearok: '全写真をほぼOK に設定しました', ng: '全写真を NG に設定しました', null: 'すべてリセットしました' };
+      const msgs = { ok: '全写真を OK に設定しました', nearok: '全写真を保留 に設定しました', ng: '全写真を NG に設定しました', null: 'すべてリセットしました' };
       showToast(msgs[newStatus] || 'すべてリセットしました', newStatus === 'ng' ? 'coral' : newStatus === 'ok' ? 'green' : '');
     }
 
@@ -2950,7 +2950,7 @@
         else state.status.set(p.id, newStatus);
       });
       refreshUI(group);
-      const label = { ok: 'OK', nearok: 'ほぼOK', ng: 'NG' }[newStatus];
+      const label = { ok: 'OK', nearok: '保留', ng: 'NG' }[newStatus];
       showToast(`${group.name} を全て ${label} にしました`, newStatus === 'ng' ? 'coral' : newStatus === 'ok' ? 'green' : '');
     }
 
@@ -2965,7 +2965,7 @@
       const nearok = group.photos.filter(p => getStatus(p.id) === 'nearok').length;
       const ng = group.photos.filter(p => getStatus(p.id) === 'ng').length;
       document.getElementById('groupResetDesc').innerHTML =
-        `<strong>${group.name}</strong> の判定をリセットします。<br>OK:${ok} / ほぼOK:${nearok} / NG:${ng} — 全て消えます。`;
+        `<strong>${group.name}</strong> の判定をリセットします。<br>OK:${ok} / 保留:${nearok} / NG:${ng} — 全て消えます。`;
       document.getElementById('groupResetModal').classList.add('open');
     }
 
@@ -3005,7 +3005,7 @@
       const okCnt = group.photos.filter(p => getStatus(p.id) === 'ok').length;
       const el = document.getElementById(`limit-${group.id}`);
       if (!el) return;
-      el.textContent = `OK ${okCnt} / ほぼOK ${group.photos.filter(p => getStatus(p.id) === 'nearok').length} / NG ${group.photos.filter(p => getStatus(p.id) === 'ng').length}`;
+      el.textContent = `OK ${okCnt} / 保留 ${group.photos.filter(p => getStatus(p.id) === 'nearok').length} / NG ${group.photos.filter(p => getStatus(p.id) === 'ng').length}`;
       el.className = 'group-limit-badge' + (okCnt > 0 ? ' done' : '');
       const navEl = document.getElementById(`nav-${group.id}`);
       if (navEl) navEl.textContent = `OK:${okCnt}`;
@@ -3111,7 +3111,7 @@
       if (!list) return;
       const ids = [...state.status.entries()].filter(([, v]) => v === 'nearok').map(([k]) => k);
       if (ids.length === 0) {
-        list.innerHTML = '<div style="font-size:12px;color:var(--text-dim);text-align:center;padding:12px 0">ほぼOK はありません</div>';
+        list.innerHTML = '<div style="font-size:12px;color:var(--text-dim);text-align:center;padding:12px 0">保留 はありません</div>';
         return;
       }
       list.innerHTML = '';
@@ -3126,7 +3126,7 @@
       ${_makeThumb(photo, group)}
       <div class="sel-info">
         <div class="sel-name">${photo.fname}</div>
-        <div class="sel-group" style="color:var(--yellow)">ほぼOK — 要修正</div>
+        <div class="sel-group" style="color:var(--yellow)">保留 — 要修正</div>
         ${comment ? `<div style="font-size:10px;color:var(--text-sub);margin-top:3px">💬 ${comment.substring(0, 30)}${comment.length > 30 ? '…' : ''}</div>` : ''}
       </div>
       <button class="sel-remove" onclick="setPhotoStatus('${id}', GROUPS.find(g=>g.id==='${group.id}'), null)">✕</button>`;
@@ -3939,7 +3939,7 @@
 
       showToast('ZIP生成中...');
       const content = await zip.generateAsync({ type: 'blob' });
-      const filterLabel = filter === 'all' ? '全部' : filter === 'ok' ? 'OK' : filter === 'ok+nearok' ? 'OK+ほぼOK' : 'NG';
+      const filterLabel = filter === 'all' ? '全部' : filter === 'ok' ? 'OK' : filter === 'ok+nearok' ? 'OK+保留' : 'NG';
       const modeLabel = mode === 'sns' ? '_SNS圧縮' : '';
       const a = document.createElement('a');
       a.href = URL.createObjectURL(content);
