@@ -3845,8 +3845,8 @@
         const req = indexedDB.open('PicCheckDB', 1);
         req.onupgradeneeded = (e) => {
           const db = e.target.result;
-          if (!db.objectStoreNames.contains('originals')) {
-            db.createObjectStore('originals');
+          if (!db.objectStoreNames.contains('originalPhotos')) {
+            db.createObjectStore('originalPhotos');
           }
         };
         req.onsuccess = () => resolve(req.result);
@@ -3858,8 +3858,8 @@
       try {
         const db = await openDB();
         return new Promise((resolve) => {
-          const tx = db.transaction('originals', 'readonly');
-          const store = tx.objectStore('originals');
+          const tx = db.transaction('originalPhotos', 'readonly');
+          const store = tx.objectStore('originalPhotos');
           const req = store.get(fname);
           req.onsuccess = () => resolve(req.result || null);
           req.onerror = () => resolve(null);
