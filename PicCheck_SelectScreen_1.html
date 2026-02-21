@@ -3179,6 +3179,18 @@
         imgEl.style.maxWidth = '';
         imgEl.style.maxHeight = '';
       } else {
+        const wasZoomed = container.classList.contains('zoomed');
+        // Save current image size before changing
+        const oldW = imgEl.offsetWidth;
+        const oldH = imgEl.offsetHeight;
+        // Get current transform
+        const oldTransform = imgEl.style.transform;
+        let oldTx = 0, oldTy = 0;
+        if (oldTransform) {
+          const m = oldTransform.match(/translate\(([-\d.]+)px,\s*([-\d.]+)px\)/);
+          if (m) { oldTx = parseFloat(m[1]); oldTy = parseFloat(m[2]); }
+        }
+
         // Add zoomed class FIRST so container gets height:70vh
         container.classList.add('zoomed');
         // Use natural dimensions to preserve aspect ratio
@@ -3193,8 +3205,21 @@
         imgEl.style.height = h + 'px';
         imgEl.style.maxWidth = 'none';
         imgEl.style.maxHeight = 'none';
-        // Pan to mouse position
-        _panToPoint(container, imgEl, clientX, clientY);
+
+        if (wasZoomed && oldW > 0 && oldH > 0) {
+          // Preserve pan position: scale translation proportionally
+          const scaleX = w / oldW;
+          const scaleY = h / oldH;
+          let tx = oldTx * scaleX;
+          let ty = oldTy * scaleY;
+          // Clamp
+          tx = Math.min(0, Math.max(-(w - rect.width), tx));
+          ty = Math.min(0, Math.max(-(h - rect.height), ty));
+          imgEl.style.transform = `translate(${tx}px, ${ty}px)`;
+        } else {
+          // First zoom: center on click position
+          _panToPoint(container, imgEl, clientX, clientY);
+        }
       }
       _updateZoomIndicator();
     }
