@@ -2148,15 +2148,11 @@
 
         async function previewSelect() {
             const btn = document.getElementById('previewBtn');
-            /*
-             * 1. Open window IMMEDIATELY to avoid browser popup blockers.
-             * Values returned by async functions are not considered "user actions".
-             */
             const newWin = window.open('', '_blank');
             if (newWin) {
                 newWin.document.write(`
                     <html>
-                        <head><title>PicCheck AI解析中...</title>
+                        <head><title>PicCheck 準備中...</title>
                         <style>
                             body{background:#0f1117;color:#e8eaf6;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;}
                             .loader{border:4px solid #2e3250;border-top:4px solid #ff6b6b;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin-bottom:20px;}
@@ -2165,7 +2161,7 @@
                         </head>
                         <body>
                             <div class="loader"></div>
-                            <div id="msg">AI解析を実行中です...<br>そのままお待ちください</div>
+                            <div id="msg">サムネイルを生成中です...<br>そのままお待ちください</div>
                         </body>
                     </html>`);
             } else {
@@ -2175,7 +2171,7 @@
 
             if (btn) {
                 btn.disabled = true;
-                btn.textContent = 'AI解析中...'; // Initial text
+                btn.textContent = 'サムネイル生成中...';
             }
 
             const totalPhotos = groups.reduce((s, g) => s + g.photos.length, 0);
@@ -2187,63 +2183,11 @@
             }
 
             try {
-                // Load and Analyze
-                const flatPhotos = [];
-
-                // 1. Identify which photos need analysis
-                for (let gi = 0; gi < groups.length; gi++) {
-                    for (let pi = 0; pi < groups[gi].photos.length; pi++) {
-                        const p = groups[gi].photos[pi];
-                        const item = {
-                            gi, pi, img: null,
-                            aiTags: p._aiTags ? new Set(p._aiTags) : new Set(),
-                            _needsLoad: !p._aiTags // Only load if no tags exist
-                        };
-                        flatPhotos.push(item);
-                    }
-                }
-
-                // 2. Load images ONLY for new targets
-                const analysisTargets = [];
-                for (const item of flatPhotos) {
-                    if (item._needsLoad) {
-                        try {
-                            const url = groups[item.gi].photos[item.pi].url;
-                            item.img = await loadImg(url);
-                            analysisTargets.push(item);
-                        } catch {
-                            item.img = null;
-                        }
-                    }
-                }
-
-                // 3. Run AI only on new valid targets
-                const validTargets = analysisTargets.filter(p => p.img !== null);
-
-                if (validTargets.length > 0) {
-                    await runAIAnalysis(validTargets, (done, total) => {
-                        const msg = `AI解析中… ${done} / ${total}枚`;
-                        if (btn) btn.textContent = msg;
-                        if (newWin && newWin.document.getElementById('msg')) {
-                            newWin.document.getElementById('msg').innerText = msg + '\n完了までお待ちください...';
-                        }
-                    });
-
-                    // Save results back to source photos
-                    for (const item of validTargets) {
-                        groups[item.gi].photos[item.pi]._aiTags = [...item.aiTags];
-                    }
-                }
-
-                if (btn) btn.textContent = '結果を準備中…';
-
-                // Save data and Navigate
                 _doPreviewSelect(newWin);
-
             } catch (err) {
-                console.error('AI analysis error:', err);
-                showToast('AI解析でエラーが発生しました。スキップして続行します。');
-                if (newWin) _doPreviewSelect(newWin); // Try to proceed even on error
+                console.error('Preview error:', err);
+                showToast('エラーが発生しました');
+                if (newWin) newWin.close();
             } finally {
                 if (btn) {
                     btn.disabled = false;
