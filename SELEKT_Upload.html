@@ -1078,6 +1078,18 @@
             <div class="group-list" id="groupList"></div>
             <button class="btn-add-group" onclick="addNewGroup()">＋ 新しいグループを追加</button>
 
+            <div
+                style="margin:20px 0;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;">
+                <div style="font-size:13px;font-weight:700;margin-bottom:12px;color:var(--text);">📋
+                    セッション情報（セレクト画面に表示されます）</div>
+                <div style="display:flex;flex-direction:column;gap:10px;">
+                    <input type="text" id="sessionTitle" placeholder="プロジェクト名（例：夏コスプレ撮影会）" maxlength="50"
+                        style="width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;font-family:inherit;box-sizing:border-box;">
+                    <input type="text" id="photographerName" placeholder="カメラマン名（例：@tanaka_photo）" maxlength="30"
+                        style="width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;font-family:inherit;box-sizing:border-box;">
+                </div>
+            </div>
+
             <div class="action-bar">
                 <button class="btn-secondary" onclick="goToStep(1)">← やり直す</button>
                 <button class="btn-undo" id="undoBtn" disabled onclick="undo()">↩ 元に戻す</button>
@@ -2279,7 +2291,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         title: document.getElementById('sessionTitle')?.value || '撮影会',
-                        photographer: '',
+                        photographer: document.getElementById('photographerName')?.value || '',
                         groups: data.map(g => ({
                             id: g.id, label: g.label, name: g.name,
                             color: g.color, limit: g.limit,

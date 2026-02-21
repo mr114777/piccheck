@@ -2022,8 +2022,8 @@
     <div class="logo">SEL<span>EKT</span></div>
     <div class="topbar-divider"></div>
     <div class="session-name">
-      <strong>夏コスプレ撮影会 #2025-08</strong>
-      <span style="color:var(--text-dim);margin-left:8px;font-size:11px">by @photographer_tanaka</span>
+      <strong id="sessionTitle">撮影会</strong>
+      <span id="sessionPhotographer" style="color:var(--text-dim);margin-left:8px;font-size:11px"></span>
     </div>
     <div class="topbar-right">
       <div class="progress-wrap">
@@ -2451,6 +2451,17 @@
           }));
 
           window._selektSessionId = sessionId;
+
+          // Update session title and photographer in topbar
+          if (meta.title) {
+            const titleEl = document.getElementById('sessionTitle');
+            if (titleEl) titleEl.textContent = meta.title;
+          }
+          if (meta.photographer) {
+            const photoEl = document.getElementById('sessionPhotographer');
+            if (photoEl) photoEl.textContent = 'by ' + meta.photographer;
+          }
+
           window.setGroupData(cloudGroups);
         } else if (res.status === 410) {
           document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:white;font-size:18px;text-align:center;padding:20px;">⏰ このセッションは有効期限が切れています</div>';
