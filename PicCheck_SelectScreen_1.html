@@ -2658,15 +2658,17 @@
       if (container) {
         container.innerHTML = '';
         GROUPS.forEach(g => {
-          const section = document.createElement('div');
-          section.className = 'group-section';
-          section.id = g.id;
+          try {
+            const section = document.createElement('div');
+            section.className = 'group-section';
+            section.id = g.id;
 
-          const bg = hexToRgba(g.color || '#cccccc', 0.15);
-          const border = hexToRgba(g.color || '#cccccc', 0.3);
-          const headerName = g.name && g.name !== g.label ? `${g.label}: ${g.name}` : `グループ ${g.label}`;
+            const color = g.color || '#888888';
+            const bg = hexToRgba(color, 0.15);
+            const border = hexToRgba(color, 0.3);
+            const headerName = g.name && g.name !== g.label ? `${g.label}: ${g.name}` : `グループ ${g.label}`;
 
-          section.innerHTML = `
+            section.innerHTML = `
             <div class="group-header">
               <div class="group-color-pill"
                 style="background:${bg};color:${g.color};border:1px solid ${border}">
@@ -2685,8 +2687,13 @@
             </div>
             <div class="photo-grid" id="grid-${g.id}"></div>
           `;
-          container.appendChild(section);
+            container.appendChild(section);
+          } catch (e) {
+            console.error('[buildGroupUI] Error building group', g.id, e);
+          }
         });
+      } else {
+        console.error('[buildGroupUI] #groupSections container not found!');
       }
 
       // 4. Mobile group list
@@ -2730,6 +2737,10 @@
     function renderGroup(group) {
       const grid = document.getElementById(`grid-${group.id}`);
       const section = document.getElementById(group.id);
+      if (!grid || !section) {
+        console.warn('[renderGroup] Missing grid or section for', group.id);
+        return;
+      }
       grid.innerHTML = '';
 
       const photos = group.photos.filter(p => {
