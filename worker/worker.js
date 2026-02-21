@@ -54,7 +54,7 @@ export default {
 
         const meta = {
           id: sessionId,
-          title: body.title || 'Untitled Session',
+          title: body.title || '',
           photographer: body.photographer || '',
           groups: body.groups || [],
           createdAt: now,
