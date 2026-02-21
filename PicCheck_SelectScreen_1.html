@@ -1186,7 +1186,8 @@
 
     .modal-photo-img.zoomed {
       cursor: zoom-out;
-      max-height: 60vh;
+      height: 70vh;
+      max-height: 70vh;
       overflow: hidden;
     }
 
@@ -3175,13 +3176,14 @@
         imgEl.style.maxWidth = '';
         imgEl.style.maxHeight = '';
       } else {
+        // Add zoomed class FIRST so container gets height:70vh
         container.classList.add('zoomed');
         // Use natural dimensions to preserve aspect ratio
-        const natW = imgEl.naturalWidth || imgEl.offsetWidth;
-        const natH = imgEl.naturalHeight || imgEl.offsetHeight;
+        const natW = imgEl.naturalWidth || 800;
+        const natH = imgEl.naturalHeight || 600;
         const rect = container.getBoundingClientRect();
-        // Fit within container at 1x, then scale
-        const fitScale = Math.min(rect.width / natW, rect.height / natH, 1);
+        // Scale to fit container at 1x, maintaining aspect ratio
+        const fitScale = Math.min(rect.width / natW, rect.height / natH);
         const w = natW * fitScale * _zoomLevel;
         const h = natH * fitScale * _zoomLevel;
         imgEl.style.width = w + 'px';
