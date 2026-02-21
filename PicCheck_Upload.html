@@ -715,13 +715,18 @@
             flex-wrap: wrap;
             gap: 8px;
             padding: 10px 16px;
-            background: rgba(59, 191, 165, 0.15);
+            background: rgba(20, 25, 35, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border: 1px solid #3BBFA5;
             border-radius: 10px;
             margin-bottom: 12px;
             font-size: 13px;
             font-weight: 600;
             color: #3BBFA5;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .selection-bar .sel-label {
