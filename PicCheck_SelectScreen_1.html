@@ -2266,7 +2266,7 @@
         <span id="modalQualityNotice">⚡ プレビュー用に画質を落としています</span>
         <button id="modalFullsizeBtn" onclick="loadFullSize()"
           style="background:var(--surface3);border:1px solid var(--border2);color:var(--text-sub);font-size:11px;padding:3px 10px;border-radius:6px;cursor:pointer;">
-          🔍 フルサイズで表示
+          🔍 フルサイズで表示（全体）
         </button>
       </div>
       <button class="modal-nav modal-nav-next" id="modalNext" onclick="modalNav(1)">›</button>
@@ -3218,6 +3218,53 @@
       imgEl.style.transform = `translate(${tx}px, ${ty}px)`;
     }
 
+    let _fullSizeMode = false;
+
+    function _updateQualityBar() {
+      const notice = document.getElementById('modalQualityNotice');
+      const btn = document.getElementById('modalFullsizeBtn');
+      if (_fullSizeMode) {
+        if (notice) notice.textContent = '⏳ フルサイズ読み込み中...';
+        if (btn) { btn.textContent = '⚡ プレビューに戻す'; btn.disabled = false; btn.style.display = ''; }
+      } else {
+        if (notice) notice.textContent = '⚡ プレビュー用に画質を落としています';
+        if (btn) { btn.textContent = '🔍 フルサイズで表示（全体）'; btn.disabled = false; btn.style.display = ''; }
+      }
+    }
+
+    function _loadFullSizeForCurrent() {
+      if (!modalPhoto || !modalPhoto.fname) return;
+      const notice = document.getElementById('modalQualityNotice');
+      const imgEl = document.querySelector('#modalImg img');
+      if (!imgEl) return;
+
+      if (notice) notice.textContent = '⏳ フルサイズ読み込み中...（少し時間がかかる場合があります）';
+
+      getOriginalFile(modalPhoto.fname).then(blob => {
+        if (blob) {
+          const fullUrl = URL.createObjectURL(blob);
+          imgEl.src = fullUrl;
+          if (notice) notice.textContent = '✅ フルサイズ表示中';
+        } else {
+          if (notice) notice.textContent = '⚠️ 元画像が見つかりません';
+        }
+      }).catch(() => {
+        if (notice) notice.textContent = '⚠️ 読み込みエラー';
+      });
+    }
+
+    function loadFullSize() {
+      _fullSizeMode = !_fullSizeMode;
+      _updateQualityBar();
+      if (_fullSizeMode) {
+        _loadFullSizeForCurrent();
+      } else {
+        // Revert to thumbnail - re-render modal
+        _renderModal();
+      }
+    }
+    window.loadFullSize = loadFullSize;
+
     function _renderModal() {
       const { photo, group } = modalAllPhotos[modalIdx];
       modalPhoto = photo;
@@ -3279,43 +3326,11 @@
       }
       container.style.borderColor = group.color;
 
-      // Reset quality bar
-      const notice = document.getElementById('modalQualityNotice');
-      const btn = document.getElementById('modalFullsizeBtn');
-      if (notice) notice.textContent = '⚡ プレビュー用に画質を落としています';
-      if (btn) { btn.textContent = '🔍 フルサイズで表示'; btn.disabled = false; btn.style.display = ''; }
-
-      let _modalIsFullSize = false;
-
-      function loadFullSize() {
-        if (!modalPhoto || !modalPhoto.fname) return;
-        const notice = document.getElementById('modalQualityNotice');
-        const btn = document.getElementById('modalFullsizeBtn');
-        const imgEl = document.querySelector('#modalImg img');
-        if (!imgEl) return;
-
-        // Show loading state
-        if (notice) notice.textContent = '⏳ フルサイズ読み込み中...（少し時間がかかる場合があります）';
-        if (btn) { btn.disabled = true; btn.textContent = '読み込み中...'; }
-
-        getOriginalFile(modalPhoto.fname).then(blob => {
-          if (blob) {
-            const fullUrl = URL.createObjectURL(blob);
-            imgEl.src = fullUrl;
-            _modalIsFullSize = true;
-            if (notice) notice.textContent = '✅ フルサイズ表示中';
-            if (btn) btn.style.display = 'none';
-            console.log('[Modal] Loaded full-res:', modalPhoto.fname);
-          } else {
-            if (notice) notice.textContent = '⚠️ 元画像が見つかりません（プレビュー表示中）';
-            if (btn) { btn.disabled = false; btn.textContent = '🔍 再試行'; }
-          }
-        }).catch(() => {
-          if (notice) notice.textContent = '⚠️ 読み込みエラー（プレビュー表示中）';
-          if (btn) { btn.disabled = false; btn.textContent = '🔍 再試行'; }
-        });
+      // Quality bar: auto-load if global full-size mode is on
+      _updateQualityBar();
+      if (_fullSizeMode && photo.url && photo.fname) {
+        _loadFullSizeForCurrent();
       }
-      window.loadFullSize = loadFullSize;
 
       // Meta
       document.getElementById('modalFname').textContent = photo.fname;
