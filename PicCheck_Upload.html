@@ -1445,6 +1445,7 @@
         // --- RENDER STEP 3 ---
         let _dragData = null;
         let _selectedPhotos = new Set(); // "groupIdx-photoIdx" keys
+        let _lastClicked = null; // { gi, pi } for Shift+click range
 
         function _selKey(gi, pi) { return `${gi}-${pi}`; }
 
@@ -1549,17 +1550,32 @@
                     thumb.draggable = true;
                     thumb.innerHTML = `<img src="${p.url}" alt="${p.file.name}" loading="lazy">`;
 
-                    // Click to toggle selection
+                    // Click to toggle selection (Shift = range select)
                     thumb.addEventListener('click', (e) => {
                         e.preventDefault();
                         const key = _selKey(gi, pi);
-                        if (_selectedPhotos.has(key)) {
-                            _selectedPhotos.delete(key);
-                            thumb.classList.remove('selected');
+
+                        if (e.shiftKey && _lastClicked && _lastClicked.gi === gi) {
+                            // Shift+click: select range within same group
+                            const from = Math.min(_lastClicked.pi, pi);
+                            const to = Math.max(_lastClicked.pi, pi);
+                            const grid = document.getElementById(`gphoto-${gi}`);
+                            const thumbs = grid.querySelectorAll('.group-photo-thumb');
+                            for (let idx = from; idx <= to; idx++) {
+                                _selectedPhotos.add(_selKey(gi, idx));
+                                if (thumbs[idx]) thumbs[idx].classList.add('selected');
+                            }
                         } else {
-                            _selectedPhotos.add(key);
-                            thumb.classList.add('selected');
+                            // Normal click: toggle single
+                            if (_selectedPhotos.has(key)) {
+                                _selectedPhotos.delete(key);
+                                thumb.classList.remove('selected');
+                            } else {
+                                _selectedPhotos.add(key);
+                                thumb.classList.add('selected');
+                            }
                         }
+                        _lastClicked = { gi, pi };
                         updateSelectionBar();
                     });
 
