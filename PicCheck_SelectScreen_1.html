@@ -1183,13 +1183,45 @@
       flex-shrink: 0;
       overflow: hidden;
       background: var(--surface);
+      position: relative;
+      cursor: zoom-in;
+    }
+
+    .modal-photo-img.zoomed {
+      cursor: zoom-out;
+    }
+
+    .modal-photo-img.zoomed-dragging {
+      cursor: grabbing;
     }
 
     .modal-photo-img img {
+      display: block;
+      transform-origin: 0 0;
+      transition: none;
+      max-width: none;
+      max-height: none;
+    }
+
+    .modal-photo-img:not(.zoomed) img {
       width: 100%;
       height: 100%;
       object-fit: contain;
-      display: block;
+    }
+
+    .zoom-indicator {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      z-index: 10;
+      pointer-events: none;
+      font-family: 'Space Mono', monospace;
     }
 
     .modal-actions {
@@ -3096,6 +3128,69 @@
       document.getElementById('modal').classList.add('open');
     }
 
+    let _zoomLevel = 1;
+    const ZOOM_LEVELS = [1, 2, 3];
+
+    function _resetZoom() {
+      _zoomLevel = 1;
+      const container = document.getElementById('modalImg');
+      container.classList.remove('zoomed', 'zoomed-dragging');
+      const imgEl = container.querySelector('img');
+      if (imgEl) {
+        imgEl.style.transform = '';
+        imgEl.style.width = '100%';
+        imgEl.style.height = '100%';
+      }
+      _updateZoomIndicator();
+    }
+
+    function _updateZoomIndicator() {
+      let badge = document.getElementById('zoomBadge');
+      if (!badge) {
+        badge = document.createElement('div');
+        badge.className = 'zoom-indicator';
+        badge.id = 'zoomBadge';
+        document.getElementById('modalImg').appendChild(badge);
+      }
+      badge.textContent = `${_zoomLevel}x`;
+      badge.style.display = _zoomLevel > 1 ? 'block' : 'none';
+    }
+
+    function _applyZoom(container, imgEl, clientX, clientY) {
+      if (_zoomLevel === 1) {
+        container.classList.remove('zoomed');
+        imgEl.style.transform = '';
+        imgEl.style.width = '100%';
+        imgEl.style.height = '100%';
+      } else {
+        container.classList.add('zoomed');
+        imgEl.style.width = (_zoomLevel * 100) + '%';
+        imgEl.style.height = (_zoomLevel * 100) + '%';
+        // Pan to mouse position
+        _panToPoint(container, imgEl, clientX, clientY);
+      }
+      _updateZoomIndicator();
+    }
+
+    function _panToPoint(container, imgEl, clientX, clientY) {
+      const rect = container.getBoundingClientRect();
+      // Mouse position as fraction of container
+      const mx = (clientX - rect.left) / rect.width;
+      const my = (clientY - rect.top) / rect.height;
+      // Image size
+      const imgW = imgEl.offsetWidth;
+      const imgH = imgEl.offsetHeight;
+      const cW = rect.width;
+      const cH = rect.height;
+      // Calculate translation so the point under cursor stays there
+      let tx = -(mx * imgW - mx * cW);
+      let ty = -(my * imgH - my * cH);
+      // Clamp
+      tx = Math.min(0, Math.max(-(imgW - cW), tx));
+      ty = Math.min(0, Math.max(-(imgH - cH), ty));
+      imgEl.style.transform = `translate(${tx}px, ${ty}px)`;
+    }
+
     function _renderModal() {
       const { photo, group } = modalAllPhotos[modalIdx];
       modalPhoto = photo;
@@ -3104,22 +3199,57 @@
       const container = document.getElementById('modalImg');
       container.innerHTML = '';
       container.style.background = 'var(--surface)';
+      container.classList.remove('zoomed', 'zoomed-dragging');
+      _zoomLevel = 1;
 
       if (photo.url) {
-        // Create img element for sharp rendering
         const imgEl = document.createElement('img');
-        imgEl.src = photo.url; // Start with thumbnail
+        imgEl.src = photo.url;
         imgEl.alt = photo.fname;
+        imgEl.draggable = false;
         container.appendChild(imgEl);
+
+        // Zoom indicator
+        const badge = document.createElement('div');
+        badge.className = 'zoom-indicator';
+        badge.id = 'zoomBadge';
+        badge.style.display = 'none';
+        container.appendChild(badge);
+
+        // Click to cycle zoom
+        container.addEventListener('click', function _clickZoom(e) {
+          if (e.target.closest('.zoom-indicator')) return;
+          const idx = ZOOM_LEVELS.indexOf(_zoomLevel);
+          _zoomLevel = ZOOM_LEVELS[(idx + 1) % ZOOM_LEVELS.length];
+          _applyZoom(container, imgEl, e.clientX, e.clientY);
+        }, { once: false });
+
+        // Scroll wheel zoom
+        container.addEventListener('wheel', function _wheelZoom(e) {
+          e.preventDefault();
+          if (e.deltaY < 0) {
+            // Zoom in
+            const idx = ZOOM_LEVELS.indexOf(_zoomLevel);
+            if (idx < ZOOM_LEVELS.length - 1) _zoomLevel = ZOOM_LEVELS[idx + 1];
+          } else {
+            // Zoom out
+            const idx = ZOOM_LEVELS.indexOf(_zoomLevel);
+            if (idx > 0) _zoomLevel = ZOOM_LEVELS[idx - 1];
+          }
+          _applyZoom(container, imgEl, e.clientX, e.clientY);
+        }, { passive: false });
+
+        // Mouse move panning when zoomed
+        container.addEventListener('mousemove', function _panMove(e) {
+          if (_zoomLevel <= 1) return;
+          _panToPoint(container, imgEl, e.clientX, e.clientY);
+        });
 
         // Try to load full-res from IndexedDB
         if (photo.fname) {
           getOriginalFile(photo.fname).then(blob => {
             if (blob) {
               const fullUrl = URL.createObjectURL(blob);
-              imgEl.onload = function () {
-                // Clean up previous object URL on next load
-              };
               imgEl.src = fullUrl;
               console.log('[Modal] Loaded full-res:', photo.fname);
             }
