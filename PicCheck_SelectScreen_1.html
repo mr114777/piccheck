@@ -2688,7 +2688,6 @@
             <div class="photo-grid" id="grid-${g.id}"></div>
           `;
             container.appendChild(section);
-            console.log('[buildGroupUI] Created section', g.id, 'grid:', !!document.getElementById('grid-' + g.id));
           } catch (e) {
             console.error('[buildGroupUI] Error building group', g.id, e);
           }
@@ -2763,7 +2762,6 @@
         const card = buildCard(photo, group);
         grid.appendChild(card);
       });
-      console.log('[renderGroup]', group.id, 'rendered', photos.length, 'photos');
 
       grid.className = 'photo-grid' + (state.gridSize === 'large' ? ' large' : state.gridSize === 'small' ? ' small' : '');
     }
@@ -3585,13 +3583,13 @@
     }
 
     // ===== INIT =====
-    try { buildGroupUI(); console.log('[INIT] buildGroupUI done'); } catch (e) { console.error('[INIT] buildGroupUI FAILED', e); }
-    try { renderAll(); console.log('[INIT] renderAll done'); } catch (e) { console.error('[INIT] renderAll FAILED', e); }
-    try { GROUPS.forEach(g => updateGroupLimitBadge(g)); console.log('[INIT] updateGroupLimitBadge done'); } catch (e) { console.error('[INIT] updateGroupLimitBadge FAILED', e); }
-    try { updateProgress(); } catch (e) { console.error('[INIT] updateProgress FAILED', e); }
-    try { updateStats(); } catch (e) { console.error('[INIT] updateStats FAILED', e); }
-    try { renderSelectedList(); } catch (e) { console.error('[INIT] renderSelectedList FAILED', e); }
-    try { renderNGList(); } catch (e) { console.error('[INIT] renderNGList FAILED', e); }
+    buildGroupUI();
+    renderAll();
+    GROUPS.forEach(g => updateGroupLimitBadge(g));
+    updateProgress();
+    updateStats();
+    renderSelectedList();
+    renderNGList();
   </script>
 
   <!-- ===== MOBILE JS ===== -->
