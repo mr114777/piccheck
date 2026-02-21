@@ -1,0 +1,12 @@
+name = "selekt-api"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+MAX_PHOTOS_PER_SESSION = "50"
+MAX_FILE_SIZE_MB = "25"
+SESSION_TTL_DAYS = "7"
+
+[[r2_buckets]]
+binding = "PHOTOS"
+bucket_name = "selekt-photos"

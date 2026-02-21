@@ -2265,7 +2265,6 @@
                     data.reduce((a, g) => a + g.photos.length, 0), 'photos');
             } catch (e) {
                 console.warn('localStorage save failed (data too large?):', e);
-                // Try storing without images as last resort
                 try {
                     const lite = data.map(g => ({ ...g, photos: g.photos.map(p => ({ ...p, url: '' })) }));
                     localStorage.setItem('piccheck_groups', JSON.stringify(lite));
@@ -2275,11 +2274,81 @@
                 }
             }
 
+            // === CLOUD UPLOAD (SELEKT API) ===
+            const API_BASE = 'https://selekt-api.mr-mail114.workers.dev';
+            let sessionId = null;
+
+            try {
+                if (btn) btn.textContent = 'クラウドにセッション作成中…';
+
+                // Create session
+                const sessionRes = await fetch(`${API_BASE}/api/session`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: document.getElementById('sessionTitle')?.value || '撮影会',
+                        photographer: '',
+                        groups: data.map(g => ({
+                            id: g.id, label: g.label, name: g.name,
+                            color: g.color, limit: g.limit,
+                            photoCount: g.photos.length
+                        }))
+                    })
+                });
+                const sessionData = await sessionRes.json();
+                sessionId = sessionData.sessionId;
+                console.log('[SELEKT] Session created:', sessionId);
+
+                // Upload photos
+                const totalPhotos = groups.reduce((a, g) => a + g.photos.length, 0);
+                let uploaded = 0;
+
+                for (let i = 0; i < groups.length; i++) {
+                    const g = groups[i];
+                    for (let j = 0; j < g.photos.length; j++) {
+                        uploaded++;
+                        if (btn) btn.textContent = `クラウドにアップロード中… ${uploaded}/${totalPhotos}`;
+
+                        const p = g.photos[j];
+                        const photoData = data[i].photos[j];
+                        const formData = new FormData();
+                        formData.append('file', p.file);
+                        formData.append('fname', p.file.name);
+                        formData.append('groupId', data[i].id);
+
+                        // Add thumbnail as blob
+                        if (photoData.url && photoData.url.startsWith('data:')) {
+                            const thumbRes = await fetch(photoData.url);
+                            const thumbBlob = await thumbRes.blob();
+                            formData.append('thumb', thumbBlob, p.file.name);
+                        }
+
+                        await fetch(`${API_BASE}/api/session/${sessionId}/upload`, {
+                            method: 'POST',
+                            body: formData
+                        });
+                    }
+                }
+
+                console.log('[SELEKT] All photos uploaded to cloud');
+
+                // Save session ID
+                localStorage.setItem('selekt_sessionId', sessionId);
+
+            } catch (cloudErr) {
+                console.warn('[SELEKT] Cloud upload failed, using local mode:', cloudErr);
+                showToast('クラウドアップロード失敗。ローカルモードで続行します');
+            }
+
             // Navigate to selection screen
+            const selectUrl = sessionId
+                ? `PicCheck_SelectScreen_1.html?session=${sessionId}`
+                : 'PicCheck_SelectScreen_1.html?from=upload';
+
             if (targetWindow && !targetWindow.closed) {
-                targetWindow.location.href = 'PicCheck_SelectScreen_1.html?from=upload';
+                targetWindow.location.href = selectUrl;
             } else {
-                window.open('PicCheck_SelectScreen_1.html?from=upload', '_blank');
+                window.open(selectUrl, '_blank');
             }
         }
 
