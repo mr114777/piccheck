@@ -1177,7 +1177,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 120px;
       box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
       border: 2px solid var(--border2);
       flex-shrink: 0;
@@ -1199,13 +1198,13 @@
       display: block;
       transform-origin: 0 0;
       transition: none;
-      max-width: none;
-      max-height: none;
     }
 
     .modal-photo-img:not(.zoomed) img {
-      width: 100%;
-      height: 100%;
+      max-width: 100%;
+      max-height: 60vh;
+      width: auto;
+      height: auto;
       object-fit: contain;
     }
 
@@ -3171,12 +3170,24 @@
       if (_zoomLevel === 1) {
         container.classList.remove('zoomed');
         imgEl.style.transform = '';
-        imgEl.style.width = '100%';
-        imgEl.style.height = '100%';
+        imgEl.style.width = '';
+        imgEl.style.height = '';
+        imgEl.style.maxWidth = '';
+        imgEl.style.maxHeight = '';
       } else {
         container.classList.add('zoomed');
-        imgEl.style.width = (_zoomLevel * 100) + '%';
-        imgEl.style.height = (_zoomLevel * 100) + '%';
+        // Use natural dimensions to preserve aspect ratio
+        const natW = imgEl.naturalWidth || imgEl.offsetWidth;
+        const natH = imgEl.naturalHeight || imgEl.offsetHeight;
+        const rect = container.getBoundingClientRect();
+        // Fit within container at 1x, then scale
+        const fitScale = Math.min(rect.width / natW, rect.height / natH, 1);
+        const w = natW * fitScale * _zoomLevel;
+        const h = natH * fitScale * _zoomLevel;
+        imgEl.style.width = w + 'px';
+        imgEl.style.height = h + 'px';
+        imgEl.style.maxWidth = 'none';
+        imgEl.style.maxHeight = 'none';
         // Pan to mouse position
         _panToPoint(container, imgEl, clientX, clientY);
       }
