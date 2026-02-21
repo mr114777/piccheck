@@ -3672,8 +3672,9 @@
     renderSelectedList();
     renderNGList();
 
-    // Load from cloud if ?session= param present
+    // Load from cloud if ?session= param present AND no local data loaded
     (function checkCloudSession() {
+      if (isPreviewMode) return; // already have local data, don't overwrite
       const urlParams = new URLSearchParams(window.location.search);
       const sessionId = urlParams.get('session');
       if (sessionId) {
