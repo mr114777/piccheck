@@ -2031,45 +2031,16 @@
 
       <div class="sidebar-section">
         <div class="sidebar-label">グループ一覧</div>
-        <button class="group-nav-item active" onclick="scrollToGroup('g1', this)">
-          <div class="group-color-bar" style="background:var(--g1)"></div>
-          <span class="group-nav-name">A：メインポーズ</span>
-          <span class="group-nav-sel" id="nav-g1">0/3</span>
-        </button>
-        <button class="group-nav-item" onclick="scrollToGroup('g2', this)">
-          <div class="group-color-bar" style="background:var(--g2)"></div>
-          <span class="group-nav-name">B：アップカット</span>
-          <span class="group-nav-sel" id="nav-g2">0/2</span>
-        </button>
-        <button class="group-nav-item" onclick="scrollToGroup('g3', this)">
-          <div class="group-color-bar" style="background:var(--g3)"></div>
-          <span class="group-nav-name">C：立ちポーズ</span>
-          <span class="group-nav-sel" id="nav-g3">0/3</span>
-        </button>
-        <button class="group-nav-item" onclick="scrollToGroup('g4', this)">
-          <div class="group-color-bar" style="background:var(--g4)"></div>
-          <span class="group-nav-name">D：背景引き</span>
-          <span class="group-nav-sel" id="nav-g4">0/2</span>
-        </button>
-        <button class="group-nav-item" onclick="scrollToGroup('g5', this)">
-          <div class="group-color-bar" style="background:var(--g5)"></div>
-          <span class="group-nav-name">E：座りポーズ</span>
-          <span class="group-nav-sel" id="nav-g5">0/2</span>
-        </button>
-        <button class="group-nav-item" onclick="scrollToGroup('g6', this)">
-          <div class="group-color-bar" style="background:var(--g6)"></div>
-          <span class="group-nav-name">F：小道具あり</span>
-          <span class="group-nav-sel" id="nav-g6">0/3</span>
-        </button>
+        <div id="sidebarGroupNav"></div>
       </div>
 
       <div class="sidebar-section">
         <div class="sidebar-label">撮影情報</div>
-        <div class="stat-row"><span class="stat-key">合計枚数</span><span class="stat-val">42枚</span></div>
-        <div class="stat-row"><span class="stat-key">選択上限</span><span class="stat-val yellow">15枚</span></div>
-        <div class="stat-row"><span class="stat-key">AI 要確認</span><span class="stat-val"
-            style="color:var(--lavender)">8枚</span></div>
-        <div class="stat-row"><span class="stat-key">保存期間</span><span class="stat-val">2025/09/08まで</span></div>
+        <div id="sidebarStats">
+          <div class="stat-row"><span class="stat-key">合計枚数</span><span class="stat-val" id="statTotal">0枚</span></div>
+          <div class="stat-row"><span class="stat-key">選択上限</span><span class="stat-val yellow" id="statLimit">0枚</span>
+          </div>
+        </div>
       </div>
 
       <div class="sidebar-section">
@@ -2117,131 +2088,8 @@
         <button class="bulk-btn bulk-btn-reset" onclick="bulkSetAll(null)">リセット</button>
       </div>
 
-      <!-- ====== GROUP A ====== -->
-      <div class="group-section" id="g1">
-        <div class="group-header">
-          <div class="group-color-pill"
-            style="background:rgba(255,107,107,0.15);color:var(--g1);border:1px solid rgba(255,107,107,0.3)">
-            <span style="width:7px;height:7px;border-radius:50%;background:var(--g1);display:inline-block"></span>
-            グループ A
-          </div>
-          <div class="group-title" id="gtitle-g1">グループ A</div>
-          <div class="group-meta" id="gmeta-g1">15枚</div>
-          <div class="group-bulk-btns">
-            <button class="group-bulk-btn gbtn-ok" onclick="bulkSetGroup('g1','ok')">全OK</button>
-            <button class="group-bulk-btn gbtn-nearok" onclick="bulkSetGroup('g1','nearok')">全ほぼOK</button>
-            <button class="group-bulk-btn gbtn-ng" onclick="bulkSetGroup('g1','ng')">全NG</button>
-            <button class="group-bulk-btn gbtn-reset" onclick="confirmGroupReset('g1')">リセット</button>
-          </div>
-          <div class="group-limit-badge" id="limit-g1">0 OK</div>
-        </div>
-        <div class="photo-grid" id="grid-g1"></div>
-      </div>
-
-      <!-- ====== GROUP B ====== -->
-      <div class="group-section" id="g2">
-        <div class="group-header">
-          <div class="group-color-pill"
-            style="background:rgba(59,191,165,0.15);color:var(--g2);border:1px solid rgba(59,191,165,0.3)">
-            <span style="width:7px;height:7px;border-radius:50%;background:var(--g2);display:inline-block"></span>
-            グループ B
-          </div>
-          <div class="group-title" id="gtitle-g2">グループ B</div>
-          <div class="group-meta" id="gmeta-g2">15枚</div>
-          <div class="group-bulk-btns">
-            <button class="group-bulk-btn gbtn-ok" onclick="bulkSetGroup('g2','ok')">全OK</button>
-            <button class="group-bulk-btn gbtn-nearok" onclick="bulkSetGroup('g2','nearok')">全ほぼOK</button>
-            <button class="group-bulk-btn gbtn-ng" onclick="bulkSetGroup('g2','ng')">全NG</button>
-            <button class="group-bulk-btn gbtn-reset" onclick="confirmGroupReset('g2')">リセット</button>
-          </div>
-          <div class="group-limit-badge" id="limit-g2">0 OK</div>
-        </div>
-        <div class="photo-grid" id="grid-g2"></div>
-      </div>
-
-      <!-- ====== GROUP C ====== -->
-      <div class="group-section" id="g3">
-        <div class="group-header">
-          <div class="group-color-pill"
-            style="background:rgba(155,127,232,0.15);color:var(--g3);border:1px solid rgba(155,127,232,0.3)">
-            <span style="width:7px;height:7px;border-radius:50%;background:var(--g3);display:inline-block"></span>
-            グループ C
-          </div>
-          <div class="group-title" id="gtitle-g3">グループ C</div>
-          <div class="group-meta" id="gmeta-g3">15枚</div>
-          <div class="group-bulk-btns">
-            <button class="group-bulk-btn gbtn-ok" onclick="bulkSetGroup('g3','ok')">全OK</button>
-            <button class="group-bulk-btn gbtn-nearok" onclick="bulkSetGroup('g3','nearok')">全ほぼOK</button>
-            <button class="group-bulk-btn gbtn-ng" onclick="bulkSetGroup('g3','ng')">全NG</button>
-            <button class="group-bulk-btn gbtn-reset" onclick="confirmGroupReset('g3')">リセット</button>
-          </div>
-          <div class="group-limit-badge" id="limit-g3">0 OK</div>
-        </div>
-        <div class="photo-grid" id="grid-g3"></div>
-      </div>
-
-      <!-- ====== GROUP D ====== -->
-      <div class="group-section" id="g4">
-        <div class="group-header">
-          <div class="group-color-pill"
-            style="background:rgba(74,158,224,0.15);color:var(--g4);border:1px solid rgba(74,158,224,0.3)">
-            <span style="width:7px;height:7px;border-radius:50%;background:var(--g4);display:inline-block"></span>
-            グループ D
-          </div>
-          <div class="group-title" id="gtitle-g4">グループ D</div>
-          <div class="group-meta" id="gmeta-g4">15枚</div>
-          <div class="group-bulk-btns">
-            <button class="group-bulk-btn gbtn-ok" onclick="bulkSetGroup('g4','ok')">全OK</button>
-            <button class="group-bulk-btn gbtn-nearok" onclick="bulkSetGroup('g4','nearok')">全ほぼOK</button>
-            <button class="group-bulk-btn gbtn-ng" onclick="bulkSetGroup('g4','ng')">全NG</button>
-            <button class="group-bulk-btn gbtn-reset" onclick="confirmGroupReset('g4')">リセット</button>
-          </div>
-          <div class="group-limit-badge" id="limit-g4">0 OK</div>
-        </div>
-        <div class="photo-grid" id="grid-g4"></div>
-      </div>
-
-      <!-- ====== GROUP E ====== -->
-      <div class="group-section" id="g5">
-        <div class="group-header">
-          <div class="group-color-pill"
-            style="background:rgba(245,200,66,0.15);color:var(--g5);border:1px solid rgba(245,200,66,0.3)">
-            <span style="width:7px;height:7px;border-radius:50%;background:var(--g5);display:inline-block"></span>
-            グループ E
-          </div>
-          <div class="group-title" id="gtitle-g5">グループ E</div>
-          <div class="group-meta" id="gmeta-g5">15枚</div>
-          <div class="group-bulk-btns">
-            <button class="group-bulk-btn gbtn-ok" onclick="bulkSetGroup('g5','ok')">全OK</button>
-            <button class="group-bulk-btn gbtn-nearok" onclick="bulkSetGroup('g5','nearok')">全ほぼOK</button>
-            <button class="group-bulk-btn gbtn-ng" onclick="bulkSetGroup('g5','ng')">全NG</button>
-            <button class="group-bulk-btn gbtn-reset" onclick="confirmGroupReset('g5')">リセット</button>
-          </div>
-          <div class="group-limit-badge" id="limit-g5">0 OK</div>
-        </div>
-        <div class="photo-grid" id="grid-g5"></div>
-      </div>
-
-      <!-- ====== GROUP F ====== -->
-      <div class="group-section" id="g6">
-        <div class="group-header">
-          <div class="group-color-pill"
-            style="background:rgba(240,98,146,0.15);color:var(--g6);border:1px solid rgba(240,98,146,0.3)">
-            <span style="width:7px;height:7px;border-radius:50%;background:var(--g6);display:inline-block"></span>
-            グループ F
-          </div>
-          <div class="group-title" id="gtitle-g6">グループ F</div>
-          <div class="group-meta" id="gmeta-g6">12枚</div>
-          <div class="group-bulk-btns">
-            <button class="group-bulk-btn gbtn-ok" onclick="bulkSetGroup('g6','ok')">全OK</button>
-            <button class="group-bulk-btn gbtn-nearok" onclick="bulkSetGroup('g6','nearok')">全ほぼOK</button>
-            <button class="group-bulk-btn gbtn-ng" onclick="bulkSetGroup('g6','ng')">全NG</button>
-            <button class="group-bulk-btn gbtn-reset" onclick="confirmGroupReset('g6')">リセット</button>
-          </div>
-          <div class="group-limit-badge" id="limit-g6">0 OK</div>
-        </div>
-        <div class="photo-grid" id="grid-g6"></div>
-      </div>
+      <!-- Group sections generated dynamically by buildGroupSections() -->
+      <div id="groupSections"></div>
 
     </div>
 
@@ -2719,72 +2567,18 @@
       if (!newGroups || !Array.isArray(newGroups)) return;
       GROUPS = newGroups;
 
+      // Ensure limits are set to max photos per group
+      GROUPS.forEach(g => {
+        if (!g.limit || g.limit < g.photos.length) g.limit = g.photos.length;
+      });
+
       // Reset state
       if (state && state.status) state.status.clear();
       if (state && state.comments) state.comments.clear();
 
-      // 1. Rebuild Sidebar Nav
-      const sidebarSection = document.querySelectorAll('.sidebar-section')[1]; // Assume 2nd section is "グループ一覧"
-      if (sidebarSection) {
-        // Keep label, remove buttons
-        const label = sidebarSection.querySelector('.sidebar-label');
-        sidebarSection.innerHTML = '';
-        sidebarSection.appendChild(label);
+      buildGroupUI();
 
-        GROUPS.forEach((g, i) => {
-          const btn = document.createElement('button');
-          btn.className = `group-nav-item ${i === 0 ? 'active' : ''}`;
-          btn.onclick = function () { scrollToGroup(g.id, this); };
-          btn.innerHTML = `
-                  <div class="group-color-bar" style="background:${g.color}"></div>
-                  <span class="group-nav-name">${g.label}：${g.name}</span>
-                  <span class="group-nav-sel" id="nav-${g.id}">0/${g.limit || 5}</span>
-                `;
-          sidebarSection.appendChild(btn);
-        });
-      }
-
-      // 2. Rebuild Main Content Sections
-      const contentDiv = document.getElementById('content') || document.querySelector('.content');
-      if (contentDiv) {
-        // Remove existing group sections (keep Toolbar and Bulk Bar)
-        // Assuming group sections have class 'group-section'
-        const existing = contentDiv.querySelectorAll('.group-section');
-        existing.forEach(el => el.remove());
-
-        // Append new sections
-        GROUPS.forEach(g => {
-          const section = document.createElement('div');
-          section.className = 'group-section';
-          section.id = g.id;
-
-          const bg = hexToRgba(g.color || '#cccccc', 0.15);
-          const border = hexToRgba(g.color || '#cccccc', 0.3);
-
-          section.innerHTML = `
-                <div class="group-header">
-                  <div class="group-color-pill"
-                    style="background:${bg};color:${g.color};border:1px solid ${border}">
-                    <span style="width:7px;height:7px;border-radius:50%;background:${g.color};display:inline-block"></span>
-                    ${g.name}
-                  </div>
-                  <div class="group-title" id="gtitle-${g.id}">${g.name}</div>
-                  <div class="group-meta" id="gmeta-${g.id}">${g.photos.length}枚</div>
-                  <div class="group-bulk-btns">
-                    <button class="group-bulk-btn gbtn-ok" onclick="bulkSetGroup('${g.id}','ok')">全OK</button>
-                    <button class="group-bulk-btn gbtn-nearok" onclick="bulkSetGroup('${g.id}','nearok')">全ほぼOK</button>
-                    <button class="group-bulk-btn gbtn-ng" onclick="bulkSetGroup('${g.id}','ng')">全NG</button>
-                    <button class="group-bulk-btn gbtn-reset" onclick="confirmGroupReset('${g.id}')">リセット</button>
-                  </div>
-                  <div class="group-limit-badge" id="limit-${g.id}">0 OK</div>
-                </div>
-                <div class="photo-grid" id="grid-${g.id}"></div>
-                `;
-          contentDiv.appendChild(section);
-        });
-      }
-
-      // 3. Render all UI
+      // Render all UI
       renderAll();
       GROUPS.forEach(g => { if (typeof updateGroupLimitBadge === 'function') updateGroupLimitBadge(g); });
       if (typeof updateProgress === 'function') updateProgress();
@@ -2795,6 +2589,89 @@
       const totalPhotos = GROUPS.reduce((acc, g) => acc + g.photos.length, 0);
       showToast(`写真 ${totalPhotos}枚 を読み込みました`, 'green');
     };
+
+    function buildGroupUI() {
+      // 1. Sidebar group navigation (with editable names)
+      const sidebarNav = document.getElementById('sidebarGroupNav');
+      if (sidebarNav) {
+        sidebarNav.innerHTML = '';
+        GROUPS.forEach((g, i) => {
+          const btn = document.createElement('button');
+          btn.className = `group-nav-item ${i === 0 ? 'active' : ''}`;
+          btn.onclick = function () { scrollToGroup(g.id, this); };
+
+          const displayName = g.name && g.name !== g.label ? g.name : '';
+          btn.innerHTML = `
+            <div class="group-color-bar" style="background:${g.color}"></div>
+            <input class="group-nav-name" value="${displayName}" placeholder="${g.label}"
+              style="background:none;border:none;color:var(--text);font-size:12px;font-weight:600;width:100%;outline:none;cursor:text;padding:0;"
+              onclick="event.stopPropagation()"
+              oninput="renameGroup('${g.id}', this.value)">
+            <span class="group-nav-sel" id="nav-${g.id}">0/${g.limit || g.photos.length}</span>
+          `;
+          sidebarNav.appendChild(btn);
+        });
+      }
+
+      // 2. Stats
+      const totalPhotos = GROUPS.reduce((acc, g) => acc + g.photos.length, 0);
+      const totalLimit = GROUPS.reduce((acc, g) => acc + (g.limit || g.photos.length), 0);
+      const statTotal = document.getElementById('statTotal');
+      const statLimit = document.getElementById('statLimit');
+      if (statTotal) statTotal.textContent = totalPhotos + '枚';
+      if (statLimit) statLimit.textContent = totalLimit + '枚';
+
+      // 3. Main content group sections
+      const container = document.getElementById('groupSections');
+      if (container) {
+        container.innerHTML = '';
+        GROUPS.forEach(g => {
+          const section = document.createElement('div');
+          section.className = 'group-section';
+          section.id = g.id;
+
+          const bg = hexToRgba(g.color || '#cccccc', 0.15);
+          const border = hexToRgba(g.color || '#cccccc', 0.3);
+          const headerName = g.name && g.name !== g.label ? `${g.label}: ${g.name}` : `グループ ${g.label}`;
+
+          section.innerHTML = `
+            <div class="group-header">
+              <div class="group-color-pill"
+                style="background:${bg};color:${g.color};border:1px solid ${border}">
+                <span style="width:7px;height:7px;border-radius:50%;background:${g.color};display:inline-block"></span>
+                ${g.label}
+              </div>
+              <div class="group-title" id="gtitle-${g.id}">${headerName}</div>
+              <div class="group-meta" id="gmeta-${g.id}">${g.photos.length}枚</div>
+              <div class="group-bulk-btns">
+                <button class="group-bulk-btn gbtn-ok" onclick="bulkSetGroup('${g.id}','ok')">全OK</button>
+                <button class="group-bulk-btn gbtn-nearok" onclick="bulkSetGroup('${g.id}','nearok')">全ほぼOK</button>
+                <button class="group-bulk-btn gbtn-ng" onclick="bulkSetGroup('${g.id}','ng')">全NG</button>
+                <button class="group-bulk-btn gbtn-reset" onclick="confirmGroupReset('${g.id}')">リセット</button>
+              </div>
+              <div class="group-limit-badge" id="limit-${g.id}">0 OK</div>
+            </div>
+            <div class="photo-grid" id="grid-${g.id}"></div>
+          `;
+          container.appendChild(section);
+        });
+      }
+
+      // 4. Mobile group list
+      if (typeof mobileRefreshGroupList === 'function') mobileRefreshGroupList();
+    }
+
+    function renameGroup(groupId, newName) {
+      const group = GROUPS.find(g => g.id === groupId);
+      if (!group) return;
+      group.name = newName || group.label;
+
+      // Update header title
+      const title = document.getElementById('gtitle-' + groupId);
+      if (title) {
+        title.textContent = newName ? `${group.label}: ${newName}` : `グループ ${group.label}`;
+      }
+    }
 
     const MAX_SELECT = 29;
 
@@ -3699,8 +3576,9 @@
       }, { passive: true });
     })();
 
-    // Init mobile group list after all functions are defined
-    mobileRefreshGroupList();
+    // Init: build group UI and render all photos
+    buildGroupUI();
+    renderAll();
 
     // ===== DOWNLOAD DROPDOWN =====
     function toggleDlMenu() {

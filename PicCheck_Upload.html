@@ -1264,7 +1264,7 @@
                 name: 'A',
                 reason: '',
                 color: GROUP_COLORS[0],
-                limit: Math.max(1, Math.ceil(uploadedFiles.length * 0.4)),
+                limit: uploadedFiles.length,
                 photos: [...uploadedFiles]
             }];
             renderGroupConfirm();
@@ -1511,7 +1511,7 @@
                 const label = LABELS[i] || String(i + 1);
                 const color = GROUP_COLORS[i % GROUP_COLORS.length];
                 const name = label;
-                const defaultLimit = Math.max(1, Math.ceil(g.photos.length * 0.4));
+                const defaultLimit = g.photos.length;
                 return { label, name, reason: '', color, limit: defaultLimit, photos: g.photos };
             });
         }
