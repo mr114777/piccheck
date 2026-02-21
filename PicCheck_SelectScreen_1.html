@@ -1172,7 +1172,7 @@
     .modal-photo-img {
       width: calc(100% - 32px);
       margin: 16px auto 0;
-      aspect-ratio: 3/4;
+      max-height: 60vh;
       border-radius: 12px;
       display: flex;
       align-items: center;
@@ -1181,6 +1181,15 @@
       box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
       border: 2px solid var(--border2);
       flex-shrink: 0;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .modal-photo-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
     }
 
     .modal-actions {
@@ -3215,17 +3224,36 @@
       modalPhoto = photo;
       modalGroup = group;
 
-      const img = document.getElementById('modalImg');
+      const container = document.getElementById('modalImg');
+      container.innerHTML = '';
+      container.style.background = 'var(--surface)';
+
       if (photo.url) {
-        img.style.background = `url(${photo.url}) center/cover no-repeat`;
-        img.textContent = '';
-        img.style.fontSize = '0';
+        // Create img element for sharp rendering
+        const imgEl = document.createElement('img');
+        imgEl.src = photo.url; // Start with thumbnail
+        imgEl.alt = photo.fname;
+        container.appendChild(imgEl);
+
+        // Try to load full-res from IndexedDB
+        if (photo.fname) {
+          getOriginalFile(photo.fname).then(blob => {
+            if (blob) {
+              const fullUrl = URL.createObjectURL(blob);
+              imgEl.onload = function () {
+                // Clean up previous object URL on next load
+              };
+              imgEl.src = fullUrl;
+              console.log('[Modal] Loaded full-res:', photo.fname);
+            }
+          }).catch(() => { });
+        }
       } else {
-        img.style.background = photo.bg;
-        img.textContent = photo.emoji;
-        img.style.fontSize = '120px';
+        container.style.background = photo.bg;
+        container.textContent = photo.emoji;
+        container.style.fontSize = '120px';
       }
-      img.style.borderColor = group.color;
+      container.style.borderColor = group.color;
 
       // Meta
       document.getElementById('modalFname').textContent = photo.fname;
