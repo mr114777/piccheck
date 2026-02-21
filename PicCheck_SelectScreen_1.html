@@ -1958,10 +1958,13 @@
           📥 ダウンロード ▼
         </button>
         <div class="dl-menu" id="dlMenu">
-          <button onclick="downloadPhotos('all')">📥 全部ダウンロード</button>
-          <button onclick="downloadPhotos('ok')">✓ OKカットのみ</button>
-          <button onclick="downloadPhotos('ok+nearok')">△ ほぼOKも含む</button>
-          <button onclick="downloadPhotos('ng')">✕ NGのみ</button>
+          <button onclick="downloadPhotos('all','full')">📥 全部 (フルサイズ)</button>
+          <button onclick="downloadPhotos('ok','full')">✓ OKのみ (フルサイズ)</button>
+          <button onclick="downloadPhotos('ok+nearok','full')">△ ほぼOKも含む (フルサイズ)</button>
+          <hr style="border:none;border-top:1px solid var(--border);margin:4px 0">
+          <button onclick="downloadPhotos('all','sns')">📱 全部 (SNS用圧縮)</button>
+          <button onclick="downloadPhotos('ok','sns')">📱 OKのみ (SNS用圧縮)</button>
+          <button onclick="downloadPhotos('ok+nearok','sns')">📱 ほぼOKも含む (SNS用圧縮)</button>
         </div>
       </div>
       <button class="btn-complete" onclick="openConfirm()">
@@ -3670,6 +3673,181 @@
 
     // Init mobile group list after all functions are defined
     mobileRefreshGroupList();
+
+    // ===== DOWNLOAD DROPDOWN =====
+    function toggleDlMenu() {
+      const menu = document.getElementById('dlMenu');
+      menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    }
+    document.addEventListener('click', function (e) {
+      const dl = document.querySelector('.dl-dropdown');
+      if (dl && !dl.contains(e.target)) {
+        document.getElementById('dlMenu').style.display = 'none';
+      }
+    });
+
+    // ===== INDEXEDDB READER =====
+    function openDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open('PicCheckDB', 1);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains('originals')) {
+            db.createObjectStore('originals');
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function getOriginalFile(fname) {
+      try {
+        const db = await openDB();
+        return new Promise((resolve) => {
+          const tx = db.transaction('originals', 'readonly');
+          const store = tx.objectStore('originals');
+          const req = store.get(fname);
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => resolve(null);
+        });
+      } catch { return null; }
+    }
+
+    // ===== DOWNLOAD PHOTOS =====
+    async function downloadPhotos(filter, mode) {
+      document.getElementById('dlMenu').style.display = 'none';
+
+      // Collect all photos across groups
+      const allPhotos = [];
+      GROUPS.forEach(g => {
+        g.photos.forEach(p => {
+          allPhotos.push({ ...p, groupLabel: g.label, status: photoStatus[p.id] || 'unset' });
+        });
+      });
+
+      // Filter by status
+      let photos;
+      if (filter === 'ok') {
+        photos = allPhotos.filter(p => p.status === 'ok');
+      } else if (filter === 'ok+nearok') {
+        photos = allPhotos.filter(p => p.status === 'ok' || p.status === 'nearok');
+      } else if (filter === 'ng') {
+        photos = allPhotos.filter(p => p.status === 'ng');
+      } else {
+        photos = allPhotos;
+      }
+
+      if (photos.length === 0) {
+        showToast('対象の写真がありません');
+        return;
+      }
+
+      showToast(`${photos.length}枚を準備中...`);
+
+      const zip = new JSZip();
+      let processed = 0;
+
+      for (const photo of photos) {
+        processed++;
+        showToast(`準備中... ${processed}/${photos.length}`);
+
+        try {
+          let blob = null;
+
+          // Try IndexedDB for original file
+          const original = await getOriginalFile(photo.fname);
+
+          if (mode === 'sns') {
+            // SNS compression: target 1-3MB
+            blob = await compressForSNS(original || photo.url, photo.fname);
+          } else {
+            // Full size: use original from IndexedDB
+            if (original) {
+              blob = original;
+            } else if (photo.url && photo.url.startsWith('data:')) {
+              // Fall back to data URL
+              const res = await fetch(photo.url);
+              blob = await res.blob();
+            }
+          }
+
+          if (blob) {
+            const ext = photo.fname.split('.').pop().toLowerCase();
+            const safeName = photo.fname || `${photo.id}.${ext || 'jpg'}`;
+            zip.file(safeName, blob);
+          }
+        } catch (e) {
+          console.warn('Download failed for', photo.fname, e);
+        }
+      }
+
+      showToast('ZIP生成中...');
+      const content = await zip.generateAsync({ type: 'blob' });
+      const filterLabel = filter === 'all' ? '全部' : filter === 'ok' ? 'OK' : filter === 'ok+nearok' ? 'OK+ほぼOK' : 'NG';
+      const modeLabel = mode === 'sns' ? '_SNS圧縮' : '';
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(content);
+      a.download = `PicCheck_${filterLabel}${modeLabel}_${photos.length}枚.zip`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      showToast(`${photos.length}枚のダウンロード完了 ✓`);
+    }
+
+    // ===== SNS COMPRESSION (target 1-3MB) =====
+    async function compressForSNS(source, fname) {
+      return new Promise(async (resolve) => {
+        try {
+          let imgSrc;
+          if (source instanceof Blob) {
+            imgSrc = URL.createObjectURL(source);
+          } else if (typeof source === 'string') {
+            imgSrc = source;
+          } else {
+            resolve(source);
+            return;
+          }
+
+          const img = new Image();
+          img.onload = function () {
+            // Already small enough? (< 1MB)
+            // We can't check original size easily for data URLs, so always process
+            const MAX_DIM = 2048;
+            let w = img.naturalWidth, h = img.naturalHeight;
+            if (w > MAX_DIM || h > MAX_DIM) {
+              if (w > h) { h = Math.round(h * MAX_DIM / w); w = MAX_DIM; }
+              else { w = Math.round(w * MAX_DIM / h); h = MAX_DIM; }
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+
+            // Start at quality 0.85, reduce if too large
+            let quality = 0.85;
+            const tryCompress = () => {
+              canvas.toBlob((blob) => {
+                if (blob && blob.size > 3 * 1024 * 1024 && quality > 0.4) {
+                  quality -= 0.1;
+                  tryCompress();
+                } else {
+                  if (source instanceof Blob) URL.revokeObjectURL(imgSrc);
+                  resolve(blob);
+                }
+              }, 'image/jpeg', quality);
+            };
+            tryCompress();
+          };
+          img.onerror = () => resolve(source instanceof Blob ? source : null);
+          img.src = imgSrc;
+        } catch (e) {
+          console.warn('SNS compression failed:', e);
+          resolve(null);
+        }
+      });
+    }
+
   </script>
 </body>
 
