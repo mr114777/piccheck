@@ -1598,12 +1598,12 @@
       .main {
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
+        height: calc(100dvh - 52px);
       }
 
       .content {
-        padding: 14px 10px 130px;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
+        padding: 14px 10px 140px;
+        min-height: 100%;
       }
 
       /* 2-column grid */
@@ -1644,19 +1644,29 @@
         white-space: nowrap;
       }
 
-      /* Group header compact */
       .group-header {
-        gap: 8px;
+        flex-wrap: wrap;
+        gap: 6px;
         margin-bottom: 10px;
         padding-bottom: 10px;
       }
 
       .group-title {
         font-size: 13px;
+        flex: 1 1 auto;
+        min-width: 60%;
+        word-break: keep-all;
+        overflow-wrap: break-word;
       }
 
       .group-meta {
         font-size: 10px;
+      }
+
+      .group-bulk-btns {
+        width: 100%;
+        display: flex;
+        gap: 4px;
       }
 
       .group-limit-badge {
@@ -2328,20 +2338,31 @@
     <div class="bs-panel">
       <div class="bs-handle"></div>
       <div class="bs-header">
-        <span class="bs-title">📥 写真ダウンロード（ZIP）</span>
+        <span class="bs-title">📥 写真ダウンロード</span>
         <button class="bs-close" onclick="closeBottomSheet('dlSheet')">✕</button>
       </div>
-      <div class="bs-body" style="padding:16px;display:flex;flex-direction:column;gap:10px;">
+      <div class="bs-body" style="padding:16px;display:flex;flex-direction:column;gap:8px;">
+        <p style="font-size:12px;color:var(--text-sub);margin:0 0 4px;font-weight:700">📦 フルサイズ（原寸）</p>
         <button class="bulk-btn"
-          style="background:#4CAF7D;color:white;padding:14px;border-radius:10px;font-size:14px;border:none;cursor:pointer"
-          onclick="downloadPhotos('ok','full');closeBottomSheet('dlSheet')">✓ OK写真をZIPダウンロード</button>
+          style="background:#4CAF7D;color:white;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
+          onclick="downloadPhotos('ok','full');closeBottomSheet('dlSheet')">✓ OK写真をZIP</button>
         <button class="bulk-btn"
-          style="background:#F5C842;color:#111;padding:14px;border-radius:10px;font-size:14px;border:none;cursor:pointer"
-          onclick="downloadPhotos('ok+nearok','full');closeBottomSheet('dlSheet')">△ OK+保留をZIPダウンロード</button>
+          style="background:#F5C842;color:#111;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
+          onclick="downloadPhotos('ok+nearok','full');closeBottomSheet('dlSheet')">△ OK+保留をZIP</button>
         <button class="bulk-btn"
-          style="background:var(--surface3);color:var(--text);padding:14px;border-radius:10px;font-size:14px;border:1px solid var(--border2);cursor:pointer"
-          onclick="downloadPhotos('all','full');closeBottomSheet('dlSheet')">全ての写真をZIPダウンロード</button>
-        <p style="font-size:11px;color:var(--text-dim);text-align:center;margin:4px 0 0">ZIP形式でまとめてダウンロードされます</p>
+          style="background:var(--surface3);color:var(--text);padding:12px;border-radius:10px;font-size:13px;border:1px solid var(--border2);cursor:pointer"
+          onclick="downloadPhotos('all','full');closeBottomSheet('dlSheet')">全てをZIP</button>
+        <hr style="border:none;border-top:1px solid var(--border);margin:8px 0">
+        <p style="font-size:12px;color:var(--text-sub);margin:0 0 4px;font-weight:700">📱 SNS用（1〜3MB圧縮）</p>
+        <button class="bulk-btn"
+          style="background:#4CAF7D;color:white;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
+          onclick="downloadPhotos('ok','sns');closeBottomSheet('dlSheet')">✓ OK写真をZIP</button>
+        <button class="bulk-btn"
+          style="background:#F5C842;color:#111;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
+          onclick="downloadPhotos('ok+nearok','sns');closeBottomSheet('dlSheet')">△ OK+保留をZIP</button>
+        <button class="bulk-btn"
+          style="background:var(--surface3);color:var(--text);padding:12px;border-radius:10px;font-size:13px;border:1px solid var(--border2);cursor:pointer"
+          onclick="downloadPhotos('all','sns');closeBottomSheet('dlSheet')">全てをZIP</button>
       </div>
     </div>
   </div>
