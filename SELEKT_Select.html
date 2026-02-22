@@ -769,6 +769,11 @@
       color: #1a1a1a;
     }
 
+    .badge-sensitive {
+      background: rgba(255, 82, 82, 0.9);
+      color: #fff;
+    }
+
     /* Status badge top-right */
     .status-badge {
       position: absolute;
@@ -2850,13 +2855,16 @@
         badges.className = 'ai-badges';
         photo.ai.forEach(ai => {
           const b = document.createElement('div');
-          b.className = 'ai-badge ' + {
+          const aiLabel = typeof ai === 'string' ? ai : ai.label;
+          const aiType = typeof ai === 'string' ? ai : (ai.type || '');
+          b.className = 'ai-badge ' + ({
             '半目': 'badge-hanme',
             'ピンボケ': 'badge-blur',
             '露出': 'badge-expo',
-            '類似': 'badge-sim'
-          }[ai];
-          b.textContent = ai;
+            '類似': 'badge-sim',
+            'sensitive': 'badge-sensitive'
+          }[aiType] || '');
+          b.textContent = aiLabel;
           badges.appendChild(b);
         });
         card.appendChild(badges);
@@ -3456,8 +3464,10 @@
       badgesEl.innerHTML = '';
       photo.ai.forEach(ai => {
         const b = document.createElement('div');
-        b.className = 'ai-badge ' + { '半目': 'badge-hanme', 'ピンボケ': 'badge-blur', '露出': 'badge-expo', '類似': 'badge-sim' }[ai];
-        b.textContent = ai;
+        const aiLabel = typeof ai === 'string' ? ai : ai.label;
+        const aiType = typeof ai === 'string' ? ai : (ai.type || '');
+        b.className = 'ai-badge ' + ({ '半目': 'badge-hanme', 'ピンボケ': 'badge-blur', '露出': 'badge-expo', '類似': 'badge-sim', 'sensitive': 'badge-sensitive' }[aiType] || '');
+        b.textContent = aiLabel;
         badgesEl.appendChild(b);
       });
 
