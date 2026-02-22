@@ -3721,7 +3721,7 @@
           }
           btn.textContent = '🛡️ AIモデル読込中…';
           // Use relative path - works on any hosting
-          nsfwModel = await nsfwjs.load('models/nsfwjs/');
+          nsfwModel = await nsfwjs.load('models/nsfwjs/', { size: 299 });
         }
 
         let sensitiveCount = 0;
