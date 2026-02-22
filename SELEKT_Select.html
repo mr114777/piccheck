@@ -23,32 +23,32 @@
     }
 
     :root {
-      --bg: #0A0C10;
-      --surface: #111318;
-      --surface2: #181B22;
-      --surface3: #1F232E;
-      --border: #262A37;
-      --border2: #2F3445;
-      --text: #ECEEF3;
-      --text-sub: #8A90A2;
-      --text-dim: #4A4F62;
+      --bg: #06080D;
+      --surface: #0C0F16;
+      --surface2: #12151E;
+      --surface3: #1A1E2A;
+      --border: #1E2333;
+      --border2: #2A3044;
+      --text: #F0F2F8;
+      --text-sub: #7882A0;
+      --text-dim: #3C4260;
 
-      --coral: #F2879A;
-      --mint: #5EDDC0;
-      --lavender: #A893F0;
-      --sky: #7DB8F0;
-      --yellow: #F0D060;
-      --green: #5CE0A6;
-      --pink: #E87BAD;
-      --orange: #F0A07A;
+      --coral: #FF4D6A;
+      --mint: #00E5A0;
+      --lavender: #7C5CFC;
+      --sky: #3B9EFF;
+      --yellow: #FFB800;
+      --green: #00D68F;
+      --pink: #FF3D9A;
+      --orange: #FF7A3D;
 
       /* Group colors */
-      --g1: #F2879A;
-      --g2: #5EDDC0;
-      --g3: #A893F0;
-      --g4: #7DB8F0;
-      --g5: #F0D060;
-      --g6: #E87BAD;
+      --g1: #FF4D6A;
+      --g2: #00E5A0;
+      --g3: #7C5CFC;
+      --g4: #3B9EFF;
+      --g5: #FFB800;
+      --g6: #FF3D9A;
     }
 
     body {
@@ -2355,13 +2355,13 @@
       <div class="bs-body" style="padding:16px;display:flex;flex-direction:column;gap:8px;">
         <p style="font-size:12px;color:var(--text-sub);margin:0 0 4px;font-weight:700">📦 フルサイズ（原寸）</p>
         <button class="bulk-btn"
-          style="background:#5CE0A6;color:white;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
+          style="background:#00D68F;color:white;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
           onclick="downloadPhotos('ok','full');closeBottomSheet('dlSheet')">✓ OK写真をZIP</button>
         <button class="bulk-btn"
-          style="background:#F0D060;color:#111;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
+          style="background:#FFB800;color:#111;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
           onclick="downloadPhotos('ok+nearok','full');closeBottomSheet('dlSheet')">△ OK+保留をZIP</button>
         <button class="bulk-btn"
-          style="background:#F2879A;color:white;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
+          style="background:#FF4D6A;color:white;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
           onclick="downloadPhotos('ng','full');closeBottomSheet('dlSheet')">✕ NGをZIP</button>
         <button class="bulk-btn"
           style="background:var(--surface3);color:var(--text);padding:12px;border-radius:10px;font-size:13px;border:1px solid var(--border2);cursor:pointer"
@@ -2369,13 +2369,13 @@
         <hr style="border:none;border-top:1px solid var(--border);margin:8px 0">
         <p style="font-size:12px;color:var(--text-sub);margin:0 0 4px;font-weight:700">📱 SNS用（1〜3MB圧縮）</p>
         <button class="bulk-btn"
-          style="background:#5CE0A6;color:white;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
+          style="background:#00D68F;color:white;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
           onclick="downloadPhotos('ok','sns');closeBottomSheet('dlSheet')">✓ OK写真をZIP</button>
         <button class="bulk-btn"
-          style="background:#F0D060;color:#111;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
+          style="background:#FFB800;color:#111;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
           onclick="downloadPhotos('ok+nearok','sns');closeBottomSheet('dlSheet')">△ OK+保留をZIP</button>
         <button class="bulk-btn"
-          style="background:#F2879A;color:white;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
+          style="background:#FF4D6A;color:white;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
           onclick="downloadPhotos('ng','sns');closeBottomSheet('dlSheet')">✕ NGをZIP</button>
         <button class="bulk-btn"
           style="background:var(--surface3);color:var(--text);padding:12px;border-radius:10px;font-size:13px;border:1px solid var(--border2);cursor:pointer"
@@ -2685,7 +2685,7 @@
 
           console.log('[loadGroupData] Loaded', arr.length, 'groups');
 
-          const defaultColors = ['#F2879A', '#5EDDC0', '#A893F0', '#7DB8F0', '#F0D060', '#E87BAD'];
+          const defaultColors = ['#FF4D6A', '#00E5A0', '#7C5CFC', '#3B9EFF', '#FFB800', '#FF3D9A'];
           const defaultLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
           return arr.map((g, i) => ({
@@ -3221,7 +3221,7 @@
         div.innerHTML = `
       <div class="gp-header">
         <span class="gp-name" style="color:${g.color}">${g.label}: ${g.name}</span>
-        <span class="gp-count" style="color:${ok > 0 ? '#5CE0A6' : '#8A90A2'};font-size:10px">OK:${ok} △:${nearok} NG:${ng}</span>
+        <span class="gp-count" style="color:${ok > 0 ? '#00D68F' : '#7882A0'};font-size:10px">OK:${ok} △:${nearok} NG:${ng}</span>
       </div>
       <div class="gp-bar">
         <div class="gp-fill" style="width:${Math.min(100, pct)}%;background:${g.color}"></div>
@@ -3704,7 +3704,7 @@
       // Update modal image border to reflect status color
       const imgContainer = document.getElementById('modalImg');
       if (st) {
-        const bc = { ok: '#5CE0A6', nearok: '#F0D060', ng: '#F2879A' }[st];
+        const bc = { ok: '#00D68F', nearok: '#FFB800', ng: '#FF4D6A' }[st];
         imgContainer.style.setProperty('border-color', bc, 'important');
       } else {
         imgContainer.style.removeProperty('border-color');
@@ -3712,7 +3712,7 @@
       // Status indicator bar
       const indicator = document.getElementById('modalStatusIndicator');
       if (st) {
-        const cfg = { ok: { bg: '#5CE0A6', color: '#fff', text: '✓ OK' }, nearok: { bg: '#F0D060', color: '#111', text: '△ 保留' }, ng: { bg: '#F2879A', color: '#fff', text: '✕ NG' } }[st];
+        const cfg = { ok: { bg: '#00D68F', color: '#fff', text: '✓ OK' }, nearok: { bg: '#FFB800', color: '#111', text: '△ 保留' }, ng: { bg: '#FF4D6A', color: '#fff', text: '✕ NG' } }[st];
         indicator.style.background = cfg.bg;
         indicator.style.color = cfg.color;
         indicator.textContent = cfg.text;
@@ -3769,7 +3769,7 @@
       }
       const c = document.getElementById('modalImg');
       if (st) {
-        const bc = { ok: '#5CE0A6', nearok: '#F0D060', ng: '#F2879A' }[st];
+        const bc = { ok: '#00D68F', nearok: '#FFB800', ng: '#FF4D6A' }[st];
         c.style.setProperty('border-color', bc, 'important');
       } else {
         c.style.removeProperty('border-color');
@@ -3777,7 +3777,7 @@
       // Update status indicator bar
       const ind = document.getElementById('modalStatusIndicator');
       if (st) {
-        const cfg = { ok: { bg: '#5CE0A6', color: '#fff', text: '✓ OK' }, nearok: { bg: '#F0D060', color: '#111', text: '△ 保留' }, ng: { bg: '#F2879A', color: '#fff', text: '✕ NG' } }[st];
+        const cfg = { ok: { bg: '#00D68F', color: '#fff', text: '✓ OK' }, nearok: { bg: '#FFB800', color: '#111', text: '△ 保留' }, ng: { bg: '#FF4D6A', color: '#fff', text: '✕ NG' } }[st];
         ind.style.background = cfg.bg;
         ind.style.color = cfg.color;
         ind.textContent = cfg.text;
@@ -3904,7 +3904,7 @@
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
       const ctx = canvas.getContext('2d');
-      const colors = ['#F2879A', '#5EDDC0', '#A893F0', '#7DB8F0', '#F0D060', '#E87BAD', '#5CE0A6'];
+      const colors = ['#FF4D6A', '#00E5A0', '#7C5CFC', '#3B9EFF', '#FFB800', '#FF3D9A', '#00D68F'];
       const pieces = Array.from({ length: 120 }, () => ({
         x: Math.random() * canvas.width,
         y: -20 - Math.random() * 100,
@@ -4248,7 +4248,7 @@
       const text = document.getElementById('expiryText');
       if (!banner || !text) return;
       if (daysLeft <= 3) {
-        banner.style.background = 'linear-gradient(90deg,#F2879A,#ff4444)';
+        banner.style.background = 'linear-gradient(90deg,#FF4D6A,#ff4444)';
         banner.style.color = '#fff';
         text.textContent = `⚠️ 残り${daysLeft}日！期限: ${expStr}`;
       } else if (daysLeft <= 7) {
