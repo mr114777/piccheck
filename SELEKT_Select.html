@@ -33,22 +33,22 @@
       --text-sub: #8A90A2;
       --text-dim: #4A4F62;
 
-      --coral: #E85D75;
-      --mint: #34D1A8;
-      --lavender: #8B6FE0;
-      --sky: #5BA4E6;
-      --yellow: #E6B832;
-      --green: #2ECC87;
-      --pink: #D94F8A;
-      --orange: #E87E56;
+      --coral: #F2879A;
+      --mint: #5EDDC0;
+      --lavender: #A893F0;
+      --sky: #7DB8F0;
+      --yellow: #F0D060;
+      --green: #5CE0A6;
+      --pink: #E87BAD;
+      --orange: #F0A07A;
 
       /* Group colors */
-      --g1: #E85D75;
-      --g2: #34D1A8;
-      --g3: #8B6FE0;
-      --g4: #5BA4E6;
-      --g5: #E6B832;
-      --g6: #D94F8A;
+      --g1: #F2879A;
+      --g2: #5EDDC0;
+      --g3: #A893F0;
+      --g4: #7DB8F0;
+      --g5: #F0D060;
+      --g6: #E87BAD;
     }
 
     body {
@@ -2079,12 +2079,12 @@
     <div class="logo">SE<span>LEKT</span></div>
     <div class="topbar-divider"></div>
     <div class="session-name">
-      <strong id="sessionTitle" onclick="editSessionTitle()" style="cursor:pointer" title="クリックで編集">プロジェクト名未設定
-        ✏️</strong>
+      <strong id="sessionTitle" onclick="editSessionTitle()" style="cursor:pointer" title="クリックで編集">プロジェクト名未設定 <span
+          style="opacity:0.4;font-size:11px">▹ edit</span></strong>
       <span id="sessionPhotographer" style="color:var(--text-dim);margin-left:8px;font-size:11px"></span>
     </div>
     <div id="expiryBanner"
-      style="display:none;background:linear-gradient(90deg,#E6B832,#D98A00);color:#111;padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;margin-left:auto;margin-right:8px;">
+      style="display:none;background:rgba(255,255,255,0.06);color:var(--text-sub);padding:4px 14px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap;margin-left:auto;margin-right:8px;border:1px solid rgba(255,255,255,0.08);">
       <span id="expiryText"></span>
     </div>
     <div class="topbar-right">
@@ -2355,13 +2355,13 @@
       <div class="bs-body" style="padding:16px;display:flex;flex-direction:column;gap:8px;">
         <p style="font-size:12px;color:var(--text-sub);margin:0 0 4px;font-weight:700">📦 フルサイズ（原寸）</p>
         <button class="bulk-btn"
-          style="background:#2ECC87;color:white;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
+          style="background:#5CE0A6;color:white;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
           onclick="downloadPhotos('ok','full');closeBottomSheet('dlSheet')">✓ OK写真をZIP</button>
         <button class="bulk-btn"
-          style="background:#E6B832;color:#111;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
+          style="background:#F0D060;color:#111;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
           onclick="downloadPhotos('ok+nearok','full');closeBottomSheet('dlSheet')">△ OK+保留をZIP</button>
         <button class="bulk-btn"
-          style="background:#E85D75;color:white;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
+          style="background:#F2879A;color:white;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
           onclick="downloadPhotos('ng','full');closeBottomSheet('dlSheet')">✕ NGをZIP</button>
         <button class="bulk-btn"
           style="background:var(--surface3);color:var(--text);padding:12px;border-radius:10px;font-size:13px;border:1px solid var(--border2);cursor:pointer"
@@ -2369,13 +2369,13 @@
         <hr style="border:none;border-top:1px solid var(--border);margin:8px 0">
         <p style="font-size:12px;color:var(--text-sub);margin:0 0 4px;font-weight:700">📱 SNS用（1〜3MB圧縮）</p>
         <button class="bulk-btn"
-          style="background:#2ECC87;color:white;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
+          style="background:#5CE0A6;color:white;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
           onclick="downloadPhotos('ok','sns');closeBottomSheet('dlSheet')">✓ OK写真をZIP</button>
         <button class="bulk-btn"
-          style="background:#E6B832;color:#111;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
+          style="background:#F0D060;color:#111;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
           onclick="downloadPhotos('ok+nearok','sns');closeBottomSheet('dlSheet')">△ OK+保留をZIP</button>
         <button class="bulk-btn"
-          style="background:#E85D75;color:white;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
+          style="background:#F2879A;color:white;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
           onclick="downloadPhotos('ng','sns');closeBottomSheet('dlSheet')">✕ NGをZIP</button>
         <button class="bulk-btn"
           style="background:var(--surface3);color:var(--text);padding:12px;border-radius:10px;font-size:13px;border:1px solid var(--border2);cursor:pointer"
@@ -2685,7 +2685,7 @@
 
           console.log('[loadGroupData] Loaded', arr.length, 'groups');
 
-          const defaultColors = ['#E85D75', '#34D1A8', '#8B6FE0', '#5BA4E6', '#E6B832', '#D94F8A'];
+          const defaultColors = ['#F2879A', '#5EDDC0', '#A893F0', '#7DB8F0', '#F0D060', '#E87BAD'];
           const defaultLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
           return arr.map((g, i) => ({
@@ -3221,7 +3221,7 @@
         div.innerHTML = `
       <div class="gp-header">
         <span class="gp-name" style="color:${g.color}">${g.label}: ${g.name}</span>
-        <span class="gp-count" style="color:${ok > 0 ? '#2ECC87' : '#8A90A2'};font-size:10px">OK:${ok} △:${nearok} NG:${ng}</span>
+        <span class="gp-count" style="color:${ok > 0 ? '#5CE0A6' : '#8A90A2'};font-size:10px">OK:${ok} △:${nearok} NG:${ng}</span>
       </div>
       <div class="gp-bar">
         <div class="gp-fill" style="width:${Math.min(100, pct)}%;background:${g.color}"></div>
@@ -3704,7 +3704,7 @@
       // Update modal image border to reflect status color
       const imgContainer = document.getElementById('modalImg');
       if (st) {
-        const bc = { ok: '#2ECC87', nearok: '#E6B832', ng: '#E85D75' }[st];
+        const bc = { ok: '#5CE0A6', nearok: '#F0D060', ng: '#F2879A' }[st];
         imgContainer.style.setProperty('border-color', bc, 'important');
       } else {
         imgContainer.style.removeProperty('border-color');
@@ -3712,7 +3712,7 @@
       // Status indicator bar
       const indicator = document.getElementById('modalStatusIndicator');
       if (st) {
-        const cfg = { ok: { bg: '#2ECC87', color: '#fff', text: '✓ OK' }, nearok: { bg: '#E6B832', color: '#111', text: '△ 保留' }, ng: { bg: '#E85D75', color: '#fff', text: '✕ NG' } }[st];
+        const cfg = { ok: { bg: '#5CE0A6', color: '#fff', text: '✓ OK' }, nearok: { bg: '#F0D060', color: '#111', text: '△ 保留' }, ng: { bg: '#F2879A', color: '#fff', text: '✕ NG' } }[st];
         indicator.style.background = cfg.bg;
         indicator.style.color = cfg.color;
         indicator.textContent = cfg.text;
@@ -3769,7 +3769,7 @@
       }
       const c = document.getElementById('modalImg');
       if (st) {
-        const bc = { ok: '#2ECC87', nearok: '#E6B832', ng: '#E85D75' }[st];
+        const bc = { ok: '#5CE0A6', nearok: '#F0D060', ng: '#F2879A' }[st];
         c.style.setProperty('border-color', bc, 'important');
       } else {
         c.style.removeProperty('border-color');
@@ -3777,7 +3777,7 @@
       // Update status indicator bar
       const ind = document.getElementById('modalStatusIndicator');
       if (st) {
-        const cfg = { ok: { bg: '#2ECC87', color: '#fff', text: '✓ OK' }, nearok: { bg: '#E6B832', color: '#111', text: '△ 保留' }, ng: { bg: '#E85D75', color: '#fff', text: '✕ NG' } }[st];
+        const cfg = { ok: { bg: '#5CE0A6', color: '#fff', text: '✓ OK' }, nearok: { bg: '#F0D060', color: '#111', text: '△ 保留' }, ng: { bg: '#F2879A', color: '#fff', text: '✕ NG' } }[st];
         ind.style.background = cfg.bg;
         ind.style.color = cfg.color;
         ind.textContent = cfg.text;
@@ -3904,7 +3904,7 @@
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
       const ctx = canvas.getContext('2d');
-      const colors = ['#E85D75', '#34D1A8', '#8B6FE0', '#5BA4E6', '#E6B832', '#D94F8A', '#2ECC87'];
+      const colors = ['#F2879A', '#5EDDC0', '#A893F0', '#7DB8F0', '#F0D060', '#E87BAD', '#5CE0A6'];
       const pieces = Array.from({ length: 120 }, () => ({
         x: Math.random() * canvas.width,
         y: -20 - Math.random() * 100,
@@ -4229,7 +4229,7 @@
       const saved = localStorage.getItem('selekt_project_title');
       const titleEl = document.getElementById('sessionTitle');
       if (saved && titleEl) {
-        titleEl.textContent = saved + ' ✏️';
+        titleEl.innerHTML = saved + ' <span style="opacity:0.4;font-size:11px">▹ edit</span>';
       }
       // Fallback expiry: 30 days from first visit
       let firstVisit = localStorage.getItem('selekt_first_visit');
@@ -4248,7 +4248,7 @@
       const text = document.getElementById('expiryText');
       if (!banner || !text) return;
       if (daysLeft <= 3) {
-        banner.style.background = 'linear-gradient(90deg,#E85D75,#ff4444)';
+        banner.style.background = 'linear-gradient(90deg,#F2879A,#ff4444)';
         banner.style.color = '#fff';
         text.textContent = `⚠️ 残り${daysLeft}日！期限: ${expStr}`;
       } else if (daysLeft <= 7) {
@@ -4266,7 +4266,7 @@
       localStorage.setItem('selekt_project_title', newTitle);
       const titleEl = document.getElementById('sessionTitle');
       if (titleEl) {
-        titleEl.textContent = (newTitle || 'プロジェクト名未設定') + ' ✏️';
+        titleEl.innerHTML = (newTitle || 'プロジェクト名未設定') + ' <span style="opacity:0.4;font-size:11px">▹ edit</span>';
       }
     }
   </script>
