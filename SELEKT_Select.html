@@ -1234,6 +1234,20 @@
       transition: border-color 0.25s ease;
     }
 
+    /* Prevent button text wrapping globally */
+    .tb-btn,
+    .bn-btn,
+    .bn-complete,
+    .bulk-btn,
+    .modal-btn,
+    .filter-btn,
+    .dl-row-btn,
+    .btn-complete,
+    .group-bulk-btn,
+    .overlay-btn {
+      white-space: nowrap;
+    }
+
     .modal-photo-img.zoomed {
       cursor: zoom-out;
       height: 70vh;
@@ -2289,7 +2303,37 @@
         <span class="bn-badge" id="bnSelBadge" style="display:none">0</span>
       </button>
     </div>
+    <div class="bn-btn-wrap">
+      <button class="bn-btn" onclick="openBottomSheet('dlSheet')">
+        <span class="bn-icon">📥</span>
+        <span>DL</span>
+      </button>
+    </div>
     <button class="bn-complete" onclick="openConfirm()">完了して送信 →</button>
+  </div>
+
+  <!-- ===== BOTTOM SHEET: Download ===== -->
+  <div class="bottom-sheet" id="dlSheet">
+    <div class="bs-backdrop" onclick="closeBottomSheet('dlSheet')"></div>
+    <div class="bs-panel">
+      <div class="bs-handle"></div>
+      <div class="bs-header">
+        <span class="bs-title">📥 写真ダウンロード（ZIP）</span>
+        <button class="bs-close" onclick="closeBottomSheet('dlSheet')">✕</button>
+      </div>
+      <div class="bs-body" style="padding:16px;display:flex;flex-direction:column;gap:10px;">
+        <button class="bulk-btn"
+          style="background:#4CAF7D;color:white;padding:14px;border-radius:10px;font-size:14px;border:none;cursor:pointer"
+          onclick="downloadPhotos('ok','full');closeBottomSheet('dlSheet')">✓ OK写真をZIPダウンロード</button>
+        <button class="bulk-btn"
+          style="background:#F5C842;color:#111;padding:14px;border-radius:10px;font-size:14px;border:none;cursor:pointer"
+          onclick="downloadPhotos('ok+nearok','full');closeBottomSheet('dlSheet')">△ OK+保留をZIPダウンロード</button>
+        <button class="bulk-btn"
+          style="background:var(--surface3);color:var(--text);padding:14px;border-radius:10px;font-size:14px;border:1px solid var(--border2);cursor:pointer"
+          onclick="downloadPhotos('all','full');closeBottomSheet('dlSheet')">全ての写真をZIPダウンロード</button>
+        <p style="font-size:11px;color:var(--text-dim);text-align:center;margin:4px 0 0">ZIP形式でまとめてダウンロードされます</p>
+      </div>
+    </div>
   </div>
 
   <!-- ===== BOTTOM SHEET: Group & Filter ===== -->
@@ -3578,8 +3622,8 @@
 
       // Update modal image border to reflect status color
       const imgContainer = document.getElementById('modalImg');
-      const _borderColors = { ok: 'var(--green)', nearok: 'var(--yellow)', ng: 'var(--coral)' };
-      imgContainer.style.borderColor = st ? _borderColors[st] : '';
+      const _bColors = { ok: '#4CAF7D', nearok: '#F5C842', ng: '#FF6B6B' };
+      imgContainer.style.borderColor = st ? _bColors[st] : '';
 
       // Comment
       const commentEl = document.getElementById('modalComment');
@@ -3628,8 +3672,8 @@
         ngBtn.style.outline = st === 'ng' ? '2px solid #fff2' : 'none';
       }
       const c = document.getElementById('modalImg');
-      const borderColors = { ok: 'var(--green)', nearok: 'var(--yellow)', ng: 'var(--coral)' };
-      c.style.borderColor = st ? borderColors[st] : '';
+      const bColors = { ok: '#4CAF7D', nearok: '#F5C842', ng: '#FF6B6B' };
+      c.style.borderColor = st ? bColors[st] : '';
     }
 
     async function downloadCurrentPhoto() {
