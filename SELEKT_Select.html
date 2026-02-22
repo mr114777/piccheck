@@ -1595,17 +1595,20 @@
       }
 
       /* Main layout: full width, let page scroll naturally */
+      body {
+        height: auto !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        padding-bottom: 80px;
+      }
+
       .main {
-        overflow: visible;
+        overflow: visible !important;
+        flex: none;
       }
 
       .content {
-        padding: 14px 10px 80px;
-      }
-
-      /* Ensure body can scroll past the fixed bottom nav */
-      body {
-        padding-bottom: 80px;
+        padding: 14px 10px 20px;
       }
 
       /* 2-column grid */
