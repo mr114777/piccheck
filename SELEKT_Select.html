@@ -2127,8 +2127,8 @@
         </button>
         <button class="filter-btn" onclick="setFilter('ai', this)">
           <span class="filter-dot" style="background:var(--lavender)"></span>
-          AI 要確認
-          <span class="filter-count">0</span>
+          AIセンシティブ判定（要確認）
+          <span class="filter-count" id="cnt-ai">0</span>
         </button>
         <button class="filter-btn" onclick="setFilter('none', this)">
           <span class="filter-dot" style="background:var(--text-dim)"></span>
@@ -2189,7 +2189,7 @@
             <span id="gridIcon">⊞</span> 表示サイズ
           </button>
           <button class="tb-btn" id="aiFilterBtn" onclick="toggleAIFilter()">
-            AI 要確認のみ
+            🔍 AIセンシティブ判定（要確認）
           </button>
         </div>
       </div>
@@ -3048,16 +3048,19 @@
     function updateStats() {
       const ok = okCount(), nearok = nearokCount(), ng = ngCount();
       const total = GROUPS.reduce((a, g) => a + g.photos.length, 0);
+      const aiCount = GROUPS.reduce((a, g) => a + g.photos.filter(p => p.ai && p.ai.some(t => t.type === 'sensitive')).length, 0);
       const el_ok = document.getElementById('cnt-ok');
       const el_nearok = document.getElementById('cnt-nearok');
       const el_ng = document.getElementById('cnt-ng');
       const el_none = document.getElementById('cnt-none');
       const el_all = document.getElementById('cnt-all');
+      const el_ai = document.getElementById('cnt-ai');
       if (el_ok) el_ok.textContent = ok;
       if (el_nearok) el_nearok.textContent = nearok;
       if (el_ng) el_ng.textContent = ng;
       if (el_none) el_none.textContent = total - ok - nearok - ng;
       if (el_all) el_all.textContent = total;
+      if (el_ai) el_ai.textContent = aiCount;
     }
 
     function renderGroupProgress() {
@@ -3623,7 +3626,13 @@
 
     // ===== AI FILTER =====
     function toggleAIFilter() {
-      state.aiFilterOn = !state.aiFilterOn;
+      if (state.currentFilter === 'ai') {
+        state.currentFilter = 'all';
+        state.aiFilterOn = false;
+      } else {
+        state.currentFilter = 'ai';
+        state.aiFilterOn = true;
+      }
       const btn = document.getElementById('aiFilterBtn');
       btn.classList.toggle('active', state.aiFilterOn);
       GROUPS.forEach(g => renderGroup(g));
@@ -3747,18 +3756,13 @@
 
             if (sensitive.length > 0) {
               sensitiveCount++;
-              const topClass = sensitive.sort((a, b) => b.probability - a.probability)[0];
-              const pct = Math.round(topClass.probability * 100);
-              const labelMap = { Porn: 'センシティブ', Hentai: 'イラスト系', Sexy: 'セクシー' };
-              const tag = labelMap[topClass.className] || topClass.className;
 
               const originalPhoto = photo.group.photos.find(p => p.id === photo.id);
               if (originalPhoto) {
                 if (!originalPhoto.ai) originalPhoto.ai = [];
-                originalPhoto.ai.push({ label: `⚠️ ${tag} (${pct}%)`, type: 'sensitive' });
+                originalPhoto.ai.push({ label: 'AIセンシティブ判定', type: 'sensitive' });
               }
-              // Set to 保留 (nearok) for review, not auto-NG
-              state.status.set(photo.id, 'nearok');
+              // ステータスはつけず、ラベルのみ
             }
           } catch (err) {
             errorCount++;
