@@ -1596,12 +1596,14 @@
 
       /* Main layout: full width, add bottom padding for nav */
       .main {
-        overflow: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
       }
 
       .content {
-        padding: 14px 10px 90px;
+        padding: 14px 10px 130px;
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
       }
 
       /* 2-column grid */
@@ -2228,9 +2230,6 @@
           <button class="tb-btn" onclick="toggleGridSize()">
             <span id="gridIcon">⊞</span> 表示サイズ
           </button>
-          <button class="tb-btn" id="aiFilterBtn" onclick="toggleAIFilter()">
-            🔍 AIセンシティブ判定（要確認）
-          </button>
         </div>
       </div>
 
@@ -2369,7 +2368,7 @@
             <span class="filter-chip-dot" style="background:var(--coral)"></span>NG
           </button>
           <button class="filter-chip" data-filter="ai" onclick="mobileSetFilter('ai', this)">
-            <span class="filter-chip-dot" style="background:var(--lavender)"></span>AI要確認
+            <span class="filter-chip-dot" style="background:var(--lavender)"></span>AIセンシティブ
           </button>
           <button class="filter-chip" data-filter="none" onclick="mobileSetFilter('none', this)">
             <span class="filter-chip-dot" style="background:var(--text-dim)"></span>未選択
