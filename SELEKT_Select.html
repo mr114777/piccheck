@@ -3715,18 +3715,20 @@
         }
       }
 
-      renderAll();
-      GROUPS.forEach(g => refreshUI(g));
+      btn.textContent = '🛡️ 完了処理中…';
+      await new Promise(r => setTimeout(r, 50));
 
-      let msg = '';
+      try {
+        renderAll();
+        GROUPS.forEach(g => refreshUI(g));
+      } catch (e) {
+        console.warn('[AI] UI refresh error:', e);
+      }
+
       if (sensitiveCount > 0) {
-        msg = `⚠️ ${sensitiveCount}枚のセンシティブ写真を検出 → NGに設定`;
-        if (errorCount > 0) msg += ` (${errorCount}枚スキップ)`;
-        showToast(msg, 'coral');
+        showToast(`⚠️ ${sensitiveCount}枚のセンシティブな写真が見つかったので要確認ラベルをつけました`, 'coral');
       } else {
-        msg = '✅ センシティブ写真は検出されませんでした';
-        if (errorCount > 0) msg += ` (${errorCount}枚スキップ)`;
-        showToast(msg, 'green');
+        showToast('✅ センシティブな写真は見つかりませんでした', 'green');
       }
 
       btn.disabled = false;
