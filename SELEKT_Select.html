@@ -2372,36 +2372,61 @@
     </div>
   </div>
 
-  <!-- ===== BOTTOM SHEET: Group & Filter ===== -->
+  <!-- ===== BOTTOM SHEET: Group ===== -->
   <div class="bottom-sheet" id="groupSheet">
     <div class="bs-backdrop" onclick="closeBottomSheet('groupSheet')"></div>
     <div class="bs-panel">
       <div class="bs-handle"></div>
       <div class="bs-header">
-        <span class="bs-title">グループ・フィルター</span>
+        <span class="bs-title">🗂️ グループ</span>
         <button class="bs-close" onclick="closeBottomSheet('groupSheet')">✕</button>
       </div>
       <div class="bs-content">
-        <!-- Filter chips -->
-        <div class="filter-chips" id="mobileFilterChips">
-          <button class="filter-chip active" data-filter="all" onclick="mobileSetFilter('all', this)">
-            <span class="filter-chip-dot" style="background:var(--text-sub)"></span>すべて
-          </button>
-          <button class="filter-chip" data-filter="selected" onclick="mobileSetFilter('selected', this)">
-            <span class="filter-chip-dot" style="background:var(--green)"></span>選択済み
-          </button>
-          <button class="filter-chip" data-filter="ng" onclick="mobileSetFilter('ng', this)">
-            <span class="filter-chip-dot" style="background:var(--coral)"></span>NG
-          </button>
-          <button class="filter-chip" data-filter="ai" onclick="mobileSetFilter('ai', this)">
+        <div class="filter-chips" style="margin-bottom:12px">
+          <button class="filter-chip" data-filter="ai"
+            onclick="mobileSetFilter('ai', this);closeBottomSheet('groupSheet')">
             <span class="filter-chip-dot" style="background:var(--lavender)"></span>AIセンシティブ
           </button>
-          <button class="filter-chip" data-filter="none" onclick="mobileSetFilter('none', this)">
+          <button class="filter-chip" data-filter="none"
+            onclick="mobileSetFilter('none', this);closeBottomSheet('groupSheet')">
             <span class="filter-chip-dot" style="background:var(--text-dim)"></span>未選択
           </button>
         </div>
-        <!-- Group list -->
         <div class="mobile-group-list" id="mobileGroupList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== BOTTOM SHEET: Filter (Status) ===== -->
+  <div class="bottom-sheet" id="filterSheet">
+    <div class="bs-backdrop" onclick="closeBottomSheet('filterSheet')"></div>
+    <div class="bs-panel">
+      <div class="bs-handle"></div>
+      <div class="bs-header">
+        <span class="bs-title">✨ フィルター</span>
+        <button class="bs-close" onclick="closeBottomSheet('filterSheet')">✕</button>
+      </div>
+      <div class="bs-content" style="padding:16px;display:flex;flex-direction:column;gap:10px;">
+        <button class="filter-chip active" data-filter="all"
+          onclick="mobileSetFilter('all', this);closeBottomSheet('filterSheet')"
+          style="padding:14px;font-size:14px;border-radius:10px">
+          <span class="filter-chip-dot" style="background:var(--text-sub)"></span>すべて
+        </button>
+        <button class="filter-chip" data-filter="ok"
+          onclick="mobileSetFilter('ok', this);closeBottomSheet('filterSheet')"
+          style="padding:14px;font-size:14px;border-radius:10px">
+          <span class="filter-chip-dot" style="background:var(--green)"></span>✓ OK
+        </button>
+        <button class="filter-chip" data-filter="nearok"
+          onclick="mobileSetFilter('nearok', this);closeBottomSheet('filterSheet')"
+          style="padding:14px;font-size:14px;border-radius:10px">
+          <span class="filter-chip-dot" style="background:var(--yellow)"></span>△ 保留
+        </button>
+        <button class="filter-chip" data-filter="ng"
+          onclick="mobileSetFilter('ng', this);closeBottomSheet('filterSheet')"
+          style="padding:14px;font-size:14px;border-radius:10px">
+          <span class="filter-chip-dot" style="background:var(--coral)"></span>✕ NG
+        </button>
       </div>
     </div>
   </div>
@@ -4194,13 +4219,9 @@
 
     // --- Mobile Filter ---
     function mobileSetFilter(filter, btn) {
-      // Sync with PC filter
       setFilter(filter, null);
-      // Update chip styles
       document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
       if (btn) btn.classList.add('active');
-      // Close sheet after short delay
-      setTimeout(() => closeBottomSheet('groupSheet'), 200);
     }
 
     // --- Mobile Group List ---
@@ -4209,8 +4230,8 @@
       if (!container) return;
       container.innerHTML = '';
       GROUPS.forEach(g => {
-        const cnt = [...state.selected].filter(id => g.photos.some(p => p.id === id)).length;
-        const pct = Math.min(100, (cnt / g.limit) * 100);
+        const cnt = g.photos.filter(p => getStatus(p.id) === 'ok').length;
+        const pct = g.limit > 0 ? Math.min(100, (cnt / g.limit) * 100) : 0;
         const item = document.createElement('div');
         item.className = 'mobile-group-item';
         item.innerHTML = `
@@ -4234,18 +4255,19 @@
       });
     }
 
-    // --- Mobile Selected/NG Sheet ---
     function mobileRefreshSelectedSheet() {
-      // Selected list
+      // OK list
       const selEl = document.getElementById('mobileSelectedList');
       if (selEl) {
-        if (state.selected.size === 0) {
-          selEl.innerHTML = '<div style="font-size:12px;color:var(--text-dim);text-align:center;padding:12px 0">写真を選んでください</div>';
+        const okPhotos = [];
+        GROUPS.forEach(g => g.photos.forEach(p => {
+          if (getStatus(p.id) === 'ok') okPhotos.push({ photo: p, group: g });
+        }));
+        if (okPhotos.length === 0) {
+          selEl.innerHTML = '<div style="font-size:12px;color:var(--text-dim);text-align:center;padding:12px 0">OKの写真はまだありません</div>';
         } else {
           selEl.innerHTML = '';
-          state.selected.forEach(id => {
-            const group = GROUPS.find(g => g.photos.some(p => p.id === id));
-            const photo = group.photos.find(p => p.id === id);
+          okPhotos.forEach(({ photo, group }) => {
             const div = document.createElement('div');
             div.className = 'sel-item';
             div.style.borderColor = group.color;
@@ -4255,7 +4277,7 @@
                 <div class="sel-name">${photo.fname}</div>
                 <div class="sel-group" style="color:${group.color}">${group.label}: ${group.name}</div>
               </div>
-              <button class="sel-remove" onclick="toggleSelect('${id}', GROUPS.find(g=>g.id==='${group.id}'))">✕</button>`;
+              <span style="color:var(--green);font-weight:700">✓ OK</span>`;
             selEl.appendChild(div);
           });
         }
@@ -4263,26 +4285,35 @@
       // NG list
       const ngEl = document.getElementById('mobileNgList');
       if (ngEl) {
-        if (state.ng.size === 0) {
+        const ngPhotos = [];
+        GROUPS.forEach(g => g.photos.forEach(p => {
+          if (getStatus(p.id) === 'ng') ngPhotos.push({ photo: p, group: g });
+        }));
+        if (ngPhotos.length === 0) {
           ngEl.innerHTML = '<div style="font-size:12px;color:var(--text-dim);text-align:center;padding:12px 0">NG はありません</div>';
         } else {
           ngEl.innerHTML = '';
-          state.ng.forEach(id => {
-            const group = GROUPS.find(g => g.photos.some(p => p.id === id));
-            const photo = group.photos.find(p => p.id === id);
+          ngPhotos.forEach(({ photo, group }) => {
             const div = document.createElement('div');
             div.className = 'sel-item';
             div.style.borderColor = 'var(--coral)';
             div.innerHTML = `
-              <div class="sel-thumb" style="background:${photo.bg};filter:grayscale(60%)">${photo.emoji}</div>
+              <div class="sel-thumb" style="background:${photo.bg}">${photo.emoji}</div>
               <div class="sel-info">
                 <div class="sel-name">${photo.fname}</div>
-                <div class="sel-group" style="color:var(--coral)">NG フラグ</div>
+                <div class="sel-group" style="color:${group.color}">${group.label}: ${group.name}</div>
               </div>
-              <button class="sel-remove" onclick="toggleNG('${id}', GROUPS.find(g=>g.id==='${group.id}'))">✕</button>`;
+              <span style="color:var(--coral);font-weight:700">✕ NG</span>`;
             ngEl.appendChild(div);
           });
         }
+      }
+      // Update badge
+      const badge = document.getElementById('bnSelBadge');
+      if (badge) {
+        const okCnt = GROUPS.reduce((a, g) => a + g.photos.filter(p => getStatus(p.id) === 'ok').length, 0);
+        badge.textContent = okCnt;
+        badge.style.display = okCnt > 0 ? 'inline-block' : 'none';
       }
       mobileRefreshGroupList();
     }
