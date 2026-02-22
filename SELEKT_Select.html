@@ -3776,6 +3776,7 @@
         try {
           renderAll();
           GROUPS.forEach(g => refreshUI(g));
+          updateStats();
         } catch (e) {
           console.warn('[AI] UI refresh:', e);
         }
