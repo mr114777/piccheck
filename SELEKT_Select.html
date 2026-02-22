@@ -3690,9 +3690,15 @@
       for (let i = 0; i < allPhotos.length; i++) {
         const photo = allPhotos[i];
         btn.textContent = `🛡️ 解析中… ${i + 1}/${allPhotos.length}`;
+        // Yield to UI thread so button text updates
+        await new Promise(r => setTimeout(r, 0));
 
         try {
-          const skinPct = await analyzeSkinColor(photo.url || photo.fullUrl);
+          // 8 second timeout per photo
+          const skinPct = await Promise.race([
+            analyzeSkinColor(photo.url || photo.fullUrl),
+            new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 8000))
+          ]);
 
           if (skinPct > 40) {
             sensitiveCount++;
