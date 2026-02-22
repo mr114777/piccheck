@@ -2078,7 +2078,8 @@
     <div class="logo">SE<span>LEKT</span></div>
     <div class="topbar-divider"></div>
     <div class="session-name">
-      <strong id="sessionTitle"></strong>
+      <strong id="sessionTitle" onclick="editSessionTitle()" style="cursor:pointer" title="クリックで編集">プロジェクト名未設定
+        ✏️</strong>
       <span id="sessionPhotographer" style="color:var(--text-dim);margin-left:8px;font-size:11px"></span>
     </div>
     <div id="expiryBanner"
@@ -2613,24 +2614,7 @@
 
           // Show expiry banner
           if (meta.expiresAt) {
-            const exp = new Date(meta.expiresAt);
-            const now = new Date();
-            const daysLeft = Math.max(0, Math.ceil((exp - now) / 86400000));
-            const expStr = `${exp.getFullYear()}/${String(exp.getMonth() + 1).padStart(2, '0')}/${String(exp.getDate()).padStart(2, '0')}`;
-            const banner = document.getElementById('expiryBanner');
-            const text = document.getElementById('expiryText');
-            if (banner && text) {
-              if (daysLeft <= 3) {
-                banner.style.background = 'linear-gradient(90deg,#FF6B6B,#ff4444)';
-                banner.style.color = '#fff';
-                text.textContent = `⚠️ 残り${daysLeft}日！期限: ${expStr}`;
-              } else if (daysLeft <= 7) {
-                text.textContent = `⏰ 残り${daysLeft}日 ・ 期限: ${expStr}`;
-              } else {
-                text.textContent = `📅 セレクト期限: ${expStr}（残${daysLeft}日）`;
-              }
-              banner.style.display = 'block';
-            }
+            showExpiryBanner(new Date(meta.expiresAt));
           }
 
           window.setGroupData(cloudGroups);
@@ -4228,13 +4212,62 @@
 
     // Load from cloud if ?session= param present AND no local data loaded
     (function checkCloudSession() {
-      if (isPreviewMode) return; // already have local data, don't overwrite
+      if (isPreviewMode) return;
       const urlParams = new URLSearchParams(window.location.search);
       const sessionId = urlParams.get('session');
       if (sessionId) {
         loadCloudSession(sessionId);
+      } else {
+        // Local mode — show fallback expiry and load saved title
+        initLocalSessionUI();
       }
     })();
+
+    function initLocalSessionUI() {
+      // Load saved title
+      const saved = localStorage.getItem('selekt_project_title');
+      const titleEl = document.getElementById('sessionTitle');
+      if (saved && titleEl) {
+        titleEl.textContent = saved + ' ✏️';
+      }
+      // Fallback expiry: 30 days from first visit
+      let firstVisit = localStorage.getItem('selekt_first_visit');
+      if (!firstVisit) {
+        firstVisit = new Date().toISOString();
+        localStorage.setItem('selekt_first_visit', firstVisit);
+      }
+      showExpiryBanner(new Date(new Date(firstVisit).getTime() + 30 * 86400000));
+    }
+
+    function showExpiryBanner(expDate) {
+      const now = new Date();
+      const daysLeft = Math.max(0, Math.ceil((expDate - now) / 86400000));
+      const expStr = `${expDate.getFullYear()}/${String(expDate.getMonth() + 1).padStart(2, '0')}/${String(expDate.getDate()).padStart(2, '0')}`;
+      const banner = document.getElementById('expiryBanner');
+      const text = document.getElementById('expiryText');
+      if (!banner || !text) return;
+      if (daysLeft <= 3) {
+        banner.style.background = 'linear-gradient(90deg,#FF6B6B,#ff4444)';
+        banner.style.color = '#fff';
+        text.textContent = `⚠️ 残り${daysLeft}日！期限: ${expStr}`;
+      } else if (daysLeft <= 7) {
+        text.textContent = `⏰ 残り${daysLeft}日 ・ 期限: ${expStr}`;
+      } else {
+        text.textContent = `📅 セレクト期限: ${expStr}（残${daysLeft}日）`;
+      }
+      banner.style.display = 'block';
+    }
+
+    function editSessionTitle() {
+      const current = localStorage.getItem('selekt_project_title') || '';
+      const newTitle = prompt('プロジェクト名を入力:', current);
+      if (newTitle === null) return;
+      localStorage.setItem('selekt_project_title', newTitle);
+      const titleEl = document.getElementById('sessionTitle');
+      if (titleEl) {
+        titleEl.textContent = (newTitle || 'プロジェクト名未設定') + ' ✏️';
+      }
+    }
   </script>
 
   <!-- ===== MOBILE JS ===== -->
