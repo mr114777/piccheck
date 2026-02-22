@@ -3622,8 +3622,13 @@
 
       // Update modal image border to reflect status color
       const imgContainer = document.getElementById('modalImg');
-      const _bColors = { ok: '#4CAF7D', nearok: '#F5C842', ng: '#FF6B6B' };
-      imgContainer.style.borderColor = st ? _bColors[st] : '';
+      if (st) {
+        const bc = { ok: '#4CAF7D', nearok: '#F5C842', ng: '#FF6B6B' }[st];
+        imgContainer.style.setProperty('border-color', bc, 'important');
+      } else {
+        imgContainer.style.removeProperty('border-color');
+      }
+      imgContainer.offsetHeight; // force repaint
 
       // Comment
       const commentEl = document.getElementById('modalComment');
@@ -3672,8 +3677,13 @@
         ngBtn.style.outline = st === 'ng' ? '2px solid #fff2' : 'none';
       }
       const c = document.getElementById('modalImg');
-      const bColors = { ok: '#4CAF7D', nearok: '#F5C842', ng: '#FF6B6B' };
-      c.style.borderColor = st ? bColors[st] : '';
+      if (st) {
+        const bc = { ok: '#4CAF7D', nearok: '#F5C842', ng: '#FF6B6B' }[st];
+        c.style.setProperty('border-color', bc, 'important');
+      } else {
+        c.style.removeProperty('border-color');
+      }
+      c.offsetHeight; // force repaint
     }
 
     async function downloadCurrentPhoto() {
