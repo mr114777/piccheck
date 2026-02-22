@@ -1226,11 +1226,12 @@
       border-radius: 12px;
       text-align: center;
       box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
-      border: 2px solid var(--border2);
+      border: 3px solid var(--border2);
       background: var(--surface);
       position: relative;
       cursor: zoom-in;
       overflow: hidden;
+      transition: border-color 0.25s ease;
     }
 
     .modal-photo-img.zoomed {
@@ -1678,20 +1679,7 @@
         border-radius: 0 !important;
         font-size: 80px !important;
         margin: 0 !important;
-        border: 3px solid var(--border2) !important;
-        transition: border-color 0.2s;
-      }
-
-      .modal-photo-img.status-ok {
-        border-color: var(--green) !important;
-      }
-
-      .modal-photo-img.status-nearok {
-        border-color: var(--yellow) !important;
-      }
-
-      .modal-photo-img.status-ng {
-        border-color: var(--coral) !important;
+        border-width: 4px !important;
       }
 
       .modal-meta {
@@ -2097,10 +2085,13 @@
           <div class="dl-row">
             <span class="dl-row-label">✓ OKのみ</span>
             <button class="dl-row-btn" onclick="downloadPhotos('ok','sns')">📱 DL</button>
+            <button class="dl-row-btn" onclick="batchDownloadPhotos('ok')" style="font-size:10px">📱 1枚ずつ保存</button>
           </div>
           <div class="dl-row">
             <span class="dl-row-label">△ OK+保留</span>
             <button class="dl-row-btn" onclick="downloadPhotos('ok+nearok','sns')">📱 DL</button>
+            <button class="dl-row-btn" onclick="batchDownloadPhotos('ok+nearok')" style="font-size:10px">📱
+              1枚ずつ保存</button>
           </div>
           <div class="dl-row">
             <span class="dl-row-label">✕ NGのみ</span>
@@ -3585,10 +3576,10 @@
         ngBtn.style.outline = st === 'ng' ? '2px solid #fff2' : 'none';
       }
 
-      // Update modal image border to reflect status color (mobile)
+      // Update modal image border to reflect status color
       const imgContainer = document.getElementById('modalImg');
-      imgContainer.classList.remove('status-ok', 'status-nearok', 'status-ng');
-      if (st) imgContainer.classList.add('status-' + st);
+      const _borderColors = { ok: 'var(--green)', nearok: 'var(--yellow)', ng: 'var(--coral)' };
+      imgContainer.style.borderColor = st ? _borderColors[st] : '';
 
       // Comment
       const commentEl = document.getElementById('modalComment');
@@ -3637,8 +3628,8 @@
         ngBtn.style.outline = st === 'ng' ? '2px solid #fff2' : 'none';
       }
       const c = document.getElementById('modalImg');
-      c.classList.remove('status-ok', 'status-nearok', 'status-ng');
-      if (st) c.classList.add('status-' + st);
+      const borderColors = { ok: 'var(--green)', nearok: 'var(--yellow)', ng: 'var(--coral)' };
+      c.style.borderColor = st ? borderColors[st] : '';
     }
 
     async function downloadCurrentPhoto() {
@@ -3659,10 +3650,52 @@
         setTimeout(() => URL.revokeObjectURL(blobUrl), 3000);
         showToast('✅ 保存しました', 'green');
       } catch (e) {
-        // Fallback: open in new tab for long-press save
         window.open(url, '_blank');
         showToast('新しいタブで開きました。長押しで保存してください', '');
       }
+    }
+
+    async function batchDownloadPhotos(filter) {
+      const photos = [];
+      GROUPS.forEach(g => g.photos.forEach(p => {
+        const st = getStatus(p.id);
+        if (filter === 'ok' && st === 'ok') photos.push(p);
+        else if (filter === 'ok+nearok' && (st === 'ok' || st === 'nearok')) photos.push(p);
+        else if (filter === 'all') photos.push(p);
+      }));
+      if (photos.length === 0) { showToast('対象写真がありません', 'coral'); return; }
+
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      if (isIOS) {
+        showToast(`📱 ${photos.length}枚の写真を新しいタブで開きます。長押し→「写真に保存」してください`, '');
+        for (let i = 0; i < photos.length; i++) {
+          await new Promise(r => setTimeout(r, 600));
+          window.open(photos[i].fullUrl || photos[i].url, '_blank');
+        }
+        return;
+      }
+
+      showToast(`📥 ${photos.length}枚をダウンロード中…`, '');
+      let done = 0;
+      for (const p of photos) {
+        try {
+          const res = await fetch(p.fullUrl || p.url);
+          const blob = await res.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = blobUrl;
+          a.download = p.fname || 'photo.jpg';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 3000);
+          done++;
+          await new Promise(r => setTimeout(r, 500));
+        } catch (e) {
+          console.warn('[DL]', p.fname, e);
+        }
+      }
+      showToast(`✅ ${done}枚を保存しました`, 'green');
     }
 
     function saveComment() {
