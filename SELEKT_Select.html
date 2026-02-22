@@ -3720,8 +3720,8 @@
             throw new Error('NSFWJS ライブラリが読み込まれていません。ページをリロードしてください。');
           }
           btn.textContent = '🛡️ AIモデル読込中…';
-          const modelBase = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/models/nsfwjs/');
-          nsfwModel = await nsfwjs.load(modelBase);
+          // Use relative path - works on any hosting
+          nsfwModel = await nsfwjs.load('models/nsfwjs/');
         }
 
         let sensitiveCount = 0;
