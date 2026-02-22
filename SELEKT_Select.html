@@ -2391,8 +2391,8 @@
           onclick="modalAction('nearok')">△ 保留</button>
         <button class="modal-btn" id="modalNgBtn" style="background:var(--coral);color:white"
           onclick="modalAction('ng')">✕ NG</button>
-        <button class="modal-btn" style="background:var(--surface3);color:var(--text)"
-          onclick="closeModal()">閉じる</button>
+        <button class="modal-btn" id="modalDlBtn" style="background:var(--surface3);color:var(--text)"
+          onclick="downloadCurrentPhoto()">💾 保存</button>
       </div>
       <!-- Comment field -->
       <div style="padding:0 20px 16px;">
@@ -3303,18 +3303,30 @@
 
     function _panToPoint(container, imgEl, clientX, clientY) {
       const rect = container.getBoundingClientRect();
-      // Mouse position as fraction of container
       const mx = (clientX - rect.left) / rect.width;
       const my = (clientY - rect.top) / rect.height;
-      // Image size
       const imgW = imgEl.offsetWidth;
       const imgH = imgEl.offsetHeight;
       const cW = rect.width;
       const cH = rect.height;
-      // Calculate translation so the point under cursor stays there
       let tx = -(mx * imgW - mx * cW);
       let ty = -(my * imgH - my * cH);
-      // Clamp
+      tx = Math.min(0, Math.max(-(imgW - cW), tx));
+      ty = Math.min(0, Math.max(-(imgH - cH), ty));
+      imgEl.style.transform = `translate(${tx}px, ${ty}px)`;
+    }
+
+    function _panByDelta(container, imgEl, dx, dy) {
+      const rect = container.getBoundingClientRect();
+      const imgW = imgEl.offsetWidth;
+      const imgH = imgEl.offsetHeight;
+      const cW = rect.width;
+      const cH = rect.height;
+      const m = imgEl.style.transform.match(/translate\(([\d.e+-]+)px,\s*([\d.e+-]+)px\)/);
+      let tx = m ? parseFloat(m[1]) : 0;
+      let ty = m ? parseFloat(m[2]) : 0;
+      tx += dx;
+      ty += dy;
       tx = Math.min(0, Math.max(-(imgW - cW), tx));
       ty = Math.min(0, Math.max(-(imgH - cH), ty));
       imgEl.style.transform = `translate(${tx}px, ${ty}px)`;
@@ -3457,13 +3469,12 @@
           container.classList.remove('zoomed-dragging');
         });
 
-        // === TOUCH: drag panning when zoomed ===
-        let _touchStartX = 0, _touchStartY = 0, _touchPanning = false;
+        // === TOUCH: delta-based drag panning ===
+        let _lastTouchX = 0, _lastTouchY = 0, _touchPanning = false;
         let _pinchStartDist = 0;
 
         container.addEventListener('touchstart', function (e) {
           if (e.touches.length === 2) {
-            // Pinch start
             _pinchStartDist = Math.hypot(
               e.touches[0].clientX - e.touches[1].clientX,
               e.touches[0].clientY - e.touches[1].clientY
@@ -3473,15 +3484,14 @@
           }
           if (_zoomLevel <= 1) return;
           _touchPanning = true;
-          _touchStartX = e.touches[0].clientX;
-          _touchStartY = e.touches[0].clientY;
+          _lastTouchX = e.touches[0].clientX;
+          _lastTouchY = e.touches[0].clientY;
           container.classList.add('zoomed-dragging');
           e.preventDefault();
         }, { passive: false });
 
         container.addEventListener('touchmove', function (e) {
           if (e.touches.length === 2 && _pinchStartDist > 0) {
-            // Pinch zoom
             e.preventDefault();
             const dist = Math.hypot(
               e.touches[0].clientX - e.touches[1].clientX,
@@ -3511,10 +3521,14 @@
           }
           if (!_touchPanning || _zoomLevel <= 1) return;
           e.preventDefault();
-          _panToPoint(container, imgEl, e.touches[0].clientX, e.touches[0].clientY);
+          const curX = e.touches[0].clientX;
+          const curY = e.touches[0].clientY;
+          _panByDelta(container, imgEl, curX - _lastTouchX, curY - _lastTouchY);
+          _lastTouchX = curX;
+          _lastTouchY = curY;
         }, { passive: false });
 
-        container.addEventListener('touchend', function (e) {
+        container.addEventListener('touchend', function () {
           _touchPanning = false;
           _pinchStartDist = 0;
           container.classList.remove('zoomed-dragging');
@@ -3600,7 +3614,55 @@
     function modalAction(type) {
       if (!modalPhoto || !modalGroup) return;
       setPhotoStatus(modalPhoto.id, modalGroup, type);
-      _renderModal();
+      // Only update status UI, don't rebuild image (preserves zoom)
+      _updateModalStatusUI();
+    }
+
+    function _updateModalStatusUI() {
+      if (!modalPhoto) return;
+      const st = getStatus(modalPhoto.id);
+      const okBtn = document.getElementById('modalOkBtn');
+      const nearokBtn = document.getElementById('modalNearokBtn');
+      const ngBtn = document.getElementById('modalNgBtn');
+      if (okBtn) {
+        okBtn.style.opacity = (!st || st === 'ok') ? '1' : '0.35';
+        okBtn.style.outline = st === 'ok' ? '2px solid white' : 'none';
+      }
+      if (nearokBtn) {
+        nearokBtn.style.opacity = (!st || st === 'nearok') ? '1' : '0.35';
+        nearokBtn.style.outline = st === 'nearok' ? '2px solid white' : 'none';
+      }
+      if (ngBtn) {
+        ngBtn.style.opacity = (!st || st === 'ng') ? '1' : '0.35';
+        ngBtn.style.outline = st === 'ng' ? '2px solid #fff2' : 'none';
+      }
+      const c = document.getElementById('modalImg');
+      c.classList.remove('status-ok', 'status-nearok', 'status-ng');
+      if (st) c.classList.add('status-' + st);
+    }
+
+    async function downloadCurrentPhoto() {
+      if (!modalPhoto) return;
+      const url = modalPhoto.fullUrl || modalPhoto.url;
+      if (!url) { showToast('画像URLがありません', 'coral'); return; }
+      try {
+        showToast('📥 ダウンロード中…', '');
+        const res = await fetch(url);
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = modalPhoto.fname || 'photo.jpg';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 3000);
+        showToast('✅ 保存しました', 'green');
+      } catch (e) {
+        // Fallback: open in new tab for long-press save
+        window.open(url, '_blank');
+        showToast('新しいタブで開きました。長押しで保存してください', '');
+      }
     }
 
     function saveComment() {
