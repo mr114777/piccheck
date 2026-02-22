@@ -2408,6 +2408,9 @@
         <div class="modal-ai-badges" id="modalAiBadges"></div>
       </div>
       <button class="modal-nav modal-nav-prev" id="modalPrev" onclick="modalNav(-1)">‹</button>
+      <div id="modalStatusIndicator"
+        style="display:none;text-align:center;padding:8px 16px;font-size:15px;font-weight:700;letter-spacing:1px;transition:all 0.2s">
+      </div>
       <div class="modal-photo-img" id="modalImg"></div>
       <div id="modalQualityBar"
         style="text-align:center;padding:6px 16px;font-size:11px;color:var(--text-dim);display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;">
@@ -3628,7 +3631,17 @@
       } else {
         imgContainer.style.removeProperty('border-color');
       }
-      imgContainer.offsetHeight; // force repaint
+      // Status indicator bar
+      const indicator = document.getElementById('modalStatusIndicator');
+      if (st) {
+        const cfg = { ok: { bg: '#4CAF7D', color: '#fff', text: '✓ OK' }, nearok: { bg: '#F5C842', color: '#111', text: '△ 保留' }, ng: { bg: '#FF6B6B', color: '#fff', text: '✕ NG' } }[st];
+        indicator.style.background = cfg.bg;
+        indicator.style.color = cfg.color;
+        indicator.textContent = cfg.text;
+        indicator.style.display = 'block';
+      } else {
+        indicator.style.display = 'none';
+      }
 
       // Comment
       const commentEl = document.getElementById('modalComment');
@@ -3683,7 +3696,17 @@
       } else {
         c.style.removeProperty('border-color');
       }
-      c.offsetHeight; // force repaint
+      // Update status indicator bar
+      const ind = document.getElementById('modalStatusIndicator');
+      if (st) {
+        const cfg = { ok: { bg: '#4CAF7D', color: '#fff', text: '✓ OK' }, nearok: { bg: '#F5C842', color: '#111', text: '△ 保留' }, ng: { bg: '#FF6B6B', color: '#fff', text: '✕ NG' } }[st];
+        ind.style.background = cfg.bg;
+        ind.style.color = cfg.color;
+        ind.textContent = cfg.text;
+        ind.style.display = 'block';
+      } else {
+        ind.style.display = 'none';
+      }
     }
 
     async function downloadCurrentPhoto() {
