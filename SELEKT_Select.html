@@ -1594,16 +1594,18 @@
         font-weight: 700;
       }
 
-      /* Main layout: full width, add bottom padding for nav */
+      /* Main layout: full width, let page scroll naturally */
       .main {
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-        height: calc(100dvh - 52px);
+        overflow: visible;
       }
 
       .content {
-        padding: 14px 10px 140px;
-        min-height: 100%;
+        padding: 14px 10px 80px;
+      }
+
+      /* Ensure body can scroll past the fixed bottom nav */
+      body {
+        padding-bottom: 80px;
       }
 
       /* 2-column grid */
