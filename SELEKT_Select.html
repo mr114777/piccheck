@@ -1603,23 +1603,28 @@
         grid-template-columns: repeat(2, 1fr) !important;
       }
 
-      /* Toolbar compact */
-      .toolbar {
-        margin-bottom: 14px;
-        gap: 8px;
-      }
-
-      .toolbar-title {
-        font-size: 13px;
-      }
-
-      .toolbar-sub {
-        font-size: 11px;
-      }
-
       .tb-btn {
         font-size: 11px;
-        padding: 6px 10px;
+        padding: 5px 8px;
+        white-space: nowrap;
+      }
+
+      .toolbar {
+        margin-bottom: 14px;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      .toolbar-right {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+
+      .filter-btn {
+        font-size: 11px;
+        padding: 6px 8px;
+        white-space: nowrap;
       }
 
       /* Group header compact */
@@ -1671,8 +1676,22 @@
         width: 100% !important;
         flex: 1;
         border-radius: 0 !important;
-        border: none !important;
         font-size: 80px !important;
+        margin: 0 !important;
+        border: 3px solid var(--border2) !important;
+        transition: border-color 0.2s;
+      }
+
+      .modal-photo-img.status-ok {
+        border-color: var(--green) !important;
+      }
+
+      .modal-photo-img.status-nearok {
+        border-color: var(--yellow) !important;
+      }
+
+      .modal-photo-img.status-ng {
+        border-color: var(--coral) !important;
       }
 
       .modal-meta {
@@ -3438,6 +3457,69 @@
           container.classList.remove('zoomed-dragging');
         });
 
+        // === TOUCH: drag panning when zoomed ===
+        let _touchStartX = 0, _touchStartY = 0, _touchPanning = false;
+        let _pinchStartDist = 0;
+
+        container.addEventListener('touchstart', function (e) {
+          if (e.touches.length === 2) {
+            // Pinch start
+            _pinchStartDist = Math.hypot(
+              e.touches[0].clientX - e.touches[1].clientX,
+              e.touches[0].clientY - e.touches[1].clientY
+            );
+            e.preventDefault();
+            return;
+          }
+          if (_zoomLevel <= 1) return;
+          _touchPanning = true;
+          _touchStartX = e.touches[0].clientX;
+          _touchStartY = e.touches[0].clientY;
+          container.classList.add('zoomed-dragging');
+          e.preventDefault();
+        }, { passive: false });
+
+        container.addEventListener('touchmove', function (e) {
+          if (e.touches.length === 2 && _pinchStartDist > 0) {
+            // Pinch zoom
+            e.preventDefault();
+            const dist = Math.hypot(
+              e.touches[0].clientX - e.touches[1].clientX,
+              e.touches[0].clientY - e.touches[1].clientY
+            );
+            const scale = dist / _pinchStartDist;
+            if (scale > 1.3) {
+              const idx = ZOOM_LEVELS.indexOf(_zoomLevel);
+              if (idx < ZOOM_LEVELS.length - 1) {
+                _zoomLevel = ZOOM_LEVELS[idx + 1];
+                const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                _applyZoom(container, imgEl, cx, cy);
+              }
+              _pinchStartDist = dist;
+            } else if (scale < 0.7) {
+              const idx = ZOOM_LEVELS.indexOf(_zoomLevel);
+              if (idx > 0) {
+                _zoomLevel = ZOOM_LEVELS[idx - 1];
+                const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                _applyZoom(container, imgEl, cx, cy);
+              }
+              _pinchStartDist = dist;
+            }
+            return;
+          }
+          if (!_touchPanning || _zoomLevel <= 1) return;
+          e.preventDefault();
+          _panToPoint(container, imgEl, e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: false });
+
+        container.addEventListener('touchend', function (e) {
+          _touchPanning = false;
+          _pinchStartDist = 0;
+          container.classList.remove('zoomed-dragging');
+        });
+
       } else {
         container.style.background = photo.bg;
         container.textContent = photo.emoji;
@@ -3488,6 +3570,11 @@
         ngBtn.style.opacity = (!st || st === 'ng') ? '1' : '0.35';
         ngBtn.style.outline = st === 'ng' ? '2px solid #fff2' : 'none';
       }
+
+      // Update modal image border to reflect status color (mobile)
+      const imgContainer = document.getElementById('modalImg');
+      imgContainer.classList.remove('status-ok', 'status-nearok', 'status-ng');
+      if (st) imgContainer.classList.add('status-' + st);
 
       // Comment
       const commentEl = document.getElementById('modalComment');
