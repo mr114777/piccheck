@@ -3672,9 +3672,7 @@
       }
     });
 
-    // ===== AI SENSITIVE DETECTION =====
-    let nsfwModel = null;
-
+    // ===== AI SENSITIVE DETECTION (Canvas-based skin-color analysis) =====
     async function runSensitiveDetection() {
       const btn = document.getElementById('aiSensitiveBtn');
       if (!btn) return;
@@ -3686,117 +3684,119 @@
       }
 
       btn.disabled = true;
-      btn.textContent = '🛡️ 読み込み中…';
+      let sensitiveCount = 0;
+      let errorCount = 0;
 
-      try {
-        // Load TF.js and NSFWJS (lazy load)
-        if (!nsfwModel) {
-          if (!window.tf) {
-            btn.textContent = '🛡️ TensorFlow.js 読込中…';
-            await loadScript('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.21.0/dist/tf.min.js');
-          }
-          if (!window.nsfwjs) {
-            btn.textContent = '🛡️ NSFWJS 読込中…';
-            await loadScript('https://cdn.jsdelivr.net/npm/nsfwjs@2.4.2/dist/nsfwjs.min.js');
-          }
-          btn.textContent = '🛡️ AIモデル読込中…';
-          // Use explicit model URL (MobileNet v2 mid-size, good balance of speed/accuracy)
-          nsfwModel = await nsfwjs.load('https://nsfwjs.com/quant_mid/model.json', { size: 299 });
-        }
+      for (let i = 0; i < allPhotos.length; i++) {
+        const photo = allPhotos[i];
+        btn.textContent = `🛡️ 解析中… ${i + 1}/${allPhotos.length}`;
 
-        let sensitiveCount = 0;
-        let errorCount = 0;
-        for (let i = 0; i < allPhotos.length; i++) {
-          const photo = allPhotos[i];
-          btn.textContent = `🛡️ 解析中… ${i + 1}/${allPhotos.length}`;
+        try {
+          const skinPct = await analyzeSkinColor(photo.url || photo.fullUrl);
 
-          try {
-            // Load image - handle both data URLs and remote URLs
-            const imgEl = await loadImageForAI(photo.url || photo.fullUrl);
-            const predictions = await nsfwModel.classify(imgEl);
-
-            // Check for sensitive categories
-            const sensitive = predictions.filter(p =>
-              ['Porn', 'Hentai', 'Sexy'].includes(p.className) && p.probability > 0.5
-            );
-
-            if (sensitive.length > 0) {
-              sensitiveCount++;
-              const topClass = sensitive.sort((a, b) => b.probability - a.probability)[0];
-              const pct = Math.round(topClass.probability * 100);
-
-              // Find the actual photo in GROUPS and add tag
-              const originalPhoto = photo.group.photos.find(p => p.id === photo.id);
-              if (originalPhoto) {
-                if (!originalPhoto.ai) originalPhoto.ai = [];
-                originalPhoto.ai.push({ label: `⚠️ センシティブ (${pct}%)`, type: 'sensitive' });
-              }
-
-              // Auto-set to NG
-              state.status.set(photo.id, 'ng');
+          if (skinPct > 40) {
+            sensitiveCount++;
+            const originalPhoto = photo.group.photos.find(p => p.id === photo.id);
+            if (originalPhoto) {
+              if (!originalPhoto.ai) originalPhoto.ai = [];
+              originalPhoto.ai.push({ label: `⚠️ 肌露出 ${skinPct}%`, type: 'sensitive' });
             }
-          } catch (err) {
-            errorCount++;
-            console.warn(`[AI] Failed for ${photo.fname}:`, err.message || err);
+            state.status.set(photo.id, 'ng');
           }
+        } catch (err) {
+          errorCount++;
+          console.warn(`[AI] Failed for ${photo.fname}:`, err.message || err);
         }
-
-        // Refresh UI
-        renderAll();
-        GROUPS.forEach(g => refreshUI(g));
-
-        let msg = '';
-        if (sensitiveCount > 0) {
-          msg = `⚠️ ${sensitiveCount}枚のセンシティブ写真を検出 → NGに設定`;
-          if (errorCount > 0) msg += ` (${errorCount}枚スキップ)`;
-          showToast(msg, 'coral');
-        } else {
-          msg = '✅ センシティブ写真は検出されませんでした';
-          if (errorCount > 0) msg += ` (${errorCount}枚スキップ)`;
-          showToast(msg, 'green');
-        }
-      } catch (err) {
-        console.error('[AI Sensitive] Error:', err);
-        showToast('AI判定エラー: ' + (err.message || '不明なエラー'), 'coral');
-      } finally {
-        btn.disabled = false;
-        btn.textContent = '🛡️ センシティブ判定';
       }
+
+      renderAll();
+      GROUPS.forEach(g => refreshUI(g));
+
+      let msg = '';
+      if (sensitiveCount > 0) {
+        msg = `⚠️ ${sensitiveCount}枚のセンシティブ写真を検出 → NGに設定`;
+        if (errorCount > 0) msg += ` (${errorCount}枚スキップ)`;
+        showToast(msg, 'coral');
+      } else {
+        msg = '✅ センシティブ写真は検出されませんでした';
+        if (errorCount > 0) msg += ` (${errorCount}枚スキップ)`;
+        showToast(msg, 'green');
+      }
+
+      btn.disabled = false;
+      btn.textContent = '🛡️ センシティブ判定';
     }
 
-    function loadScript(src) {
-      return new Promise((resolve, reject) => {
-        const s = document.createElement('script');
-        s.src = src;
-        s.onload = resolve;
-        s.onerror = () => reject(new Error('Script load failed: ' + src));
-        document.head.appendChild(s);
-      });
+    // Analyze skin-color percentage using canvas pixel sampling
+    async function analyzeSkinColor(url) {
+      const img = await loadImgForCanvas(url);
+      const canvas = document.createElement('canvas');
+      const maxDim = 200; // Resize for speed
+      let w = img.naturalWidth || img.width;
+      let h = img.naturalHeight || img.height;
+      if (w > maxDim || h > maxDim) {
+        if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+        else { w = Math.round(w * maxDim / h); h = maxDim; }
+      }
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+
+      const imageData = ctx.getImageData(0, 0, w, h);
+      const data = imageData.data;
+      let skinPixels = 0;
+      const totalPixels = w * h;
+
+      for (let i = 0; i < data.length; i += 16) { // Sample every 4th pixel for speed
+        const r = data[i], g = data[i + 1], b = data[i + 2];
+        if (isSkinColor(r, g, b)) skinPixels++;
+      }
+
+      // Adjust for sampling rate
+      const sampledTotal = Math.ceil(totalPixels / 4);
+      return Math.round((skinPixels / sampledTotal) * 100);
     }
 
-    async function loadImageForAI(url) {
-      // For data URLs, load directly
+    // Skin color detection in RGB space (empirical ranges)
+    function isSkinColor(r, g, b) {
+      // Rule 1: RGB range check
+      if (r < 80 || g < 30 || b < 15) return false;
+      if (r < g || r < b) return false;
+      if (Math.abs(r - g) < 15) return false;
+      if (r - g < 15 || r - b < 15) return false;
+      // Rule 2: Brightness check
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      if (max - min < 20) return false;
+      if (max < 100) return false;
+      // Rule 3: Hue-like check (skin tones)
+      const dr = r - g, db = r - b;
+      if (dr > 0 && db > 0 && dr < 120 && db < 180) return true;
+      return false;
+    }
+
+    // Load image handling both data URLs and remote URLs
+    async function loadImgForCanvas(url) {
       if (url.startsWith('data:')) {
         return new Promise((resolve, reject) => {
           const img = new Image();
           const timer = setTimeout(() => reject(new Error('timeout')), 10000);
           img.onload = () => { clearTimeout(timer); resolve(img); };
-          img.onerror = () => { clearTimeout(timer); reject(new Error('image load failed')); };
+          img.onerror = () => { clearTimeout(timer); reject(new Error('load failed')); };
           img.src = url;
         });
       }
-
-      // For remote URLs, fetch as blob first (avoids CORS canvas tainting)
+      // Fetch blob for remote URLs (CORS safe)
       const res = await fetch(url);
-      if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
+      if (!res.ok) throw new Error(`fetch ${res.status}`);
       const blob = await res.blob();
       const blobUrl = URL.createObjectURL(blob);
-
       return new Promise((resolve, reject) => {
         const img = new Image();
         const timer = setTimeout(() => { URL.revokeObjectURL(blobUrl); reject(new Error('timeout')); }, 10000);
         img.onload = () => { clearTimeout(timer); resolve(img); };
-        img.onerror = () => { clearTimeout(timer); URL.revokeObjectURL(blobUrl); reject(new Error('image decode failed')); };
+        img.onerror = () => { clearTimeout(timer); URL.revokeObjectURL(blobUrl); reject(new Error('decode failed')); };
         img.src = blobUrl;
       });
     }
