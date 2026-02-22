@@ -3689,27 +3689,31 @@
       btn.textContent = '🛡️ 読み込み中…';
 
       try {
-        // Load NSFWJS model (lazy load)
+        // Load TF.js and NSFWJS (lazy load)
         if (!nsfwModel) {
-          // Load TensorFlow.js and NSFWJS
           if (!window.tf) {
+            btn.textContent = '🛡️ TensorFlow.js 読込中…';
             await loadScript('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.21.0/dist/tf.min.js');
           }
           if (!window.nsfwjs) {
+            btn.textContent = '🛡️ NSFWJS 読込中…';
             await loadScript('https://cdn.jsdelivr.net/npm/nsfwjs@2.4.2/dist/nsfwjs.min.js');
           }
-          btn.textContent = '🛡️ モデル読込中…';
-          nsfwModel = await nsfwjs.load();
+          btn.textContent = '🛡️ AIモデル読込中…';
+          // Use explicit model URL (MobileNet v2 mid-size, good balance of speed/accuracy)
+          nsfwModel = await nsfwjs.load('https://nsfwjs.com/quant_mid/model.json', { size: 299 });
         }
 
         let sensitiveCount = 0;
+        let errorCount = 0;
         for (let i = 0; i < allPhotos.length; i++) {
           const photo = allPhotos[i];
           btn.textContent = `🛡️ 解析中… ${i + 1}/${allPhotos.length}`;
 
           try {
-            const img = await loadImageForAI(photo.url || photo.fullUrl);
-            const predictions = await nsfwModel.classify(img);
+            // Load image - handle both data URLs and remote URLs
+            const imgEl = await loadImageForAI(photo.url || photo.fullUrl);
+            const predictions = await nsfwModel.classify(imgEl);
 
             // Check for sensitive categories
             const sensitive = predictions.filter(p =>
@@ -3721,15 +3725,19 @@
               const topClass = sensitive.sort((a, b) => b.probability - a.probability)[0];
               const pct = Math.round(topClass.probability * 100);
 
-              // Add AI tag
-              if (!photo.ai) photo.ai = [];
-              photo.ai.push({ label: `⚠️ センシティブ (${pct}%)`, type: 'sensitive' });
+              // Find the actual photo in GROUPS and add tag
+              const originalPhoto = photo.group.photos.find(p => p.id === photo.id);
+              if (originalPhoto) {
+                if (!originalPhoto.ai) originalPhoto.ai = [];
+                originalPhoto.ai.push({ label: `⚠️ センシティブ (${pct}%)`, type: 'sensitive' });
+              }
 
               // Auto-set to NG
               state.status.set(photo.id, 'ng');
             }
           } catch (err) {
-            console.warn(`[AI] Failed for ${photo.fname}:`, err);
+            errorCount++;
+            console.warn(`[AI] Failed for ${photo.fname}:`, err.message || err);
           }
         }
 
@@ -3737,14 +3745,19 @@
         renderAll();
         GROUPS.forEach(g => refreshUI(g));
 
+        let msg = '';
         if (sensitiveCount > 0) {
-          showToast(`⚠️ ${sensitiveCount}枚のセンシティブ写真を検出 → NGに設定しました`, 'coral');
+          msg = `⚠️ ${sensitiveCount}枚のセンシティブ写真を検出 → NGに設定`;
+          if (errorCount > 0) msg += ` (${errorCount}枚スキップ)`;
+          showToast(msg, 'coral');
         } else {
-          showToast('✅ センシティブ写真は検出されませんでした', 'green');
+          msg = '✅ センシティブ写真は検出されませんでした';
+          if (errorCount > 0) msg += ` (${errorCount}枚スキップ)`;
+          showToast(msg, 'green');
         }
       } catch (err) {
         console.error('[AI Sensitive] Error:', err);
-        showToast('AI判定でエラーが発生しました: ' + err.message, 'coral');
+        showToast('AI判定エラー: ' + (err.message || '不明なエラー'), 'coral');
       } finally {
         btn.disabled = false;
         btn.textContent = '🛡️ センシティブ判定';
@@ -3756,19 +3769,35 @@
         const s = document.createElement('script');
         s.src = src;
         s.onload = resolve;
-        s.onerror = reject;
+        s.onerror = () => reject(new Error('Script load failed: ' + src));
         document.head.appendChild(s);
       });
     }
 
-    function loadImageForAI(url) {
+    async function loadImageForAI(url) {
+      // For data URLs, load directly
+      if (url.startsWith('data:')) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          const timer = setTimeout(() => reject(new Error('timeout')), 10000);
+          img.onload = () => { clearTimeout(timer); resolve(img); };
+          img.onerror = () => { clearTimeout(timer); reject(new Error('image load failed')); };
+          img.src = url;
+        });
+      }
+
+      // For remote URLs, fetch as blob first (avoids CORS canvas tainting)
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
       return new Promise((resolve, reject) => {
         const img = new Image();
-        img.crossOrigin = 'anonymous';
-        const timer = setTimeout(() => reject(new Error('timeout')), 10000);
+        const timer = setTimeout(() => { URL.revokeObjectURL(blobUrl); reject(new Error('timeout')); }, 10000);
         img.onload = () => { clearTimeout(timer); resolve(img); };
-        img.onerror = (e) => { clearTimeout(timer); reject(e); };
-        img.src = url;
+        img.onerror = () => { clearTimeout(timer); URL.revokeObjectURL(blobUrl); reject(new Error('image decode failed')); };
+        img.src = blobUrl;
       });
     }
 
