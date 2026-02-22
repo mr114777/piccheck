@@ -2081,6 +2081,10 @@
       <strong id="sessionTitle"></strong>
       <span id="sessionPhotographer" style="color:var(--text-dim);margin-left:8px;font-size:11px"></span>
     </div>
+    <div id="expiryBanner"
+      style="display:none;background:linear-gradient(90deg,#F5C842,#ff9800);color:#111;padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;margin-left:auto;margin-right:8px;">
+      <span id="expiryText"></span>
+    </div>
     <div class="topbar-right">
       <div class="progress-wrap">
         <span class="progress-label">セレクト進捗</span>
@@ -2605,6 +2609,28 @@
           if (meta.photographer) {
             const photoEl = document.getElementById('sessionPhotographer');
             if (photoEl) photoEl.textContent = 'by ' + meta.photographer;
+          }
+
+          // Show expiry banner
+          if (meta.expiresAt) {
+            const exp = new Date(meta.expiresAt);
+            const now = new Date();
+            const daysLeft = Math.max(0, Math.ceil((exp - now) / 86400000));
+            const expStr = `${exp.getFullYear()}/${String(exp.getMonth() + 1).padStart(2, '0')}/${String(exp.getDate()).padStart(2, '0')}`;
+            const banner = document.getElementById('expiryBanner');
+            const text = document.getElementById('expiryText');
+            if (banner && text) {
+              if (daysLeft <= 3) {
+                banner.style.background = 'linear-gradient(90deg,#FF6B6B,#ff4444)';
+                banner.style.color = '#fff';
+                text.textContent = `⚠️ 残り${daysLeft}日！期限: ${expStr}`;
+              } else if (daysLeft <= 7) {
+                text.textContent = `⏰ 残り${daysLeft}日 ・ 期限: ${expStr}`;
+              } else {
+                text.textContent = `📅 セレクト期限: ${expStr}（残${daysLeft}日）`;
+              }
+              banner.style.display = 'block';
+            }
           }
 
           window.setGroupData(cloudGroups);
