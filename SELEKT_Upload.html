@@ -18,20 +18,20 @@
 
     <style>
         :root {
-            --bg: #0E1015;
-            --surface: #161920;
-            --surface2: #1C2028;
-            --surface3: #242830;
-            --border: #2C3038;
-            --border2: #383D48;
-            --text: #E0E2E8;
-            --text-sub: #8890A0;
-            --text-dim: #505868;
-            --coral: #6880A8;
-            --green: #5AAA90;
-            --lavender: #8878B8;
-            --gold: #C0A050;
-            --blue: #6090B8;
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface2: #22263a;
+            --surface3: #2c3050;
+            --border: #2e3250;
+            --border2: #3a3f6a;
+            --text: #e8eaf6;
+            --text-sub: #8892b0;
+            --text-dim: #4a5280;
+            --coral: #ff6b6b;
+            --green: #3bbfa5;
+            --lavender: #9b7fe8;
+            --gold: #f5c842;
+            --blue: #4a9ee0;
             --radius: 14px;
         }
 
@@ -48,22 +48,6 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-        }
-
-        /* ===== NOISE TEXTURE OVERLAY ===== */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-            background-repeat: repeat;
-            background-size: 200px 200px;
-            opacity: 0.05;
-            pointer-events: none;
-            z-index: 9999;
-            mix-blend-mode: overlay;
         }
 
         /* ===== TOP BAR ===== */
@@ -705,7 +689,7 @@
         }
 
         .group-photo-thumb.selected {
-            box-shadow: 0 0 0 3px #5AAA90;
+            box-shadow: 0 0 0 3px #3BBFA5;
             transform: scale(0.95);
         }
 
@@ -716,7 +700,7 @@
             right: 4px;
             width: 20px;
             height: 20px;
-            background: #5AAA90;
+            background: #3BBFA5;
             color: white;
             font-size: 12px;
             font-weight: 700;
@@ -735,12 +719,12 @@
             background: rgba(20, 25, 35, 0.92);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid #5AAA90;
+            border: 1px solid #3BBFA5;
             border-radius: 10px;
             margin-bottom: 12px;
             font-size: 13px;
             font-weight: 600;
-            color: #5AAA90;
+            color: #3BBFA5;
             position: sticky;
             top: 0;
             z-index: 100;
@@ -757,8 +741,8 @@
 
         .selection-bar button {
             background: none;
-            border: 1px solid #5AAA90;
-            color: #5AAA90;
+            border: 1px solid #3BBFA5;
+            color: #3BBFA5;
             padding: 4px 12px;
             border-radius: 6px;
             font-size: 12px;
@@ -768,7 +752,7 @@
         }
 
         .selection-bar button:hover {
-            background: #5AAA90;
+            background: #3BBFA5;
             color: white;
         }
 
@@ -1142,7 +1126,7 @@
                 </button>
                 <button class="btn-secondary" id="step1Next" disabled onclick="startAI()"
                     style="padding:14px 24px;font-size:13px;font-weight:600;border-radius:12px;cursor:pointer">
-                    ✦ AIで簡易グループ分け
+                    🤖 AIで簡易グループ分け
                 </button>
             </div>
         </div>
@@ -1218,8 +1202,8 @@
         let faceApiReady = false;
 
         const GROUP_COLORS = [
-            '#6880A8', '#5AAA90', '#8878B8', '#6090B8', '#C0A050',
-            '#C08060', '#607898', '#6090B8', '#5098A0', '#80A858'
+            '#FF6B6B', '#3BBFA5', '#9B7FE8', '#4A9EE0', '#F5C842',
+            '#FF9F43', '#EE5A24', '#0652DD', '#1289A7', '#C4E538'
         ];
         const LABELS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
