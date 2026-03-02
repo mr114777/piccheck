@@ -2187,7 +2187,11 @@
           NG
           <span class="filter-count" id="cnt-ng">0</span>
         </button>
-
+        <button class="filter-btn" onclick="setFilter('ai', this)">
+          <span class="filter-dot" style="background:var(--lavender)"></span>
+          AIセンシティブ判定（要確認）
+          <span class="filter-count" id="cnt-ai">0</span>
+        </button>
         <button class="filter-btn" onclick="setFilter('none', this)">
           <span class="filter-dot" style="background:var(--text-dim)"></span>
           未判定
@@ -2246,6 +2250,9 @@
             style="display:none;">
           <button class="tb-btn" onclick="document.getElementById('addPhotoInput').click()">
             ＋ 写真追加
+          </button>
+          <button class="tb-btn" id="aiSensitiveBtn" onclick="runSensitiveDetection()">
+            🛡️ センシティブ判定
           </button>
           <button class="tb-btn" onclick="toggleGridSize()">
             <span id="gridIcon">⊞</span> 表示サイズ
@@ -2394,7 +2401,10 @@
       </div>
       <div class="bs-content">
         <div class="filter-chips" style="margin-bottom:12px">
-
+          <button class="filter-chip" data-filter="ai"
+            onclick="mobileSetFilter('ai', this);closeBottomSheet('groupSheet')">
+            <span class="filter-chip-dot" style="background:var(--lavender)"></span>AIセンシティブ
+          </button>
           <button class="filter-chip" data-filter="none"
             onclick="mobileSetFilter('none', this);closeBottomSheet('groupSheet')">
             <span class="filter-chip-dot" style="background:var(--text-dim)"></span>未選択
