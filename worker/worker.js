@@ -135,6 +135,22 @@ export default {
 
       // === POST /api/auth/login ===
       if (path === '/api/auth/login' && request.method === 'POST') {
+        // Rate limiting: 5 attempts per IP per 5 minutes
+        const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
+        const rateLimitKey = `ratelimit/login/${clientIP}`;
+        const attempts = await env.USERS.get(rateLimitKey, 'json') || { count: 0, resetAt: 0 };
+        const now = Date.now();
+        if (now < attempts.resetAt && attempts.count >= 5) {
+          const waitSec = Math.ceil((attempts.resetAt - now) / 1000);
+          return errorResponse(`ログイン試行回数を超えました。${waitSec}秒後にお試しください`, 429);
+        }
+        if (now >= attempts.resetAt) {
+          attempts.count = 0;
+          attempts.resetAt = now + 300000; // 5 minutes
+        }
+        attempts.count++;
+        await env.USERS.put(rateLimitKey, JSON.stringify(attempts), { expirationTtl: 300 });
+
         const body = await request.json();
         const { userId, password } = body;
 
@@ -228,9 +244,18 @@ export default {
       // === POST /api/user/:userId/link-session ===
       const linkMatch = path.match(/^\/api\/user\/([a-zA-Z0-9_]+)\/link-session$/);
       if (linkMatch && request.method === 'POST') {
+        // Require authentication
+        const authedUser = await getUserFromToken(request, env);
+        if (!authedUser) return errorResponse('Unauthorized', 401);
+
         const targetUserId = linkMatch[1];
         const body = await request.json();
         const { sessionId, direction } = body; // direction: 'received' or 'sent'
+
+        // Only allow linking to your own account or if you are the sender
+        if (direction === 'sent' && authedUser.id !== targetUserId) {
+          return errorResponse('Can only link sent sessions to your own account', 403);
+        }
 
         const targetUser = await env.USERS.get(`users/${targetUserId}`, 'json');
         if (!targetUser) return errorResponse('User not found', 404);
