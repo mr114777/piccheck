@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SELEKT — ログイン</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0D0F14;
+            --surface: #13161E;
+            --surface2: #1A1E28;
+            --surface3: #222736;
+            --border: #2A2F3E;
+            --border2: #333849;
+            --text: #E8EAF0;
+            --text-sub: #7B849A;
+            --text-dim: #454C60;
+            --accent: #4A9EE0;
+            --accent2: #3BBFA5;
+            --coral: #FF6B6B;
+            --green: #4CAF7D;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-size: 38px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-sub);
+            font-size: 13px;
+            margin-bottom: 32px;
+        }
+
+        /* Tab toggle */
+        .tab-toggle {
+            display: flex;
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: none;
+            border: none;
+            color: var(--text-sub);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        /* Google login */
+        .google-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px;
+            background: #fff;
+            color: #333;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: box-shadow 0.2s;
+        }
+
+        .google-btn:hover {
+            box-shadow: 0 2px 12px rgba(74, 158, 224, 0.3);
+        }
+
+        .google-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            color: var(--text-dim);
+            font-size: 12px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-sub);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-dim);
+        }
+
+        .hint {
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        /* Role selection */
+        .role-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .role-card {
+            padding: 16px 12px;
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .role-card:hover {
+            border-color: var(--text-dim);
+        }
+
+        .role-card.selected {
+            border-color: var(--accent);
+            background: rgba(74, 158, 224, 0.08);
+        }
+
+        .role-card .icon {
+            font-size: 28px;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .role-card .name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .role-card .desc {
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-top: 2px;
+        }
+
+        /* Submit */
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--accent), #3578C4);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            margin-top: 8px;
+        }
+
+        .submit-btn:hover {
+            opacity: 0.9;
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Error */
+        .error-msg {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            color: var(--coral);
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        /* Success */
+        .success-msg {
+            background: rgba(76, 175, 125, 0.1);
+            border: 1px solid rgba(76, 175, 125, 0.3);
+            color: var(--green);
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        /* Footer */
+        .footer-link {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 13px;
+            color: var(--text-sub);
+        }
+
+        .footer-link a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="auth-container">
+        <div class="logo">SE<span>LEKT</span></div>
+        <div class="subtitle">写真セレクト＆共有プラットフォーム</div>
+
+        <!-- Tab toggle -->
+        <div class="tab-toggle">
+            <button class="tab-btn active" onclick="switchTab('login')">ログイン</button>
+            <button class="tab-btn" onclick="switchTab('register')">新規登録</button>
+        </div>
+
+        <!-- Error / Success messages -->
+        <div class="error-msg" id="errorMsg"></div>
+        <div class="success-msg" id="successMsg"></div>
+
+        <!-- Google login -->
+        <button class="google-btn" onclick="loginWithGoogle()">
+            <svg viewBox="0 0 24 24">
+                <path fill="#4285F4"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
+                <path fill="#34A853"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                <path fill="#FBBC05"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                <path fill="#EA4335"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+            </svg>
+            Googleアカウントでログイン
+        </button>
+
+        <div class="divider">または</div>
+
+        <!-- Login form -->
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label>ユーザーID</label>
+                <input type="text" id="loginId" placeholder="your_id" required autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label>パスワード</label>
+                <input type="password" id="loginPw" placeholder="6文字以上" required autocomplete="current-password">
+            </div>
+            <button type="submit" class="submit-btn">ログイン</button>
+        </form>
+
+        <!-- Register form (hidden by default) -->
+        <form id="registerForm" onsubmit="handleRegister(event)" style="display:none">
+            <div class="form-group">
+                <label>ユーザーID</label>
+                <input type="text" id="regId" placeholder="photographer_tanaka" required autocomplete="username">
+                <div class="hint">英数字・アンダースコア、3〜20文字</div>
+            </div>
+            <div class="form-group">
+                <label>表示名</label>
+                <input type="text" id="regName" placeholder="田中フォト" autocomplete="name">
+            </div>
+            <div class="form-group">
+                <label>パスワード</label>
+                <input type="password" id="regPw" placeholder="6文字以上" required autocomplete="new-password">
+            </div>
+
+            <label
+                style="display:block;font-size:12px;font-weight:600;color:var(--text-sub);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px">あなたの役割</label>
+            <div class="role-grid" id="roleGrid">
+                <div class="role-card" data-role="photographer" onclick="selectRole(this)">
+                    <span class="icon">📷</span>
+                    <div class="name">カメラマン</div>
+                    <div class="desc">写真を送る側</div>
+                </div>
+                <div class="role-card" data-role="model" onclick="selectRole(this)">
+                    <span class="icon">👤</span>
+                    <div class="name">モデル</div>
+                    <div class="desc">写真を受け取る側</div>
+                </div>
+                <div class="role-card" data-role="company" onclick="selectRole(this)">
+                    <span class="icon">🏢</span>
+                    <div class="name">企業</div>
+                    <div class="desc">ビジネス利用</div>
+                </div>
+                <div class="role-card" data-role="private" onclick="selectRole(this)">
+                    <span class="icon">🔒</span>
+                    <div class="name">プライベート</div>
+                    <div class="desc">個人利用</div>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="regSubmit" disabled>アカウントを作成</button>
+        </form>
+
+        <div class="footer-link">
+            <a href="SELEKT_Upload.html">ログインせずに使う →</a>
+        </div>
+    </div>
+
+    <script>
+        const API = 'https://selekt-api.mr-mail114.workers.dev';
+        let selectedRole = null;
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach((b, i) => {
+                b.classList.toggle('active', (tab === 'login' && i === 0) || (tab === 'register' && i === 1));
+            });
+            document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+            document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+            hideMessages();
+        }
+
+        function selectRole(el) {
+            document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedRole = el.dataset.role;
+            document.getElementById('regSubmit').disabled = false;
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('errorMsg');
+            el.textContent = msg;
+            el.style.display = 'block';
+            document.getElementById('successMsg').style.display = 'none';
+        }
+
+        function showSuccess(msg) {
+            const el = document.getElementById('successMsg');
+            el.textContent = msg;
+            el.style.display = 'block';
+            document.getElementById('errorMsg').style.display = 'none';
+        }
+
+        function hideMessages() {
+            document.getElementById('errorMsg').style.display = 'none';
+            document.getElementById('successMsg').style.display = 'none';
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            hideMessages();
+            const userId = document.getElementById('loginId').value.trim();
+            const password = document.getElementById('loginPw').value;
+
+            try {
+                const res = await fetch(`${API}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, password }),
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    showError(data.error || 'ログイン失敗');
+                    return;
+                }
+
+                // Save token
+                localStorage.setItem('selekt_token', data.token);
+                localStorage.setItem('selekt_user', JSON.stringify(data.user));
+                showSuccess('ログイン成功！リダイレクト中...');
+
+                setTimeout(() => {
+                    window.location.href = 'SELEKT_Dashboard.html';
+                }, 800);
+            } catch (err) {
+                showError('通信エラー: ' + err.message);
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            hideMessages();
+            const userId = document.getElementById('regId').value.trim();
+            const displayName = document.getElementById('regName').value.trim();
+            const password = document.getElementById('regPw').value;
+
+            if (!selectedRole) {
+                showError('役割を選択してください');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API}/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, password, role: selectedRole, displayName }),
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    showError(data.error || '登録失敗');
+                    return;
+                }
+
+                // Save token
+                localStorage.setItem('selekt_token', data.token);
+                localStorage.setItem('selekt_user', JSON.stringify(data.user));
+                showSuccess('アカウント作成完了！リダイレクト中...');
+
+                setTimeout(() => {
+                    window.location.href = 'SELEKT_Dashboard.html';
+                }, 800);
+            } catch (err) {
+                showError('通信エラー: ' + err.message);
+            }
+        }
+
+        function loginWithGoogle() {
+            // TODO: Implement Google OAuth redirect
+            showError('Google ログインは現在準備中です');
+        }
+
+        // Check if already logged in
+        (function checkAuth() {
+            const token = localStorage.getItem('selekt_token');
+            if (token) {
+                fetch(`${API}/api/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` },
+                }).then(r => r.ok ? window.location.href = 'SELEKT_Dashboard.html' : null)
+                    .catch(() => { });
+            }
+        })();
+    </script>
+</body>
+
+</html>
