@@ -15,4 +15,4 @@ bucket_name = "selekt-photos"
 
 [[kv_namespaces]]
 binding = "USERS"
-id = "PLACEHOLDER_REPLACE_WITH_ACTUAL_KV_ID"
+id = "732be010c98a44b4aa9832dc6e4674af"
