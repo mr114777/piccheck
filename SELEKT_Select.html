@@ -2199,6 +2199,22 @@
         </button>
       </div>
 
+      <div style="display:flex;align-items:center;gap:8px;margin:8px 12px 0;flex-wrap:wrap">
+        <select id="sortSelect" onchange="setSortOrder(this.value)"
+          style="padding:6px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:11px;cursor:pointer;outline:none">
+          <option value="default">並び順: デフォルト</option>
+          <option value="name-asc">ファイル名 A→Z</option>
+          <option value="name-desc">ファイル名 Z→A</option>
+          <option value="status">ステータス順</option>
+        </select>
+        <label
+          style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-sub);cursor:pointer;user-select:none">
+          <input type="checkbox" id="flatViewToggle" onchange="toggleFlatView(this.checked)"
+            style="accent-color:var(--accent);cursor:pointer">
+          グループをまたいで一覧表示
+        </label>
+      </div>
+
       <div class="sidebar-section">
         <div class="sidebar-label">グループ一覧</div>
         <div id="sidebarGroupNav"></div>
@@ -2933,18 +2949,98 @@
     const MAX_SELECT = 29;
 
     const state = {
-      status: new Map(),    // photoId -> 'ok' | 'nearok' | 'ng' | null
-      comments: new Map(),  // photoId -> string
+      status: new Map(),
+      comments: new Map(),
       currentFilter: 'all',
       gridSize: 'normal',
       aiFilterOn: false,
-      modalPhotoId: null
+      modalPhotoId: null,
+      sortOrder: 'default',
+      flatView: false
     };
 
     function getStatus(id) { return state.status.get(id) || null; }
     function okCount() { return [...state.status.values()].filter(v => v === 'ok').length; }
     function nearokCount() { return [...state.status.values()].filter(v => v === 'nearok').length; }
     function ngCount() { return [...state.status.values()].filter(v => v === 'ng').length; }
+
+    // ===== SORT HELPERS =====
+    function sortPhotos(photos) {
+      if (state.sortOrder === 'name-asc') {
+        photos.sort((a, b) => (a.fname || '').localeCompare(b.fname || '', 'ja'));
+      } else if (state.sortOrder === 'name-desc') {
+        photos.sort((a, b) => (b.fname || '').localeCompare(a.fname || '', 'ja'));
+      } else if (state.sortOrder === 'status') {
+        const order = { ok: 0, nearok: 1, ng: 2 };
+        photos.sort((a, b) => {
+          const sa = order[getStatus(a.id)] ?? 3;
+          const sb = order[getStatus(b.id)] ?? 3;
+          return sa - sb;
+        });
+      }
+    }
+
+    function setSortOrder(val) {
+      state.sortOrder = val;
+      if (state.flatView) {
+        renderFlatView();
+      } else {
+        renderAll();
+      }
+    }
+
+    function toggleFlatView(checked) {
+      state.flatView = checked;
+      if (checked) {
+        renderFlatView();
+      } else {
+        buildGroupUI();
+        renderAll();
+      }
+    }
+
+    function renderFlatView() {
+      const container = document.getElementById('groupSections');
+      if (!container) return;
+
+      // Collect all photos from all groups
+      let allPhotos = [];
+      GROUPS.forEach(g => {
+        g.photos.forEach(p => {
+          allPhotos.push({ photo: p, group: g });
+        });
+      });
+
+      // Apply filter
+      allPhotos = allPhotos.filter(({ photo: p }) => {
+        const st = getStatus(p.id);
+        if (state.currentFilter === 'ok') return st === 'ok';
+        if (state.currentFilter === 'nearok') return st === 'nearok';
+        if (state.currentFilter === 'ng') return st === 'ng';
+        if (state.currentFilter === 'ai') return p.ai && p.ai.length > 0;
+        if (state.currentFilter === 'none') return !st;
+        return true;
+      });
+
+      // Apply sort
+      const photos = allPhotos.map(x => x.photo);
+      sortPhotos(photos);
+      const sorted = photos.map(p => allPhotos.find(x => x.photo.id === p.id));
+
+      // Render single flat grid
+      container.innerHTML = `
+        <div class="group-section" id="flat-view">
+          <div class="group-header">
+            <div class="group-title">全グループ一覧 (${sorted.length}枚)</div>
+          </div>
+          <div class="photo-grid" id="grid-flat"></div>
+        </div>
+      `;
+      const grid = document.getElementById('grid-flat');
+      sorted.forEach(({ photo, group }) => {
+        try { grid.appendChild(buildCard(photo, group)); } catch (e) { }
+      });
+    }
 
     // ===== RENDER PHOTOS =====
     function renderAll() {
@@ -2973,6 +3069,9 @@
         if (state.aiFilterOn) return p.ai.length > 0;
         return true;
       });
+
+      // Sort photos
+      sortPhotos(photos);
 
       section.style.display = photos.length === 0 && state.currentFilter !== 'all' ? 'none' : '';
 
