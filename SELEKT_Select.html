@@ -2202,6 +2202,10 @@
       <div class="sidebar-section">
         <div class="sidebar-label">グループ一覧</div>
         <div id="sidebarGroupNav"></div>
+        <button onclick="addNewGroup()"
+          style="width:100%;margin-top:8px;padding:8px 12px;background:var(--surface2);border:1px dashed var(--border2);border-radius:8px;color:var(--text-sub);font-size:12px;cursor:pointer;transition:all 0.2s;"
+          onmouseover="this.style.borderColor='var(--coral)';this.style.color='var(--text)'"
+          onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text-sub)'">＋ グループ追加</button>
       </div>
 
       <div class="sidebar-section">
@@ -2899,6 +2903,31 @@
       if (title) {
         title.textContent = newName ? `${group.label}: ${newName}` : `グループ ${group.label}`;
       }
+    }
+
+    function addNewGroup() {
+      const defaultColors = ['#FF6B6B', '#3BBFA5', '#9B7FE8', '#4A9EE0', '#F5C842', '#F06292', '#FF8A65', '#4DD0E1'];
+      const idx = GROUPS.length;
+      const label = String.fromCharCode(65 + idx); // A, B, C...
+      const newGroup = {
+        id: `g${idx + 1}`,
+        label: label,
+        name: '',
+        color: defaultColors[idx % defaultColors.length],
+        limit: 5,
+        photos: [],
+      };
+      GROUPS.push(newGroup);
+      buildGroupUI();
+      GROUPS.forEach(g => renderGroup(g));
+      showToast(`グループ ${label} を追加しました`, 'green');
+
+      // Focus the new group's name input
+      setTimeout(() => {
+        const inputs = document.querySelectorAll('.group-nav-name');
+        const lastInput = inputs[inputs.length - 1];
+        if (lastInput) { lastInput.focus(); lastInput.select(); }
+      }, 100);
     }
 
     const MAX_SELECT = 29;
