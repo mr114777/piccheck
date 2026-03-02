@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SELEKT — ダッシュボード</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0D0F14;
+            --surface: #13161E;
+            --surface2: #1A1E28;
+            --surface3: #222736;
+            --border: #2A2F3E;
+            --border2: #333849;
+            --text: #E8EAF0;
+            --text-sub: #7B849A;
+            --text-dim: #454C60;
+            --accent: #4A9EE0;
+            --accent2: #3BBFA5;
+            --coral: #FF6B6B;
+            --green: #4CAF7D;
+            --yellow: #F5C842;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* Topbar */
+        .topbar {
+            height: 56px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            gap: 16px;
+        }
+
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .topbar-divider {
+            width: 1px;
+            height: 28px;
+            background: var(--border);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 4px;
+        }
+
+        .nav-link {
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-sub);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            background: var(--surface2);
+            color: var(--text);
+        }
+
+        .nav-link.active {
+            background: var(--surface3);
+            color: var(--text);
+        }
+
+        .topbar-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .usage-badge {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 11px;
+            color: var(--text-sub);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .usage-bar {
+            width: 60px;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .usage-bar-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        /* Main content */
+        .main {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        .welcome {
+            margin-bottom: 32px;
+        }
+
+        .welcome h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .welcome p {
+            color: var(--text-sub);
+            font-size: 14px;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+            background: rgba(74, 158, 224, 0.15);
+            color: var(--accent);
+        }
+
+        /* Tab filter */
+        .tab-filter {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 24px;
+            background: var(--surface);
+            padding: 4px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            width: fit-content;
+        }
+
+        .filter-btn {
+            padding: 8px 18px;
+            background: none;
+            border: none;
+            color: var(--text-sub);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background: var(--surface3);
+            color: var(--text);
+        }
+
+        /* Project cards */
+        .project-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .project-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            transition: border-color 0.2s, transform 0.1s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .project-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        .project-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .project-title {
+            font-size: 16px;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .status-pending {
+            background: rgba(255, 107, 107, 0.15);
+            color: var(--coral);
+        }
+
+        .status-progress {
+            background: rgba(245, 200, 66, 0.15);
+            color: var(--yellow);
+        }
+
+        .status-done {
+            background: rgba(76, 175, 125, 0.15);
+            color: var(--green);
+        }
+
+        .project-meta {
+            display: flex;
+            gap: 20px;
+            font-size: 12px;
+            color: var(--text-sub);
+        }
+
+        .project-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .project-progress {
+            margin-top: 12px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
+
+        .progress-fill.green {
+            background: var(--green);
+        }
+
+        .progress-fill.yellow {
+            background: var(--yellow);
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-dim);
+        }
+
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .empty-state h3 {
+            color: var(--text-sub);
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            font-size: 13px;
+        }
+
+        .empty-state .cta {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 10px 20px;
+            background: var(--accent);
+            color: #fff;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* User menu dropdown */
+        .user-menu {
+            position: absolute;
+            top: 60px;
+            right: 24px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 8px;
+            min-width: 180px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            display: none;
+            z-index: 100;
+        }
+
+        .user-menu.show {
+            display: block;
+        }
+
+        .user-menu-item {
+            display: block;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: var(--text);
+            text-decoration: none;
+            transition: background 0.15s;
+        }
+
+        .user-menu-item:hover {
+            background: var(--surface3);
+        }
+
+        .user-menu-item.danger {
+            color: var(--coral);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: var(--text-dim);
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Topbar -->
+    <div class="topbar">
+        <div class="logo">SE<span>LEKT</span></div>
+        <div class="topbar-divider"></div>
+        <div class="nav-links">
+            <a class="nav-link active" href="SELEKT_Dashboard.html">ダッシュボード</a>
+            <a class="nav-link" href="SELEKT_Upload.html">アップロード</a>
+            <a class="nav-link" href="SELEKT_Pricing.html">プラン</a>
+        </div>
+        <div class="topbar-right">
+            <div class="usage-badge" id="usageBadge" style="display:none">
+                <span id="usageText">0 / 2 GB</span>
+                <div class="usage-bar">
+                    <div class="usage-bar-fill" id="usageBarFill" style="width:0%"></div>
+                </div>
+            </div>
+            <div class="user-avatar" id="userAvatar" onclick="toggleMenu()">?</div>
+        </div>
+    </div>
+
+    <!-- User menu -->
+    <div class="user-menu" id="userMenu">
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);margin-bottom:4px">
+            <div style="font-weight:600;font-size:14px" id="menuName">---</div>
+            <div style="font-size:11px;color:var(--text-dim)" id="menuId">@---</div>
+        </div>
+        <a class="user-menu-item" href="SELEKT_Pricing.html">💎 プラン</a>
+        <a class="user-menu-item danger" href="#" onclick="logout()">ログアウト</a>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+        <div class="welcome" id="welcomeSection">
+            <h1 id="welcomeMsg">読み込み中...</h1>
+            <p id="welcomeSub"></p>
+        </div>
+
+        <!-- Tab filter -->
+        <div class="tab-filter" id="tabFilter" style="display:none">
+            <button class="filter-btn active" onclick="filterProjects('all')">すべて</button>
+            <button class="filter-btn" onclick="filterProjects('received')">受信</button>
+            <button class="filter-btn" onclick="filterProjects('sent')">送信</button>
+        </div>
+
+        <div id="projectList" class="project-list">
+            <div class="loading">読み込み中...</div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'https://selekt-api.mr-mail114.workers.dev';
+        let currentUser = null;
+        let allProjects = { received: [], sent: [] };
+
+        // Role labels
+        const roleLabels = {
+            photographer: '📷 カメラマン',
+            model: '👤 モデル',
+            company: '🏢 企業',
+            private: '🔒 プライベート',
+        };
+
+        // Check auth
+        async function init() {
+            const token = localStorage.getItem('selekt_token');
+            if (!token) {
+                window.location.href = 'SELEKT_Auth.html';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API}/api/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` },
+                });
+                if (!res.ok) {
+                    localStorage.removeItem('selekt_token');
+                    localStorage.removeItem('selekt_user');
+                    window.location.href = 'SELEKT_Auth.html';
+                    return;
+                }
+
+                const data = await res.json();
+                currentUser = data.user;
+
+                // Update UI
+                document.getElementById('welcomeMsg').innerHTML =
+                    `${currentUser.displayName} さん` +
+                    `<span class="role-badge">${roleLabels[currentUser.role] || currentUser.role}</span>`;
+                document.getElementById('welcomeSub').textContent = `@${currentUser.id}`;
+                document.getElementById('userAvatar').textContent = currentUser.displayName.charAt(0).toUpperCase();
+                document.getElementById('menuName').textContent = currentUser.displayName;
+                document.getElementById('menuId').textContent = `@${currentUser.id}  ·  ${currentUser.plan === 'pro' ? 'PRO' : 'FREE'}`;
+
+                // Usage (photographer)
+                if (currentUser.role === 'photographer' && data.usage) {
+                    const badge = document.getElementById('usageBadge');
+                    badge.style.display = 'flex';
+                    const usedGB = (data.usage.usedMB / 1024).toFixed(1);
+                    const limitGB = (data.usage.limitMB / 1024).toFixed(0);
+                    document.getElementById('usageText').textContent = `${usedGB} / ${limitGB} GB`;
+                    const pct = Math.min(100, (data.usage.usedMB / data.usage.limitMB) * 100);
+                    document.getElementById('usageBarFill').style.width = pct + '%';
+                    if (pct > 80) document.getElementById('usageBarFill').style.background = '#FF6B6B';
+                }
+
+                // Load projects
+                document.getElementById('tabFilter').style.display = 'flex';
+                await loadProjects(token);
+            } catch (err) {
+                console.error(err);
+                document.getElementById('projectList').innerHTML =
+                    '<div class="empty-state"><span class="icon">⚠️</span><h3>エラーが発生しました</h3><p>' + err.message + '</p></div>';
+            }
+        }
+
+        async function loadProjects(token) {
+            try {
+                const res = await fetch(`${API}/api/user/${currentUser.id}/projects`, {
+                    headers: { 'Authorization': `Bearer ${token}` },
+                });
+                if (!res.ok) throw new Error('Projects fetch failed');
+                allProjects = await res.json();
+
+                // Fetch session details for each
+                const allSessionIds = [
+                    ...allProjects.received.map(id => ({ id, type: 'received' })),
+                    ...allProjects.sent.map(id => ({ id, type: 'sent' })),
+                ];
+
+                if (allSessionIds.length === 0) {
+                    showEmptyState();
+                    return;
+                }
+
+                const details = await Promise.all(
+                    allSessionIds.map(async ({ id, type }) => {
+                        try {
+                            const r = await fetch(`${API}/api/session/${id}`);
+                            if (!r.ok) return null;
+                            const meta = await r.json();
+                            return { ...meta, _type: type };
+                        } catch { return null; }
+                    })
+                );
+
+                const validProjects = details.filter(Boolean);
+                if (validProjects.length === 0) {
+                    showEmptyState();
+                    return;
+                }
+
+                renderProjects(validProjects);
+            } catch (err) {
+                showEmptyState();
+            }
+        }
+
+        function showEmptyState() {
+            const isPhotographer = currentUser.role === 'photographer';
+            document.getElementById('projectList').innerHTML = `
+      <div class="empty-state">
+        <span class="icon">${isPhotographer ? '📤' : '📥'}</span>
+        <h3>まだプロジェクトがありません</h3>
+        <p>${isPhotographer
+                    ? '写真をアップロードしてクライアントに共有しましょう'
+                    : 'カメラマンから写真が届くとここに表示されます'
+                }</p>
+        ${isPhotographer
+                    ? '<a class="cta" href="SELEKT_Upload.html">写真をアップロード</a>'
+                    : ''
+                }
+      </div>
+    `;
+        }
+
+        function renderProjects(projects, filter = 'all') {
+            const filtered = filter === 'all' ? projects : projects.filter(p => p._type === filter);
+            const container = document.getElementById('projectList');
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="empty-state"><h3>該当するプロジェクトがありません</h3></div>';
+                return;
+            }
+
+            // Sort by date (newest first)
+            filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            container.innerHTML = filtered.map(p => {
+                // Determine status
+                const total = p.photos?.length || 0;
+                const selected = 0; // TODO: track selection progress
+                let status, statusClass;
+                if (total === 0) {
+                    status = '空'; statusClass = 'status-pending';
+                } else if (selected === 0) {
+                    status = '🔴 未セレクト'; statusClass = 'status-pending';
+                } else if (selected < total) {
+                    status = '🟡 セレクト中'; statusClass = 'status-progress';
+                } else {
+                    status = '🟢 対応済み'; statusClass = 'status-done';
+                }
+
+                const date = new Date(p.createdAt);
+                const dateStr = `${date.getMonth() + 1}/${date.getDate()}`;
+                const typeLabel = p._type === 'sent' ? '📤 送信' : '📥 受信';
+                const progressPct = total > 0 ? Math.round((selected / total) * 100) : 0;
+                const selectUrl = `SELEKT_Select.html?session=${p.id}`;
+
+                return `
+        <a class="project-card" href="${selectUrl}">
+          <div class="project-header">
+            <div class="project-title">${p.title || 'プロジェクト ' + p.id}</div>
+            <span class="status-badge ${statusClass}">${status}</span>
+          </div>
+          <div class="project-meta">
+            <span>${typeLabel}</span>
+            <span>📅 ${dateStr}</span>
+            <span>📷 ${total}枚</span>
+            ${p.photographer ? `<span>by ${p.photographer}</span>` : ''}
+          </div>
+          ${total > 0 ? `
+          <div class="project-progress">
+            <div class="progress-bar">
+              <div class="progress-fill ${progressPct >= 100 ? 'green' : 'yellow'}" style="width:${progressPct}%"></div>
+            </div>
+          </div>` : ''}
+        </a>
+      `;
+            }).join('');
+
+            // Store for filtering
+            window._allProjects = projects;
+        }
+
+        function filterProjects(filter) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            if (window._allProjects) {
+                renderProjects(window._allProjects, filter);
+            }
+        }
+
+        function toggleMenu() {
+            document.getElementById('userMenu').classList.toggle('show');
+        }
+
+        function logout() {
+            localStorage.removeItem('selekt_token');
+            localStorage.removeItem('selekt_user');
+            window.location.href = 'SELEKT_Auth.html';
+        }
+
+        // Close menu on outside click
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.user-avatar') && !e.target.closest('.user-menu')) {
+                document.getElementById('userMenu').classList.remove('show');
+            }
+        });
+
+        init();
+    </script>
+</body>
+
+</html>
