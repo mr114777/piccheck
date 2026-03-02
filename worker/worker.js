@@ -19,7 +19,7 @@ function generateId(len = 8) {
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
 function jsonResponse(data, status = 200) {
@@ -33,6 +33,48 @@ function errorResponse(message, status = 400) {
   return jsonResponse({ error: message }, status);
 }
 
+// --- Auth helpers ---
+async function hashPassword(password, salt) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(salt + password);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return btoa(String.fromCharCode(...new Uint8Array(hash)));
+}
+
+function generateToken() {
+  return generateId(32);
+}
+
+function generateSalt() {
+  return generateId(16);
+}
+
+// Validate userId: 3-20 chars, alphanumeric + underscore
+function isValidUserId(id) {
+  return /^[a-zA-Z0-9_]{3,20}$/.test(id);
+}
+
+// Get user from auth token
+async function getUserFromToken(request, env) {
+  const auth = request.headers.get('Authorization');
+  if (!auth || !auth.startsWith('Bearer ')) return null;
+  const token = auth.slice(7);
+  const tokenData = await env.USERS.get(`tokens/${token}`, 'json');
+  if (!tokenData) return null;
+  if (new Date(tokenData.expiresAt) < new Date()) {
+    await env.USERS.delete(`tokens/${token}`);
+    return null;
+  }
+  const user = await env.USERS.get(`users/${tokenData.userId}`, 'json');
+  return user;
+}
+
+// Get current month key for usage tracking
+function getMonthKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
 export default {
   async fetch(request, env) {
     // Handle CORS preflight
@@ -44,6 +86,170 @@ export default {
     const path = url.pathname;
 
     try {
+      // =============================================
+      // AUTH ENDPOINTS
+      // =============================================
+
+      // === POST /api/auth/register ===
+      if (path === '/api/auth/register' && request.method === 'POST') {
+        const body = await request.json();
+        const { userId, password, role, displayName } = body;
+
+        if (!userId || !password) return errorResponse('userId and password required');
+        if (!isValidUserId(userId)) return errorResponse('userId must be 3-20 alphanumeric chars or underscores');
+        if (password.length < 6) return errorResponse('Password must be at least 6 characters');
+        if (!['photographer', 'model', 'company', 'private'].includes(role)) {
+          return errorResponse('Invalid role');
+        }
+
+        // Check if userId already taken
+        const existing = await env.USERS.get(`users/${userId}`);
+        if (existing) return errorResponse('userId already taken', 409);
+
+        // Hash password
+        const salt = generateSalt();
+        const passwordHash = await hashPassword(password, salt);
+
+        const user = {
+          id: userId,
+          displayName: displayName || userId,
+          role,
+          salt,
+          passwordHash,
+          plan: 'free',
+          createdAt: new Date().toISOString(),
+        };
+
+        await env.USERS.put(`users/${userId}`, JSON.stringify(user));
+        await env.USERS.put(`users/${userId}/sessions`, JSON.stringify([]));
+        await env.USERS.put(`users/${userId}/sent`, JSON.stringify([]));
+
+        // Generate token
+        const token = generateToken();
+        const expiresAt = new Date(Date.now() + 30 * 86400000).toISOString();
+        await env.USERS.put(`tokens/${token}`, JSON.stringify({ userId, expiresAt }));
+
+        const { salt: _, passwordHash: __, ...safeUser } = user;
+        return jsonResponse({ token, expiresAt, user: safeUser }, 201);
+      }
+
+      // === POST /api/auth/login ===
+      if (path === '/api/auth/login' && request.method === 'POST') {
+        const body = await request.json();
+        const { userId, password } = body;
+
+        if (!userId || !password) return errorResponse('userId and password required');
+
+        const user = await env.USERS.get(`users/${userId}`, 'json');
+        if (!user) return errorResponse('Invalid credentials', 401);
+
+        const hash = await hashPassword(password, user.salt);
+        if (hash !== user.passwordHash) return errorResponse('Invalid credentials', 401);
+
+        // Generate token
+        const token = generateToken();
+        const expiresAt = new Date(Date.now() + 30 * 86400000).toISOString();
+        await env.USERS.put(`tokens/${token}`, JSON.stringify({ userId, expiresAt }));
+
+        const { salt, passwordHash, ...safeUser } = user;
+        return jsonResponse({ token, expiresAt, user: safeUser });
+      }
+
+      // === GET /api/auth/me ===
+      if (path === '/api/auth/me' && request.method === 'GET') {
+        const user = await getUserFromToken(request, env);
+        if (!user) return errorResponse('Unauthorized', 401);
+
+        const { salt, passwordHash, ...safeUser } = user;
+
+        // Include usage info
+        const monthKey = getMonthKey();
+        const usage = await env.USERS.get(`users/${user.id}/usage/${monthKey}`, 'json') || { uploadedBytes: 0 };
+        const limitMB = user.plan === 'pro' ? parseInt(env.PRO_MONTHLY_STORAGE_MB || '102400') : parseInt(env.FREE_MONTHLY_STORAGE_MB || '2048');
+
+        return jsonResponse({
+          user: safeUser,
+          usage: {
+            usedMB: Math.round(usage.uploadedBytes / 1048576),
+            limitMB,
+            remainingMB: Math.max(0, limitMB - Math.round(usage.uploadedBytes / 1048576)),
+          },
+        });
+      }
+
+      // === GET /api/user/:userId ===
+      const userMatch = path.match(/^\/api\/user\/([a-zA-Z0-9_]+)$/);
+      if (userMatch && request.method === 'GET') {
+        const userId = userMatch[1];
+        const user = await env.USERS.get(`users/${userId}`, 'json');
+        if (!user) return errorResponse('User not found', 404);
+
+        return jsonResponse({
+          id: user.id,
+          displayName: user.displayName,
+          role: user.role,
+          plan: user.plan,
+          createdAt: user.createdAt,
+        });
+      }
+
+      // === GET /api/user/search?q=xxx ===
+      if (path === '/api/user/search' && request.method === 'GET') {
+        const q = url.searchParams.get('q');
+        if (!q || q.length < 2) return errorResponse('Query must be at least 2 characters');
+
+        // KV doesn't support prefix search natively, so we try exact match
+        const user = await env.USERS.get(`users/${q}`, 'json');
+        if (!user) return jsonResponse({ results: [] });
+
+        return jsonResponse({
+          results: [{
+            id: user.id,
+            displayName: user.displayName,
+            role: user.role,
+          }],
+        });
+      }
+
+      // === GET /api/user/:userId/projects ===
+      const projectsMatch = path.match(/^\/api\/user\/([a-zA-Z0-9_]+)\/projects$/);
+      if (projectsMatch && request.method === 'GET') {
+        const authedUser = await getUserFromToken(request, env);
+        if (!authedUser || authedUser.id !== projectsMatch[1]) {
+          return errorResponse('Unauthorized', 401);
+        }
+
+        const sessions = await env.USERS.get(`users/${authedUser.id}/sessions`, 'json') || [];
+        const sent = await env.USERS.get(`users/${authedUser.id}/sent`, 'json') || [];
+
+        return jsonResponse({ received: sessions, sent });
+      }
+
+      // === POST /api/user/:userId/link-session ===
+      const linkMatch = path.match(/^\/api\/user\/([a-zA-Z0-9_]+)\/link-session$/);
+      if (linkMatch && request.method === 'POST') {
+        const targetUserId = linkMatch[1];
+        const body = await request.json();
+        const { sessionId, direction } = body; // direction: 'received' or 'sent'
+
+        const targetUser = await env.USERS.get(`users/${targetUserId}`, 'json');
+        if (!targetUser) return errorResponse('User not found', 404);
+
+        const key = direction === 'sent' ? `users/${targetUserId}/sent` : `users/${targetUserId}/sessions`;
+        const list = await env.USERS.get(key, 'json') || [];
+
+        if (!list.includes(sessionId)) {
+          list.push(sessionId);
+          await env.USERS.put(key, JSON.stringify(list));
+        }
+
+        return jsonResponse({ ok: true });
+      }
+
+      // =============================================
+      // SESSION ENDPOINTS (existing)
+      // =============================================
+
       // === POST /api/session — Create new session ===
       if (path === '/api/session' && request.method === 'POST') {
         const body = await request.json();

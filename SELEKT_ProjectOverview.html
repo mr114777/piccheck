@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>SELEKT — プロジェクト概要資料</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;600;700&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: #fff;
+            color: #1a1a2e;
+            line-height: 1.7;
+            padding: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        @media print {
+            body {
+                padding: 20px;
+                font-size: 11pt;
+            }
+
+            .page-break {
+                page-break-before: always;
+            }
+
+            .no-print {
+                display: none;
+            }
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 4px;
+        }
+
+        h1 span {
+            color: #4A9EE0;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin: 40px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4A9EE0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        h2 .icon {
+            font-size: 24px;
+        }
+
+        h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin: 24px 0 8px;
+        }
+
+        p,
+        li {
+            font-size: 14px;
+            color: #444;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin: 8px 0;
+        }
+
+        li {
+            margin-bottom: 4px;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
+            border-left: 4px solid #4A9EE0;
+            border-radius: 8px;
+            padding: 20px 24px;
+            margin: 20px 0;
+        }
+
+        .highlight-box p {
+            margin: 4px 0;
+        }
+
+        .highlight-box strong {
+            color: #1a1a2e;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .feature-card {
+            background: #fafbff;
+            border: 1px solid #e0e6f0;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .feature-card .emoji {
+            font-size: 28px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .feature-card h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .feature-card p {
+            font-size: 13px;
+            color: #666;
+            margin: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 13px;
+        }
+
+        th {
+            background: #1a1a2e;
+            color: #fff;
+            padding: 10px 14px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fc;
+        }
+
+        .mermaid {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .price-box {
+            background: linear-gradient(135deg, #1a1a2e, #2d2d5e);
+            color: #fff;
+            border-radius: 16px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .price-box .price {
+            font-size: 42px;
+            font-weight: 700;
+        }
+
+        .price-box .unit {
+            font-size: 16px;
+            opacity: 0.7;
+        }
+
+        .price-box .plan {
+            font-size: 18px;
+            margin-bottom: 8px;
+            opacity: 0.8;
+        }
+
+        .price-box ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 16px;
+            text-align: left;
+            display: inline-block;
+        }
+
+        .price-box li {
+            color: #ccc;
+            font-size: 14px;
+            padding: 4px 0;
+        }
+
+        .price-box li::before {
+            content: "✓ ";
+            color: #4A9EE0;
+            font-weight: 700;
+        }
+
+        .footer {
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .btn-print {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #1a1a2e;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 28px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+        }
+
+        .btn-print:hover {
+            background: #2d2d5e;
+        }
+    </style>
+</head>
+
+<body>
+
+    <button class="btn-print no-print" onclick="window.print()">🖨 PDF出力</button>
+
+    <!-- ===== COVER ===== -->
+    <h1>SE<span>LEKT</span></h1>
+    <div class="subtitle">
+        写真セレクト＆共有プラットフォーム ─ プロジェクト概要資料<br>
+        最終更新: 2026年2月
+    </div>
+
+    <!-- ===== 1. サービス概要 ===== -->
+    <h2><span class="icon">🎯</span> 1. サービス概要</h2>
+
+    <div class="highlight-box">
+        <p><strong>SELEKT（セレクト）</strong>は、カメラマンがクライアントへ写真を共有し、<br>
+            クライアントが直感的に写真をOK / 保留 / NGで振り分けられるWebサービスです。</p>
+    </div>
+
+    <p>結婚式・撮影会・企業撮影など、大量の写真からお気に入りを選ぶ作業を<br>
+        スマートフォンでもストレスなく行えるよう設計されています。</p>
+
+    <h3>ターゲットユーザー</h3>
+    <table>
+        <tr>
+            <th>ユーザー</th>
+            <th>役割</th>
+            <th>中心操作</th>
+        </tr>
+        <tr>
+            <td>📸 カメラマン</td>
+            <td>写真送付者</td>
+            <td>アップロード・グループ設定</td>
+        </tr>
+        <tr>
+            <td>👤 クライアント</td>
+            <td>写真選択者</td>
+            <td>セレクト・ダウンロード</td>
+        </tr>
+    </table>
+
+    <!-- ===== 2. ユーザーフロー ===== -->
+    <h2><span class="icon">🔄</span> 2. ユーザーフロー</h2>
+
+    <div class="mermaid">
+        flowchart LR
+        A["📸 カメラマン\n写真アップロード"] --> B["🤖 AI自動\nグループ分け"]
+        B --> C["🔗 共有URL\n発行"]
+        C --> D["👤 クライアント\nURLを開く"]
+        D --> E["✓✕△ 写真を\nセレクト"]
+        E --> F["📥 ZIP\nダウンロード"]
+
+        style A fill:#4A9EE0,color:#fff,stroke:none
+        style B fill:#9B7FE8,color:#fff,stroke:none
+        style C fill:#3BBFA5,color:#fff,stroke:none
+        style D fill:#F5C842,color:#111,stroke:none
+        style E fill:#FF6B6B,color:#fff,stroke:none
+        style F fill:#4CAF7D,color:#fff,stroke:none
+    </div>
+
+    <!-- ===== 3. システムアーキテクチャ ===== -->
+    <div class="page-break"></div>
+    <h2><span class="icon">🏗️</span> 3. システムアーキテクチャ</h2>
+
+    <div class="mermaid">
+        flowchart TB
+        subgraph Client["🖥️ クライアント（ブラウザ）"]
+        UP["Upload ページ\n写真アップロード\nグループ設定"]
+        SE["Select ページ\n写真セレクト\nダウンロード"]
+        end
+
+        subgraph Edge["☁️ Cloudflare Edge"]
+        GH["GitHub Pages\n静的HTML配信"]
+        WK["Cloudflare Workers\nAPI サーバー"]
+        R2["Cloudflare R2\n写真ストレージ"]
+        end
+
+        subgraph AI["🤖 AI処理（クライアント側）"]
+        TF["TensorFlow.js"]
+        NS["NSFWJS\nセンシティブ検出"]
+        end
+
+        UP -->|"HTML配信"| GH
+        SE -->|"HTML配信"| GH
+        UP -->|"POST /upload"| WK
+        SE -->|"GET /session"| WK
+        WK -->|"保存/取得"| R2
+        SE --- AI
+
+        style GH fill:#24292e,color:#fff,stroke:none
+        style WK fill:#F38020,color:#fff,stroke:none
+        style R2 fill:#F38020,color:#fff,stroke:none
+        style TF fill:#FF6F00,color:#fff,stroke:none
+        style NS fill:#9B7FE8,color:#fff,stroke:none
+    </div>
+
+    <h3>技術スタック</h3>
+    <table>
+        <tr>
+            <th>レイヤー</th>
+            <th>技術</th>
+            <th>用途</th>
+        </tr>
+        <tr>
+            <td>フロントエンド</td>
+            <td>HTML / CSS / JavaScript</td>
+            <td>UI（SPA、フレームワーク不使用）</td>
+        </tr>
+        <tr>
+            <td>ホスティング</td>
+            <td>GitHub Pages</td>
+            <td>静的HTML配信</td>
+        </tr>
+        <tr>
+            <td>API</td>
+            <td>Cloudflare Workers</td>
+            <td>セッション管理・ファイル操作</td>
+        </tr>
+        <tr>
+            <td>ストレージ</td>
+            <td>Cloudflare R2</td>
+            <td>写真保存（S3互換）</td>
+        </tr>
+        <tr>
+            <td>AI</td>
+            <td>TensorFlow.js + NSFWJS</td>
+            <td>ブラウザ内でセンシティブ画像検出</td>
+        </tr>
+    </table>
+
+    <!-- ===== 4. 機能一覧 ===== -->
+    <h2><span class="icon">✨</span> 4. 主な機能</h2>
+
+    <div class="feature-grid">
+        <div class="feature-card">
+            <span class="emoji">📤</span>
+            <h4>写真アップロード</h4>
+            <p>ドラッグ&ドロップ対応。1セッション最大50枚、1枚25MBまで。サムネイル自動生成。</p>
+        </div>
+        <div class="feature-card">
+            <span class="emoji">🗂️</span>
+            <h4>グループ管理</h4>
+            <p>色分けされたグループで写真を分類。AIによる自動グループ分けにも対応。</p>
+        </div>
+        <div class="feature-card">
+            <span class="emoji">✓✕△</span>
+            <h4>3段階セレクト</h4>
+            <p>OK / 保留 / NG の3ステータスで直感的に振り分け。進捗バーで完了率を表示。</p>
+        </div>
+        <div class="feature-card">
+            <span class="emoji">🔍</span>
+            <h4>AIセンシティブ検出</h4>
+            <p>NSFWJS（ブラウザ内AI）で水着・下着等を自動検出。プライバシー保護のためサーバー送信なし。</p>
+        </div>
+        <div class="feature-card">
+            <span class="emoji">📱</span>
+            <h4>モバイル最適化</h4>
+            <p>スマホでフル操作可能。ピンチズーム、スワイプ、ボトムシートUIに対応。</p>
+        </div>
+        <div class="feature-card">
+            <span class="emoji">📥</span>
+            <h4>柔軟なダウンロード</h4>
+            <p>フルサイズ / SNS圧縮（1〜3MB）を選択可能。ステータス別にZIPダウンロード。</p>
+        </div>
+        <div class="feature-card">
+            <span class="emoji">⏰</span>
+            <h4>有効期限管理</h4>
+            <p>セッションに自動期限設定（デフォルト7日）。期限切れデータは自動削除。</p>
+        </div>
+        <div class="feature-card">
+            <span class="emoji">🌙</span>
+            <h4>ダークモードUI</h4>
+            <p>写真が映えるダークテーマ。ノイズテクスチャ対応など、洗練されたデザイン。</p>
+        </div>
+    </div>
+
+    <!-- ===== 5. API設計 ===== -->
+    <div class="page-break"></div>
+    <h2><span class="icon">🔌</span> 5. API設計</h2>
+
+    <table>
+        <tr>
+            <th>メソッド</th>
+            <th>エンドポイント</th>
+            <th>機能</th>
+        </tr>
+        <tr>
+            <td><code>POST</code></td>
+            <td>/api/session</td>
+            <td>新規セッション作成</td>
+        </tr>
+        <tr>
+            <td><code>GET</code></td>
+            <td>/api/session/:id</td>
+            <td>セッション情報取得</td>
+        </tr>
+        <tr>
+            <td><code>POST</code></td>
+            <td>/api/session/:id/upload</td>
+            <td>写真アップロード</td>
+        </tr>
+        <tr>
+            <td><code>GET</code></td>
+            <td>/api/session/:id/photo/:fname</td>
+            <td>フルサイズ写真取得</td>
+        </tr>
+        <tr>
+            <td><code>GET</code></td>
+            <td>/api/session/:id/thumb/:fname</td>
+            <td>サムネイル取得</td>
+        </tr>
+    </table>
+
+    <div class="mermaid">
+        sequenceDiagram
+        participant C as 📸 カメラマン
+        participant W as ☁️ Worker API
+        participant R as 💾 R2 Storage
+        participant U as 👤 クライアント
+
+        C->>W: POST /api/session
+        W->>R: meta.json 保存
+        W-->>C: sessionId 返却
+
+        C->>W: POST /session/:id/upload (写真)
+        W->>R: 写真+サムネイル保存
+        W-->>C: OK
+
+        C-->>U: 共有URL送付
+
+        U->>W: GET /api/session/:id
+        W->>R: meta.json 取得
+        W-->>U: セッション情報
+
+        U->>W: GET /session/:id/thumb/:fname
+        W->>R: サムネイル取得
+        W-->>U: 画像データ
+        </sequenceDiagram>
+    </div>
+
+    <!-- ===== 6. セキュリティ ===== -->
+    <h2><span class="icon">🔒</span> 6. セキュリティ</h2>
+
+    <table>
+        <tr>
+            <th>項目</th>
+            <th>状態</th>
+            <th>備考</th>
+        </tr>
+        <tr>
+            <td>APIキー・シークレット</td>
+            <td>✅ 安全</td>
+            <td>コードに含まれていない</td>
+        </tr>
+        <tr>
+            <td>CORS設定</td>
+            <td>✅ 設定済み</td>
+            <td>全オリジン許可（パブリックAPI）</td>
+        </tr>
+        <tr>
+            <td>セッションID</td>
+            <td>✅ ランダム8文字</td>
+            <td>推測困難</td>
+        </tr>
+        <tr>
+            <td>ファイルサイズ制限</td>
+            <td>✅ 25MB/枚</td>
+            <td>DoS対策</td>
+        </tr>
+        <tr>
+            <td>枚数制限</td>
+            <td>✅ 50枚/セッション</td>
+            <td>ストレージ保護</td>
+        </tr>
+        <tr>
+            <td>AI処理</td>
+            <td>✅ クライアント側</td>
+            <td>写真を外部送信しない</td>
+        </tr>
+        <tr>
+            <td>認証機能</td>
+            <td>⚠️ 未実装</td>
+            <td>URLが秘密鍵として機能</td>
+        </tr>
+    </table>
+
+    <!-- ===== 7. ファイル構成 ===== -->
+    <h2><span class="icon">📁</span> 7. ファイル構成</h2>
+
+    <div class="mermaid">
+        graph LR
+        subgraph Root["📦 piccheck/"]
+        A["SELEKT_Upload.html\n(アップロード画面)"]
+        B["SELEKT_Select.html\n(セレクト画面)"]
+        C["models/nsfwjs/\n(AIモデル)"]
+        subgraph Worker["worker/"]
+        D["worker.js\n(API)"]
+        E["wrangler.toml\n(設定)"]
+        end
+        end
+        style A fill:#4A9EE0,color:#fff,stroke:none
+        style B fill:#3BBFA5,color:#fff,stroke:none
+        style C fill:#9B7FE8,color:#fff,stroke:none
+        style D fill:#F38020,color:#fff,stroke:none
+    </div>
+
+    <!-- ===== 8. 今後のロードマップ ===== -->
+    <h2><span class="icon">🚀</span> 8. 今後のロードマップ</h2>
+
+    <table>
+        <tr>
+            <th>フェーズ</th>
+            <th>機能</th>
+            <th>優先度</th>
+        </tr>
+        <tr>
+            <td>Phase 1</td>
+            <td>管理者ダッシュボード（全セッション一覧）</td>
+            <td>🔴 高</td>
+        </tr>
+        <tr>
+            <td>Phase 1</td>
+            <td>アップロード時パスワード設定</td>
+            <td>🔴 高</td>
+        </tr>
+        <tr>
+            <td>Phase 2</td>
+            <td>多言語対応（英語）</td>
+            <td>🟡 中</td>
+        </tr>
+        <tr>
+            <td>Phase 2</td>
+            <td>Stripe課金連携</td>
+            <td>🟡 中</td>
+        </tr>
+        <tr>
+            <td>Phase 3</td>
+            <td>顔認識グルーピング</td>
+            <td>🟢 低</td>
+        </tr>
+        <tr>
+            <td>Phase 3</td>
+            <td>ピンボケ自動検出</td>
+            <td>🟢 低</td>
+        </tr>
+    </table>
+
+    <!-- ===== 9. 料金プラン（案） ===== -->
+    <h2><span class="icon">💎</span> 9. 料金プラン（案）</h2>
+
+    <div style="display:flex;gap:20px;margin:20px 0">
+        <div style="flex:1;border:1px solid #ddd;border-radius:16px;padding:24px;text-align:center;">
+            <div style="font-size:14px;color:#666;margin-bottom:8px">FREE</div>
+            <div style="font-size:32px;font-weight:700">¥0</div>
+            <div style="font-size:12px;color:#999;margin-bottom:16px">/月</div>
+            <ul style="list-style:none;padding:0;font-size:13px;color:#666;text-align:left">
+                <li style="padding:4px 0">✓ 月3セッション</li>
+                <li style="padding:4px 0">✓ 1セッション20枚まで</li>
+                <li style="padding:4px 0">✓ 7日間有効</li>
+            </ul>
+        </div>
+        <div class="price-box" style="flex:1">
+            <div class="plan">PRO</div>
+            <div><span class="price">¥2,980</span><span class="unit"> /月</span></div>
+            <ul>
+                <li>無制限セッション</li>
+                <li>1セッション200枚まで</li>
+                <li>30日間有効</li>
+                <li>AIセンシティブ検出</li>
+                <li>管理者ダッシュボード</li>
+                <li>パスワード保護</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>SE<span style="color:#4A9EE0">LEKT</span> — Photo Selection Platform</p>
+        <p>© 2026 SELEKT. All rights reserved.</p>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'base',
+            themeVariables: {
+                primaryColor: '#4A9EE0',
+                primaryTextColor: '#fff',
+                lineColor: '#888',
+                fontSize: '14px'
+            }
+        });
+    </script>
+</body>
+
+</html>
