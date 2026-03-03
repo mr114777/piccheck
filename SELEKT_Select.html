@@ -51,6 +51,18 @@
       --g6: #F06292;
     }
 
+    [data-theme="light"] {
+      --bg: #F5F5F8;
+      --surface: #FFFFFF;
+      --surface2: #EDEEF2;
+      --surface3: #E2E4EA;
+      --border: #D0D3DC;
+      --border2: #C0C4CF;
+      --text: #1A1C24;
+      --text-sub: #5A6070;
+      --text-dim: #8A90A0;
+    }
+
     body {
       font-family: 'Syne', 'Zen Kaku Gothic New', sans-serif;
       background: var(--bg);
@@ -2417,6 +2429,12 @@
           <button class="tb-btn" onclick="toggleGridSize()">
             <span id="gridIcon">⊞</span> 表示サイズ
           </button>
+          <button class="tb-btn" onclick="toggleTheme()" id="themeToggleBtn" title="ライト/ダーク切替">
+            🌙 テーマ
+          </button>
+          <span
+            style="font-size:10px;color:var(--text-dim);border:1px solid var(--border);border-radius:5px;padding:3px 8px;white-space:nowrap;cursor:help"
+            title="モーダル内で使用可能">⌨ O=OK H=保留 N=NG ←→=前後</span>
         </div>
       </div>
 
@@ -2643,6 +2661,8 @@
     <div class="modal-photo" id="modalPhoto">
       <div class="modal-meta">
         <span class="modal-fname" id="modalFname"></span>
+        <span class="modal-counter" id="modalCounter"
+          style="font-size:12px;color:var(--text-dim);margin-left:8px"></span>
         <span class="modal-group-tag" id="modalGroupTag"></span>
         <div class="modal-ai-badges" id="modalAiBadges"></div>
       </div>
@@ -3052,6 +3072,28 @@
             <div class="photo-grid" id="grid-${g.id}"></div>
           `;
             container.appendChild(section);
+
+            // Drop target
+            section.addEventListener('dragover', (e2) => {
+              e2.preventDefault();
+              section.style.outline = '2px dashed ' + g.color;
+              section.style.outlineOffset = '-2px';
+            });
+            section.addEventListener('dragleave', () => {
+              section.style.outline = 'none';
+            });
+            section.addEventListener('drop', (e2) => {
+              e2.preventDefault();
+              section.style.outline = 'none';
+              try {
+                const data = JSON.parse(e2.dataTransfer.getData('text/plain'));
+                if (data.isMulti && state.selected.size > 0) {
+                  bulkMoveToGroup(g.id);
+                } else if (data.photoId && data.groupId !== g.id) {
+                  movePhotoToGroup(data.photoId, data.groupId, g.id);
+                }
+              } catch (err) { }
+            });
           } catch (e) {
             console.error('[buildGroupUI] Error building group', g.id, e);
           }
@@ -3249,6 +3291,18 @@
       card.style.setProperty('--group-color', group.color);
       card.dataset.id = photo.id;
       card.dataset.group = group.id;
+
+      // Drag & drop
+      card.draggable = true;
+      card.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', JSON.stringify({
+          photoId: photo.id,
+          groupId: group.id,
+          isMulti: state.selected.size > 0 && state.selected.has(photo.id)
+        }));
+        card.style.opacity = '0.4';
+      });
+      card.addEventListener('dragend', () => { card.style.opacity = '1'; });
 
       // Selection checkbox
       const cb = document.createElement('div');
@@ -4164,6 +4218,7 @@
 
       // Meta
       document.getElementById('modalFname').textContent = photo.fname;
+      document.getElementById('modalCounter').textContent = (modalIdx + 1) + ' / ' + modalAllPhotos.length;
       const tag = document.getElementById('modalGroupTag');
       tag.textContent = `${group.label}: ${group.name}`;
       tag.style.background = group.color + '22';
@@ -4237,7 +4292,7 @@
     }
 
     function closeModal(e) {
-      if (e && e.target !== document.getElementById('modal')) return;
+      if (e && e.target && e.target !== document.getElementById('modal')) return;
       document.getElementById('modal').classList.remove('open');
     }
 
@@ -4768,6 +4823,65 @@
         titleEl.textContent = (newTitle || 'プロジェクト名未設定') + ' ✏️';
       }
     }
+
+    // ===== THEME TOGGLE =====
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isLight = html.getAttribute('data-theme') === 'light';
+      html.setAttribute('data-theme', isLight ? 'dark' : 'light');
+      localStorage.setItem('selekt-theme', isLight ? 'dark' : 'light');
+      const btn = document.getElementById('themeToggleBtn');
+      if (btn) btn.innerHTML = isLight ? '🌙 テーマ' : '☀️ テーマ';
+    }
+    // Init theme from localStorage
+    (function () {
+      const saved = localStorage.getItem('selekt-theme');
+      if (saved === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+        setTimeout(() => {
+          const btn = document.getElementById('themeToggleBtn');
+          if (btn) btn.innerHTML = '☀️ テーマ';
+        }, 100);
+      }
+    })();
+
+    // ===== KEYBOARD SHORTCUTS =====
+    document.addEventListener('keydown', function (e) {
+      // Ignore when typing in inputs
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
+
+      const modalOpen = document.getElementById('modal').classList.contains('open');
+
+      if (e.key === 'Escape' && modalOpen) {
+        closeModal();
+        return;
+      }
+
+      if (modalOpen) {
+        switch (e.key) {
+          case 'ArrowLeft':
+            e.preventDefault();
+            modalNav(-1);
+            break;
+          case 'ArrowRight':
+            e.preventDefault();
+            modalNav(1);
+            break;
+          case 'o': case 'O':
+            e.preventDefault();
+            modalAction('ok');
+            break;
+          case 'h': case 'H':
+            e.preventDefault();
+            modalAction('nearok');
+            break;
+          case 'n': case 'N':
+            e.preventDefault();
+            modalAction('ng');
+            break;
+        }
+      }
+    });
   </script>
 
   <!-- ===== MOBILE JS ===== -->
