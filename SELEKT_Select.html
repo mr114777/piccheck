@@ -3433,10 +3433,8 @@
       // Close any open dropdowns
       document.querySelectorAll('.move-dropdown').forEach(d => d.remove());
 
-      renderGroup(fromGroup);
-      renderGroup(toGroup);
-      renderGroupProgress();
       buildGroupUI();
+      renderAll();
       showToast(`${photo.fname} → ${toGroup.name || toGroup.label} に移動`, 'green');
     }
 
@@ -3530,12 +3528,8 @@
       state.selected.clear();
       state.lastSelectedId = null;
       document.getElementById('bulkMoveDd').style.display = 'none';
-      affectedGroups.forEach(gid => {
-        const g = GROUPS.find(x => x.id === gid);
-        if (g) renderGroup(g);
-      });
-      renderGroupProgress();
       buildGroupUI();
+      renderAll();
       updateSelectionUI();
       if (movedCount > 0) {
         showToast(movedCount + '\u679a\u3092 ' + (toGroup.name || toGroup.label) + ' \u306b\u79fb\u52d5\u3057\u307e\u3057\u305f', 'green');
