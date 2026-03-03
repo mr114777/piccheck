@@ -874,6 +874,109 @@
       background: var(--surface3);
     }
 
+    /* Selection checkbox */
+    .photo-select-cb {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 22px;
+      height: 22px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 5px;
+      z-index: 6;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #fff;
+    }
+
+    .photo-card:hover .photo-select-cb {
+      opacity: 0.7;
+    }
+
+    .photo-card.selected .photo-select-cb {
+      opacity: 1;
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .photo-card.selected {
+      outline: 2px solid var(--accent);
+      outline-offset: -2px;
+    }
+
+    /* Floating selection bar */
+    .selection-bar {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--surface2);
+      border: 1px solid var(--accent);
+      border-radius: 14px;
+      padding: 10px 20px;
+      display: none;
+      align-items: center;
+      gap: 14px;
+      z-index: 200;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(12px);
+    }
+
+    .selection-bar.show {
+      display: flex;
+    }
+
+    .sel-bar-count {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    .sel-bar-btn {
+      padding: 7px 14px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .sel-bar-btn:hover {
+      opacity: 0.85;
+    }
+
+    .sel-bar-btn.secondary {
+      background: var(--surface3);
+      color: var(--text-sub);
+    }
+
+    .sel-bar-move-dd {
+      position: absolute;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 6px;
+      min-width: 160px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    }
+
+    .sel-bar-move-dd .move-dropdown-item {
+      padding: 9px 12px;
+    }
+
     /* ===== BULK ACTION BAR ===== */
     .bulk-bar {
       background: var(--surface2);
@@ -2577,6 +2680,14 @@
     </div>
   </div>
 
+  <!-- Selection floating bar -->
+  <div class="selection-bar" id="selectionBar">
+    <span class="sel-bar-count" id="selBarCount">0枚選択中</span>
+    <button class="sel-bar-btn" onclick="openBulkMoveDropdown()">📂 グループ移動</button>
+    <button class="sel-bar-btn secondary" onclick="clearSelection()">✕ 解除</button>
+    <div class="sel-bar-move-dd" id="bulkMoveDd" style="display:none"></div>
+  </div>
+
   <!-- Confirm Modal -->
   <div class="confirm-overlay" id="confirmModal">
     <div class="confirm-box">
@@ -3001,7 +3112,9 @@
       aiFilterOn: false,
       modalPhotoId: null,
       sortOrder: 'default',
-      flatView: false
+      flatView: false,
+      selected: new Set(),
+      lastSelectedId: null
     };
 
     function getStatus(id) { return state.status.get(id) || null; }
@@ -3133,10 +3246,20 @@
       const hasComment = !!(state.comments.get(photo.id));
 
       const card = document.createElement('div');
-      card.className = 'photo-card' + (st ? ' ' + st : '');
+      card.className = 'photo-card' + (st ? ' ' + st : '') + (state.selected.has(photo.id) ? ' selected' : '');
       card.style.setProperty('--group-color', group.color);
       card.dataset.id = photo.id;
       card.dataset.group = group.id;
+
+      // Selection checkbox
+      const cb = document.createElement('div');
+      cb.className = 'photo-select-cb';
+      cb.textContent = state.selected.has(photo.id) ? '✓' : '';
+      cb.onclick = (e) => {
+        e.stopPropagation();
+        togglePhotoSelect(photo.id, e.shiftKey, group);
+      };
+      card.appendChild(cb);
 
       // Group color left border
       const borderEl = document.createElement('div');
@@ -3306,6 +3429,106 @@
       renderGroupProgress();
       buildGroupUI();
       showToast(`${photo.fname} → ${toGroup.name || toGroup.label} に移動`, 'green');
+    }
+
+    // ===== MULTI-SELECT =====
+    function togglePhotoSelect(photoId, isShift, group) {
+      if (isShift && state.lastSelectedId) {
+        const photos = group.photos;
+        const lastIdx = photos.findIndex(p => p.id === state.lastSelectedId);
+        const curIdx = photos.findIndex(p => p.id === photoId);
+        if (lastIdx !== -1 && curIdx !== -1) {
+          const [from, to] = [Math.min(lastIdx, curIdx), Math.max(lastIdx, curIdx)];
+          for (let i = from; i <= to; i++) {
+            state.selected.add(photos[i].id);
+          }
+        }
+      } else {
+        if (state.selected.has(photoId)) {
+          state.selected.delete(photoId);
+        } else {
+          state.selected.add(photoId);
+        }
+      }
+      state.lastSelectedId = photoId;
+      updateSelectionUI();
+    }
+
+    function updateSelectionUI() {
+      document.querySelectorAll('.photo-card').forEach(card => {
+        const id = card.dataset.id;
+        const cb = card.querySelector('.photo-select-cb');
+        if (state.selected.has(id)) {
+          card.classList.add('selected');
+          if (cb) cb.textContent = '\u2713';
+        } else {
+          card.classList.remove('selected');
+          if (cb) cb.textContent = '';
+        }
+      });
+      const bar = document.getElementById('selectionBar');
+      const count = state.selected.size;
+      if (count > 0) {
+        bar.classList.add('show');
+        document.getElementById('selBarCount').textContent = count + '\u679a\u9078\u629e\u4e2d';
+      } else {
+        bar.classList.remove('show');
+        document.getElementById('bulkMoveDd').style.display = 'none';
+      }
+    }
+
+    function openBulkMoveDropdown() {
+      const dd = document.getElementById('bulkMoveDd');
+      if (dd.style.display === 'block') { dd.style.display = 'none'; return; }
+      dd.innerHTML = '';
+      GROUPS.forEach(tg => {
+        const opt = document.createElement('div');
+        opt.className = 'move-dropdown-item';
+        opt.innerHTML = '<span style="width:8px;height:8px;border-radius:50%;background:' + tg.color + ';display:inline-block"></span> ' + (tg.name || tg.label);
+        opt.onclick = () => bulkMoveToGroup(tg.id);
+        dd.appendChild(opt);
+      });
+      dd.style.display = 'block';
+    }
+
+    function clearSelection() {
+      state.selected.clear();
+      state.lastSelectedId = null;
+      updateSelectionUI();
+    }
+
+    function bulkMoveToGroup(toGroupId) {
+      const toGroup = GROUPS.find(g => g.id === toGroupId);
+      if (!toGroup) return;
+      let movedCount = 0;
+      const affectedGroups = new Set();
+      state.selected.forEach(photoId => {
+        for (const g of GROUPS) {
+          const idx = g.photos.findIndex(p => p.id === photoId);
+          if (idx !== -1) {
+            if (g.id === toGroupId) break;
+            const [photo] = g.photos.splice(idx, 1);
+            toGroup.photos.push(photo);
+            affectedGroups.add(g.id);
+            movedCount++;
+            break;
+          }
+        }
+      });
+      affectedGroups.add(toGroupId);
+      state.selected.clear();
+      state.lastSelectedId = null;
+      document.getElementById('bulkMoveDd').style.display = 'none';
+      affectedGroups.forEach(gid => {
+        const g = GROUPS.find(x => x.id === gid);
+        if (g) renderGroup(g);
+      });
+      renderGroupProgress();
+      buildGroupUI();
+      updateSelectionUI();
+      if (movedCount > 0) {
+        showToast(movedCount + '\u679a\u3092 ' + (toGroup.name || toGroup.label) + ' \u306b\u79fb\u52d5\u3057\u307e\u3057\u305f', 'green');
+      }
     }
 
     // ===== BULK OPERATIONS =====
