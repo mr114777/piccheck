@@ -2418,7 +2418,7 @@
         <div id="sidebarStats">
           <div class="stat-row"><span class="stat-key">合計枚数</span><span class="stat-val" id="statTotal">0枚</span></div>
           <div class="stat-row"><span class="stat-key">希望セレクト枚数</span><span class="stat-val yellow"
-              id="statLimit">0枚</span>
+              id="statLimit">未設定</span>
           </div>
         </div>
       </div>
@@ -3089,7 +3089,7 @@
                 <button class="group-bulk-btn gbtn-ng" onclick="bulkSetGroup('${g.id}','ng')">全NG</button>
                 <button class="group-bulk-btn gbtn-reset" onclick="confirmGroupReset('${g.id}')">リセット</button>
               </div>
-              <span class="group-desired" id="desired-${g.id}" style="font-size:11px;color:var(--text-sub);cursor:pointer;margin-left:8px" onclick="event.stopPropagation();editGroupDesired('${g.id}')" title="クリックで変更">希望セレクト枚数: ${g.limit || 0}枚</span>
+              <span class="group-desired" id="desired-${g.id}" style="font-size:11px;color:var(--text-sub);cursor:pointer;margin-left:8px" onclick="event.stopPropagation();editGroupDesired('${g.id}')" title="クリックで変更">希望セレクト枚数: ${g.limit ? g.limit + '枚' : '未設定'}</span>
               <div class="group-limit-badge" id="limit-${g.id}">0 OK</div>
             </div>
             <div class="photo-grid" id="grid-${g.id}"></div>
@@ -3684,11 +3684,11 @@
       const num = parseInt(val) || 0;
       group.limit = num;
       const el = document.getElementById('desired-' + groupId);
-      if (el) el.textContent = '希望セレクト枚数: ' + num + '枚';
+      if (el) el.textContent = '希望セレクト枚数: ' + (num ? num + '枚' : '未設定');
       // Update total in sidebar
       const totalLimit = GROUPS.reduce((s, g) => s + (parseInt(g.limit) || 0), 0);
       const statLimit = document.getElementById('statLimit');
-      if (statLimit) statLimit.textContent = totalLimit + '枚';
+      if (statLimit) statLimit.textContent = totalLimit ? totalLimit + '枚' : '未設定';
       save();
     }
 
