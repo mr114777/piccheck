@@ -4184,14 +4184,20 @@
           _applyZoom(container, imgEl, e.clientX, e.clientY);
         }, { passive: false });
 
-        // Drag panning when zoomed (only while mouse button held)
+        // Drag panning when zoomed — scroll-based
         let _isDragging = false;
         let _didDrag = false;
+        let _dragStartX = 0, _dragStartY = 0;
+        let _scrollStartX = 0, _scrollStartY = 0;
 
         container.addEventListener('mousedown', function (e) {
           if (_zoomLevel <= 1) return;
           _isDragging = true;
           _didDrag = false;
+          _dragStartX = e.clientX;
+          _dragStartY = e.clientY;
+          _scrollStartX = container.scrollLeft;
+          _scrollStartY = container.scrollTop;
           container.classList.add('zoomed-dragging');
           e.preventDefault();
         });
@@ -4199,7 +4205,8 @@
         container.addEventListener('mousemove', function (e) {
           if (!_isDragging || _zoomLevel <= 1) return;
           _didDrag = true;
-          _panToPoint(container, imgEl, e.clientX, e.clientY);
+          container.scrollLeft = _scrollStartX - (e.clientX - _dragStartX);
+          container.scrollTop = _scrollStartY - (e.clientY - _dragStartY);
         });
 
         container.addEventListener('mouseup', function () {
@@ -4212,7 +4219,7 @@
           container.classList.remove('zoomed-dragging');
         });
 
-        // === TOUCH: delta-based drag panning ===
+        // === TOUCH: scroll-based drag + pinch zoom ===
         let _lastTouchX = 0, _lastTouchY = 0, _touchPanning = false;
         let _pinchStartDist = 0;
 
@@ -4266,7 +4273,8 @@
           e.preventDefault();
           const curX = e.touches[0].clientX;
           const curY = e.touches[0].clientY;
-          _panByDelta(container, imgEl, curX - _lastTouchX, curY - _lastTouchY);
+          container.scrollLeft -= (curX - _lastTouchX);
+          container.scrollTop -= (curY - _lastTouchY);
           _lastTouchX = curX;
           _lastTouchY = curY;
         }, { passive: false });
