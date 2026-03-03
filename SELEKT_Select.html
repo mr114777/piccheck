@@ -3257,7 +3257,7 @@
       cb.textContent = state.selected.has(photo.id) ? '✓' : '';
       cb.onclick = (e) => {
         e.stopPropagation();
-        togglePhotoSelect(photo.id, e.shiftKey, group);
+        togglePhotoSelect(photo.id, e.shiftKey, e.metaKey, group);
       };
       card.appendChild(cb);
 
@@ -3387,7 +3387,16 @@
         card.appendChild(moveBtn);
       }
 
-      card.onclick = () => openModal(photo, group);
+      card.onclick = (e) => {
+        if (e.shiftKey || e.metaKey) {
+          e.preventDefault();
+          togglePhotoSelect(photo.id, e.shiftKey, e.metaKey, group);
+        } else if (state.selected.size > 0) {
+          togglePhotoSelect(photo.id, false, true, group);
+        } else {
+          openModal(photo, group);
+        }
+      };
       return card;
     }
 
@@ -3432,8 +3441,9 @@
     }
 
     // ===== MULTI-SELECT =====
-    function togglePhotoSelect(photoId, isShift, group) {
+    function togglePhotoSelect(photoId, isShift, isCmd, group) {
       if (isShift && state.lastSelectedId) {
+        // Shift: range select
         const photos = group.photos;
         const lastIdx = photos.findIndex(p => p.id === state.lastSelectedId);
         const curIdx = photos.findIndex(p => p.id === photoId);
@@ -3444,6 +3454,7 @@
           }
         }
       } else {
+        // Cmd or normal: toggle individual
         if (state.selected.has(photoId)) {
           state.selected.delete(photoId);
         } else {
