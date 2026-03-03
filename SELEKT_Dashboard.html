@@ -448,13 +448,14 @@
 
         // Check auth
         async function init() {
-            const token = localStorage.getItem('selekt_token');
-
-            // Try API first
-            if (token) {
-                try {
+            try {
+                const token = localStorage.getItem('selekt_token');
+                if (token) {
+                    const controller = new AbortController();
+                    setTimeout(() => controller.abort(), 3000);
                     const res = await fetch(`${API}/api/auth/me`, {
                         headers: { 'Authorization': `Bearer ${token}` },
+                        signal: controller.signal
                     });
                     if (res.ok) {
                         const data = await res.json();
@@ -464,12 +465,11 @@
                         await loadProjects(token);
                         return;
                     }
-                } catch (err) {
-                    console.log('API unavailable, loading demo mode');
                 }
+            } catch (err) {
+                console.log('API unavailable, loading demo mode');
             }
-
-            // Demo mode
+            // Always fall through to demo mode
             loadDemoMode();
         }
 
