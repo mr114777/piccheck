@@ -158,21 +158,22 @@
     }
 
     .btn-complete {
-      background: var(--coral);
-      color: white;
-      border: none;
+      background: transparent;
+      color: var(--text-sub);
+      border: 1px solid var(--border2);
       padding: 8px 20px;
       border-radius: 8px;
-      font-size: 13px;
-      font-weight: 700;
+      font-size: 12px;
+      font-weight: 600;
       cursor: pointer;
       font-family: inherit;
-      transition: opacity 0.2s, transform 0.2s;
+      transition: all 0.2s;
     }
 
     .btn-complete:hover {
-      opacity: 0.85;
-      transform: translateY(-1px);
+      background: var(--surface3);
+      border-color: var(--text-sub);
+      color: var(--text);
     }
 
     /* Download Dropdown */
@@ -252,8 +253,8 @@
     }
 
     .dl-row-btn {
-      padding: 8px 16px;
-      background: var(--accent);
+      padding: 8px 18px;
+      background: linear-gradient(135deg, #4CAF7D, #3BBFA5);
       border: none;
       color: #fff;
       font-size: 12px;
@@ -263,13 +264,13 @@
       cursor: pointer;
       transition: all 0.15s;
       white-space: nowrap;
-      box-shadow: 0 2px 8px rgba(74, 158, 224, 0.3);
+      box-shadow: 0 2px 10px rgba(76, 175, 125, 0.35);
     }
 
     .dl-row-btn:hover {
-      opacity: 0.85;
+      opacity: 0.9;
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(74, 158, 224, 0.4);
+      box-shadow: 0 4px 14px rgba(76, 175, 125, 0.45);
     }
 
     .dl-sep {
