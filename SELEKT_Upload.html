@@ -1383,7 +1383,7 @@
                         name: folder,
                         reason: '',
                         color: GROUP_COLORS[i % GROUP_COLORS.length],
-                        limit: photos.length,
+                        limit: 0,
                         photos
                     });
                     i++;
@@ -1394,7 +1394,7 @@
                     name: 'A',
                     reason: '',
                     color: GROUP_COLORS[0],
-                    limit: uploadedFiles.length,
+                    limit: 0,
                     photos: [...uploadedFiles]
                 }];
             }
@@ -1642,7 +1642,7 @@
                 const label = LABELS[i] || String(i + 1);
                 const color = GROUP_COLORS[i % GROUP_COLORS.length];
                 const name = label;
-                const defaultLimit = g.photos.length;
+                const defaultLimit = 0;
                 return { label, name, reason: '', color, limit: defaultLimit, photos: g.photos };
             });
         }
@@ -1754,8 +1754,8 @@
               <div class="group-photo-count">${g.photos.length}枚</div>
               <div class="group-limit-wrap">
                 <span class="group-limit-label">希望セレクト枚数</span>
-                <input class="group-limit-input" type="number" min="1" max="${g.photos.length}"
-                  value="${g.limit}" id="glimit-${gi}"
+                <input class="group-limit-input" type="number" min="0" max="${g.photos.length}"
+                  value="${g.limit || ''}" id="glimit-${gi}"
                   onclick="event.stopPropagation()"
                   oninput="updateGroupLimit(${gi}, this.value)">
                 <span class="group-limit-unit">枚</span>
