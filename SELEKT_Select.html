@@ -2251,8 +2251,15 @@
     <div class="logo">SE<span>LEKT</span></div>
     <div class="topbar-divider"></div>
     <div class="session-name">
-      <strong id="sessionTitle" onclick="editSessionTitle()" style="cursor:pointer" title="クリックで編集">プロジェクト名未設定
-        ✏️</strong>
+      <strong id="sessionTitle" onclick="editSessionTitle()"
+        style="cursor:pointer;display:inline-flex;align-items:center;gap:6px" title="クリックで編集">プロジェクト名未設定
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round"
+          style="opacity:0.35;transition:opacity 0.15s;vertical-align:middle" onmouseover="this.style.opacity='0.8'"
+          onmouseout="this.style.opacity='0.35'">
+          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+          <path d="m15 5 4 4" />
+        </svg></strong>
       <span id="sessionPhotographer" style="color:var(--text-dim);margin-left:8px;font-size:11px"></span>
       <select id="langSelect" onchange="setLang(this.value)"
         style="background:var(--surface3);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:3px 8px;font-size:11px;cursor:pointer;font-family:inherit;margin-left:12px">
@@ -4791,7 +4798,7 @@
       const saved = localStorage.getItem('selekt_project_title');
       const titleEl = document.getElementById('sessionTitle');
       if (saved && titleEl) {
-        titleEl.textContent = saved + ' ✏️';
+        titleEl.innerHTML = saved + ' <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.35;vertical-align:middle"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>';
       }
       // Fallback expiry: 30 days from first visit
       let firstVisit = localStorage.getItem('selekt_first_visit');
@@ -4828,7 +4835,7 @@
       localStorage.setItem('selekt_project_title', newTitle);
       const titleEl = document.getElementById('sessionTitle');
       if (titleEl) {
-        titleEl.textContent = (newTitle || 'プロジェクト名未設定') + ' ✏️';
+        titleEl.innerHTML = (newTitle || 'プロジェクト名未設定') + ' <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.35;vertical-align:middle"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>';
       }
     }
 
