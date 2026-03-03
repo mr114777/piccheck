@@ -2254,6 +2254,12 @@
       <strong id="sessionTitle" onclick="editSessionTitle()" style="cursor:pointer" title="クリックで編集">プロジェクト名未設定
         ✏️</strong>
       <span id="sessionPhotographer" style="color:var(--text-dim);margin-left:8px;font-size:11px"></span>
+      <select id="langSelect" onchange="setLang(this.value)"
+        style="background:var(--surface3);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:3px 8px;font-size:11px;cursor:pointer;font-family:inherit;margin-left:12px">
+        <option value="ja">🇯🇵 日本語</option>
+        <option value="en">🇺🇸 English</option>
+        <option value="zh">🇨🇳 中文</option>
+      </select>
     </div>
     <div id="expiryBanner"
       style="display:none;background:linear-gradient(90deg,#F5C842,#ff9800);color:#111;padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;margin-left:auto;margin-right:8px;">
@@ -2436,12 +2442,7 @@
           <span
             style="font-size:10px;color:var(--text-dim);border:1px solid var(--border);border-radius:5px;padding:3px 8px;white-space:nowrap;cursor:help"
             title="モーダル内で使用可能">⌨ O=OK H=保留 N=NG ←→=前後</span>
-          <select id="langSelect" onchange="setLang(this.value)"
-            style="background:var(--surface3);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:3px 8px;font-size:11px;cursor:pointer;font-family:inherit;">
-            <option value="ja">🇯🇵 日本語</option>
-            <option value="en">🇺🇸 English</option>
-            <option value="zh">🇨🇳 中文</option>
-          </select>
+
         </div>
       </div>
 
