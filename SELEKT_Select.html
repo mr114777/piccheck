@@ -2435,6 +2435,12 @@
           <span
             style="font-size:10px;color:var(--text-dim);border:1px solid var(--border);border-radius:5px;padding:3px 8px;white-space:nowrap;cursor:help"
             title="モーダル内で使用可能">⌨ O=OK H=保留 N=NG ←→=前後</span>
+          <select id="langSelect" onchange="setLang(this.value)"
+            style="background:var(--surface3);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:3px 8px;font-size:11px;cursor:pointer;font-family:inherit;">
+            <option value="ja">🇯🇵 日本語</option>
+            <option value="en">🇺🇸 English</option>
+            <option value="zh">🇨🇳 中文</option>
+          </select>
         </div>
       </div>
 
@@ -4823,6 +4829,328 @@
         titleEl.textContent = (newTitle || 'プロジェクト名未設定') + ' ✏️';
       }
     }
+
+    // ===== I18N =====
+    const I18N = {
+      ja: {
+        title: 'SELEKT \u2014 \u5199\u771f\u30bb\u30ec\u30af\u30c8',
+        toolbarTitle: '\u5199\u771f\u306b\u30b9\u30c6\u30fc\u30bf\u30b9\u3092\u3064\u3051\u3066\u304f\u3060\u3055\u3044',
+        toolbarSub: 'OK / \u4fdd\u7559 / NG \u3067\u5224\u5b9a',
+        addPhoto: '\uff0b \u5199\u771f\u8ffd\u52a0',
+        sensitive: '\ud83d\udee1\ufe0f \u30bb\u30f3\u30b7\u30c6\u30a3\u30d6\u5224\u5b9a',
+        gridSize: '\u8868\u793a\u30b5\u30a4\u30ba',
+        theme: '\u30c6\u30fc\u30de',
+        shortcutHint: '\u2328 O=OK H=\u4fdd\u7559 N=NG \u2190\u2192=\u524d\u5f8c',
+        bulkAll: '\u5168\u4f53\uff1a',
+        allOk: '\u2713 \u5168\u3066OK',
+        allHold: '\u25b3 \u5168\u3066\u4fdd\u7559',
+        allNg: '\u2715 \u5168\u3066NG',
+        reset: '\u30ea\u30bb\u30c3\u30c8',
+        filterLabel: '\u8868\u793a\u30d5\u30a3\u30eb\u30bf\u30fc',
+        filterAll: '\u5168\u3066\u8868\u793a',
+        filterOk: 'OK',
+        filterHold: '\u4fdd\u7559',
+        filterNg: 'NG',
+        filterNone: '\u672a\u5224\u5b9a',
+        sortDefault: '\u30c7\u30d5\u30a9\u30eb\u30c8',
+        sortNameAsc: '\u30d5\u30a1\u30a4\u30eb\u540d A\u2192Z',
+        sortNameDesc: '\u30d5\u30a1\u30a4\u30eb\u540d Z\u2192A',
+        sortStatus: '\u30b9\u30c6\u30fc\u30bf\u30b9\u9806',
+        flatView: '\u30b0\u30eb\u30fc\u30d7\u3092\u307e\u305f\u3044\u3067\u4e00\u89a7\u8868\u793a',
+        groupList: '\u30b0\u30eb\u30fc\u30d7\u4e00\u89a7',
+        addGroup: '\uff0b \u30b0\u30eb\u30fc\u30d7\u8ffd\u52a0',
+        totalPhotos: '\u5408\u8a08\u679a\u6570',
+        selectLimit: '\u9078\u629e\u4e0a\u9650',
+        selectProgress: '\u30bb\u30ec\u30af\u30c8\u9032\u6357',
+        dlFull: '\u30d5\u30eb\u30b5\u30a4\u30ba\uff08\u539f\u5bf8\uff09',
+        dlSns: 'SNS\u7528\uff081\u301c3MB\u5727\u7e2e\uff09',
+        dlAll: '\u5168\u90e8',
+        dlOkOnly: '\u2713 OK\u306e\u307f',
+        dlOkHold: '\u25b3 OK+\u4fdd\u7559',
+        dlNgOnly: '\u2715 NG\u306e\u307f',
+        exportBtn: '\u30bb\u30ec\u30af\u30c8\u7d50\u679c\u3092\u66f8\u304d\u51fa\u3059 \u2192',
+        groupProgress: '\u30b0\u30eb\u30fc\u30d7\u5225 \u9032\u6357',
+        okList: 'OK \u4e00\u89a7',
+        holdList: '\u4fdd\u7559 \u4e00\u89a7',
+        ngList: 'NG \u4e00\u89a7',
+        noOk: 'OK \u5199\u771f\u3092\u9078\u3093\u3067\u304f\u3060\u3055\u3044',
+        noHold: '\u4fdd\u7559 \u306f\u3042\u308a\u307e\u305b\u3093',
+        noNg: 'NG \u306f\u3042\u308a\u307e\u305b\u3093',
+        modalOk: '\u2713 OK',
+        modalHold: '\u25b3 \u4fdd\u7559',
+        modalNg: '\u2715 NG',
+        modalSave: '\ud83d\udcbe \u4fdd\u5b58',
+        commentPlaceholder: '\u4fee\u6b63\u6307\u793a\u30fb\u30b3\u30e1\u30f3\u30c8\u3092\u5165\u529b\uff08\u4f8b\uff1a\u76ee\u3092\u958b\u3051\u305f\u30ab\u30c3\u30c8\u3092\u63a1\u7528\uff09',
+        qualityNotice: '\u26a1 \u30d7\u30ec\u30d3\u30e5\u30fc\u7528\u306b\u753b\u8cea\u3092\u843d\u3068\u3057\u3066\u3044\u307e\u3059',
+        fullQuality: '\ud83d\udcf7 \u9ad8\u753b\u8cea\u30e2\u30fc\u30c9\u306b\u5207\u66ff',
+        confirmTitle: '\u30bb\u30ec\u30af\u30c8\u3092\u9001\u4fe1\u3057\u307e\u3059\u304b\uff1f',
+        confirmDesc: '\u9078\u629e\u5185\u5bb9\u3092\u30ab\u30e1\u30e9\u30de\u30f3\u306b\u9001\u4fe1\u3057\u307e\u3059\u3002',
+        cancel: '\u30ad\u30e3\u30f3\u30bb\u30eb',
+        send: '\u9001\u4fe1\u3059\u308b \u2192',
+        selected: '\u9078\u629e\u6e08\u307f',
+        ngFlag: 'NG \u30d5\u30e9\u30b0',
+        groupOk: '\u5168OK',
+        groupHold: '\u5168\u4fdd\u7559',
+        groupNg: '\u5168NG',
+        groupReset: '\u30ea\u30bb\u30c3\u30c8',
+        selCount: '\u679a\u9078\u629e\u4e2d',
+        groupMove: '\ud83d\udcc2 \u30b0\u30eb\u30fc\u30d7\u79fb\u52d5',
+        clearSel: '\u2715 \u89e3\u9664',
+        photos: '\u679a',
+      },
+      en: {
+        title: 'SELEKT \u2014 Photo Selection',
+        toolbarTitle: 'Set status for each photo',
+        toolbarSub: 'Judge with OK / Hold / NG',
+        addPhoto: '+ Add Photos',
+        sensitive: '\ud83d\udee1\ufe0f Sensitive Check',
+        gridSize: 'Grid Size',
+        theme: 'Theme',
+        shortcutHint: '\u2328 O=OK H=Hold N=NG \u2190\u2192=Nav',
+        bulkAll: 'All:',
+        allOk: '\u2713 All OK',
+        allHold: '\u25b3 All Hold',
+        allNg: '\u2715 All NG',
+        reset: 'Reset',
+        filterLabel: 'Display Filter',
+        filterAll: 'Show All',
+        filterOk: 'OK',
+        filterHold: 'Hold',
+        filterNg: 'NG',
+        filterNone: 'Unjudged',
+        sortDefault: 'Default',
+        sortNameAsc: 'Filename A\u2192Z',
+        sortNameDesc: 'Filename Z\u2192A',
+        sortStatus: 'By Status',
+        flatView: 'Show all photos in one list',
+        groupList: 'Groups',
+        addGroup: '+ Add Group',
+        totalPhotos: 'Total Photos',
+        selectLimit: 'Selection Limit',
+        selectProgress: 'Selection Progress',
+        dlFull: 'Full Size (Original)',
+        dlSns: 'SNS (1-3MB Compressed)',
+        dlAll: 'All',
+        dlOkOnly: '\u2713 OK Only',
+        dlOkHold: '\u25b3 OK+Hold',
+        dlNgOnly: '\u2715 NG Only',
+        exportBtn: 'Export Selection Results \u2192',
+        groupProgress: 'Group Progress',
+        okList: 'OK List',
+        holdList: 'Hold List',
+        ngList: 'NG List',
+        noOk: 'Select OK photos',
+        noHold: 'No photos on hold',
+        noNg: 'No NG photos',
+        modalOk: '\u2713 OK',
+        modalHold: '\u25b3 Hold',
+        modalNg: '\u2715 NG',
+        modalSave: '\ud83d\udcbe Save',
+        commentPlaceholder: 'Enter editing notes (e.g. Use the shot with open eyes)',
+        qualityNotice: '\u26a1 Preview quality reduced',
+        fullQuality: '\ud83d\udcf7 Switch to Full Quality',
+        confirmTitle: 'Submit selection?',
+        confirmDesc: 'Send selection results to the photographer.',
+        cancel: 'Cancel',
+        send: 'Send \u2192',
+        selected: 'Selected',
+        ngFlag: 'NG Flag',
+        groupOk: 'All OK',
+        groupHold: 'All Hold',
+        groupNg: 'All NG',
+        groupReset: 'Reset',
+        selCount: ' selected',
+        groupMove: '\ud83d\udcc2 Move Group',
+        clearSel: '\u2715 Clear',
+        photos: '',
+      },
+      zh: {
+        title: 'SELEKT \u2014 \u7167\u7247\u7b5b\u9009',
+        toolbarTitle: '\u8bf7\u4e3a\u7167\u7247\u8bbe\u7f6e\u72b6\u6001',
+        toolbarSub: '\u7528 OK / \u5f85\u5b9a / NG \u5224\u5b9a',
+        addPhoto: '+ \u6dfb\u52a0\u7167\u7247',
+        sensitive: '\ud83d\udee1\ufe0f \u654f\u611f\u5185\u5bb9\u68c0\u6d4b',
+        gridSize: '\u663e\u793a\u5927\u5c0f',
+        theme: '\u4e3b\u9898',
+        shortcutHint: '\u2328 O=OK H=\u5f85\u5b9a N=NG \u2190\u2192=\u524d\u540e',
+        bulkAll: '\u5168\u90e8\uff1a',
+        allOk: '\u2713 \u5168\u90e8OK',
+        allHold: '\u25b3 \u5168\u90e8\u5f85\u5b9a',
+        allNg: '\u2715 \u5168\u90e8NG',
+        reset: '\u91cd\u7f6e',
+        filterLabel: '\u663e\u793a\u8fc7\u6ee4',
+        filterAll: '\u5168\u90e8\u663e\u793a',
+        filterOk: 'OK',
+        filterHold: '\u5f85\u5b9a',
+        filterNg: 'NG',
+        filterNone: '\u672a\u5224\u5b9a',
+        sortDefault: '\u9ed8\u8ba4',
+        sortNameAsc: '\u6587\u4ef6\u540d A\u2192Z',
+        sortNameDesc: '\u6587\u4ef6\u540d Z\u2192A',
+        sortStatus: '\u6309\u72b6\u6001',
+        flatView: '\u8de8\u7ec4\u663e\u793a\u6240\u6709\u7167\u7247',
+        groupList: '\u5206\u7ec4\u5217\u8868',
+        addGroup: '+ \u6dfb\u52a0\u5206\u7ec4',
+        totalPhotos: '\u603b\u7167\u7247\u6570',
+        selectLimit: '\u9009\u62e9\u4e0a\u9650',
+        selectProgress: '\u7b5b\u9009\u8fdb\u5ea6',
+        dlFull: '\u539f\u59cb\u5c3a\u5bf8',
+        dlSns: 'SNS\u7528\uff081-3MB\u538b\u7f29\uff09',
+        dlAll: '\u5168\u90e8',
+        dlOkOnly: '\u2713 \u4ec5OK',
+        dlOkHold: '\u25b3 OK+\u5f85\u5b9a',
+        dlNgOnly: '\u2715 \u4ec5NG',
+        exportBtn: '\u5bfc\u51fa\u7b5b\u9009\u7ed3\u679c \u2192',
+        groupProgress: '\u5206\u7ec4\u8fdb\u5ea6',
+        okList: 'OK \u5217\u8868',
+        holdList: '\u5f85\u5b9a \u5217\u8868',
+        ngList: 'NG \u5217\u8868',
+        noOk: '\u8bf7\u9009\u62e9OK\u7167\u7247',
+        noHold: '\u6ca1\u6709\u5f85\u5b9a\u7167\u7247',
+        noNg: '\u6ca1\u6709NG\u7167\u7247',
+        modalOk: '\u2713 OK',
+        modalHold: '\u25b3 \u5f85\u5b9a',
+        modalNg: '\u2715 NG',
+        modalSave: '\ud83d\udcbe \u4fdd\u5b58',
+        commentPlaceholder: '\u8f93\u5165\u4fee\u6539\u6307\u793a\uff08\u4f8b\uff1a\u4f7f\u7528\u7741\u773c\u7684\u7167\u7247\uff09',
+        qualityNotice: '\u26a1 \u9884\u89c8\u7528\u4f4e\u753b\u8d28',
+        fullQuality: '\ud83d\udcf7 \u5207\u6362\u9ad8\u753b\u8d28',
+        confirmTitle: '\u63d0\u4ea4\u7b5b\u9009\u7ed3\u679c\uff1f',
+        confirmDesc: '\u5c06\u7b5b\u9009\u7ed3\u679c\u53d1\u9001\u7ed9\u6444\u5f71\u5e08\u3002',
+        cancel: '\u53d6\u6d88',
+        send: '\u53d1\u9001 \u2192',
+        selected: '\u5df2\u9009',
+        ngFlag: 'NG \u6807\u8bb0',
+        groupOk: '\u5168OK',
+        groupHold: '\u5168\u5f85\u5b9a',
+        groupNg: '\u5168NG',
+        groupReset: '\u91cd\u7f6e',
+        selCount: ' \u5df2\u9009',
+        groupMove: '\ud83d\udcc2 \u79fb\u52a8\u5206\u7ec4',
+        clearSel: '\u2715 \u53d6\u6d88',
+        photos: '\u5f20',
+      }
+    };
+
+    let currentLang = 'ja';
+    function t(key) { return (I18N[currentLang] && I18N[currentLang][key]) || I18N.ja[key] || key; }
+
+    function setLang(lang) {
+      currentLang = lang;
+      localStorage.setItem('selekt-lang', lang);
+      document.title = t('title');
+
+      // Toolbar
+      const tt = document.querySelector('.toolbar-title');
+      const ts = document.querySelector('.toolbar-sub');
+      if (tt) tt.textContent = t('toolbarTitle');
+      if (ts) ts.textContent = t('toolbarSub');
+
+      // Bulk bar
+      const bl = document.querySelector('.bulk-label');
+      if (bl) bl.textContent = t('bulkAll');
+      const bulkBtns = document.querySelectorAll('.bulk-btn');
+      bulkBtns.forEach(b => {
+        if (b.classList.contains('bulk-btn-ok')) b.textContent = t('allOk');
+        if (b.classList.contains('bulk-btn-nearok')) b.textContent = t('allHold');
+        if (b.classList.contains('bulk-btn-ng')) b.textContent = t('allNg');
+        if (b.classList.contains('bulk-btn-reset')) b.textContent = t('reset');
+      });
+
+      // Sidebar
+      document.querySelectorAll('.sidebar-label').forEach((el, i) => {
+        if (i === 0) el.textContent = t('filterLabel');
+      });
+      const filterBtns = document.querySelectorAll('.filter-btn');
+      filterBtns.forEach(b => {
+        const txt = b.textContent.trim();
+        if (txt.includes('全て') || txt.includes('Show') || txt.includes('全部')) b.lastChild.textContent = ' ' + t('filterAll');
+      });
+
+      // Sidebar labels
+      document.querySelectorAll('.sidebar-label').forEach(el => {
+        const txt = el.textContent.trim();
+        if (txt.includes('グループ') || txt.includes('Groups') || txt.includes('分组')) el.textContent = t('groupList');
+        if (txt.includes('フィルター') || txt.includes('Filter') || txt.includes('过滤')) el.textContent = t('filterLabel');
+      });
+
+      // Stat rows
+      document.querySelectorAll('.stat-key').forEach(el => {
+        const txt = el.textContent.trim();
+        if (txt.includes('合計') || txt.includes('Total') || txt.includes('总')) el.textContent = t('totalPhotos');
+        if (txt.includes('上限') || txt.includes('Limit') || txt.includes('上限')) el.textContent = t('selectLimit');
+      });
+
+      // Export button
+      document.querySelectorAll('.btn-complete, .bn-complete').forEach(b => {
+        b.textContent = t('exportBtn');
+      });
+
+      // Modal buttons
+      const modalOk = document.getElementById('modalOkBtn');
+      const modalNearok = document.getElementById('modalNearokBtn');
+      const modalNg = document.getElementById('modalNgBtn');
+      const modalDl = document.getElementById('modalDlBtn');
+      if (modalOk) modalOk.textContent = t('modalOk');
+      if (modalNearok) modalNearok.textContent = t('modalHold');
+      if (modalNg) modalNg.textContent = t('modalNg');
+      if (modalDl) modalDl.textContent = t('modalSave');
+
+      // Comment placeholder
+      const cmt = document.getElementById('modalComment');
+      if (cmt) cmt.placeholder = t('commentPlaceholder');
+
+      // Quality notice
+      const qn = document.getElementById('modalQualityNotice');
+      if (qn) qn.textContent = t('qualityNotice');
+      const fb = document.getElementById('modalFullsizeBtn');
+      if (fb) fb.textContent = t('fullQuality');
+
+      // Confirm modal
+      const ct = document.querySelector('.confirm-title');
+      if (ct) ct.textContent = t('confirmTitle');
+
+      // Selection bar
+      const selBarBtn = document.querySelector('.sel-bar-btn');
+      if (selBarBtn) selBarBtn.textContent = t('groupMove');
+      const selBarClear = document.querySelectorAll('.sel-bar-btn')[1];
+      if (selBarClear) selBarClear.textContent = t('clearSel');
+
+      // Download labels
+      document.querySelectorAll('.dl-menu-label').forEach(el => {
+        const txt = el.textContent;
+        if (txt.includes('フル') || txt.includes('Full') || txt.includes('原始')) el.textContent = t('dlFull');
+        if (txt.includes('SNS')) el.textContent = t('dlSns');
+      });
+
+      // Progress label
+      const pl = document.querySelector('.progress-label');
+      if (pl) pl.textContent = t('selectProgress');
+
+      // Right panel labels
+      document.querySelectorAll('.rp-label').forEach(el => {
+        const txt = el.textContent.trim();
+        if (txt.includes('グループ別') || txt.includes('Group') || txt.includes('分组')) el.textContent = t('groupProgress');
+      });
+
+      // Group bulk buttons
+      document.querySelectorAll('.gbtn-ok').forEach(b => b.textContent = t('groupOk'));
+      document.querySelectorAll('.gbtn-nearok').forEach(b => b.textContent = t('groupHold'));
+      document.querySelectorAll('.gbtn-ng').forEach(b => b.textContent = t('groupNg'));
+      document.querySelectorAll('.gbtn-reset').forEach(b => b.textContent = t('groupReset'));
+
+      // Lang selector
+      const ls = document.getElementById('langSelect');
+      if (ls) ls.value = lang;
+    }
+
+    // Init language
+    (function () {
+      const saved = localStorage.getItem('selekt-lang');
+      if (saved && saved !== 'ja') {
+        setTimeout(() => setLang(saved), 200);
+      }
+    })();
 
     // ===== THEME TOGGLE =====
     function toggleTheme() {
