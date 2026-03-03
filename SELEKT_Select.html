@@ -2428,7 +2428,7 @@
         <button class="bulk-btn bulk-btn-nearok" onclick="bulkSetAll('nearok')">△ 全て保留</button>
         <button class="bulk-btn bulk-btn-ng" onclick="bulkSetAll('ng')">✕ 全てNG</button>
         <div class="bulk-sep"></div>
-        <button class="bulk-btn bulk-btn-reset" onclick="bulkSetAll(null)">リセット</button>
+        <button class="bulk-btn bulk-btn-reset" onclick="confirmBulkReset()">リセット</button>
       </div>
 
       <!-- Group sections generated dynamically by buildGroupSections() -->
@@ -3543,6 +3543,15 @@
     }
 
     // ===== BULK OPERATIONS =====
+    function confirmBulkReset() {
+      const total = [...state.status.values()].length;
+      if (total === 0) { showToast('リセットする判定がありません', ''); return; }
+      document.getElementById('groupResetDesc').textContent =
+        '全グループの OK / 保留 / NG（' + total + '件）の判定がすべて消えます。';
+      _pendingResetGroupId = '__ALL__';
+      document.getElementById('groupResetModal').classList.add('open');
+    }
+
     function bulkSetAll(newStatus) {
       GROUPS.forEach(g => {
         g.photos.forEach(p => {
@@ -3590,11 +3599,15 @@
 
     function doGroupReset() {
       if (!_pendingResetGroupId) return;
-      const group = GROUPS.find(g => g.id === _pendingResetGroupId);
-      if (group) {
-        group.photos.forEach(p => state.status.delete(p.id));
-        refreshUI(group);
-        showToast(`${group.name} をリセットしました`, '');
+      if (_pendingResetGroupId === '__ALL__') {
+        bulkSetAll(null);
+      } else {
+        const group = GROUPS.find(g => g.id === _pendingResetGroupId);
+        if (group) {
+          group.photos.forEach(p => state.status.delete(p.id));
+          refreshUI(group);
+          showToast(`${group.name} \u3092\u30ea\u30bb\u30c3\u30c8\u3057\u307e\u3057\u305f`, '');
+        }
       }
       document.getElementById('groupResetModal').classList.remove('open');
       _pendingResetGroupId = null;
