@@ -817,6 +817,63 @@
       pointer-events: none;
     }
 
+    .photo-move-btn {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 22px;
+      height: 22px;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: #ccc;
+      cursor: pointer;
+      z-index: 5;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .photo-card:hover .photo-move-btn {
+      opacity: 1;
+    }
+
+    .photo-move-btn:hover {
+      background: rgba(74, 158, 224, 0.8);
+      color: #fff;
+    }
+
+    .move-dropdown {
+      position: absolute;
+      top: 28px;
+      left: 4px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 4px;
+      min-width: 120px;
+      z-index: 20;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    }
+
+    .move-dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      font-size: 12px;
+      color: var(--text);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+
+    .move-dropdown-item:hover {
+      background: var(--surface3);
+    }
+
     /* ===== BULK ACTION BAR ===== */
     .bulk-bar {
       background: var(--surface2);
@@ -3174,6 +3231,39 @@
       }
 
       card.appendChild(overlay);
+
+      // Move-to-group button (top-left)
+      if (GROUPS.length > 1) {
+        const moveBtn = document.createElement('div');
+        moveBtn.className = 'photo-move-btn';
+        moveBtn.textContent = '↔';
+        moveBtn.title = 'グループ移動';
+        moveBtn.onclick = (e) => {
+          e.stopPropagation();
+          // Toggle dropdown
+          const existing = card.querySelector('.move-dropdown');
+          if (existing) { existing.remove(); return; }
+          // Close any other open dropdowns
+          document.querySelectorAll('.move-dropdown').forEach(d => d.remove());
+          const dd = document.createElement('div');
+          dd.className = 'move-dropdown';
+          GROUPS.filter(g => g.id !== group.id).forEach(tg => {
+            const opt = document.createElement('div');
+            opt.className = 'move-dropdown-item';
+            opt.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:${tg.color};display:inline-block"></span> ${tg.name || tg.label}`;
+            opt.onclick = (ev) => { ev.stopPropagation(); movePhotoToGroup(photo.id, group.id, tg.id); };
+            dd.appendChild(opt);
+          });
+          card.appendChild(dd);
+          // Close on outside click
+          setTimeout(() => {
+            const closer = (ev) => { if (!dd.contains(ev.target)) { dd.remove(); document.removeEventListener('click', closer); } };
+            document.addEventListener('click', closer);
+          }, 10);
+        };
+        card.appendChild(moveBtn);
+      }
+
       card.onclick = () => openModal(photo, group);
       return card;
     }
@@ -3195,6 +3285,27 @@
         showToast(msgs[newStatus], colors[newStatus]);
       }
       refreshUI(group);
+    }
+
+    function movePhotoToGroup(photoId, fromGroupId, toGroupId) {
+      const fromGroup = GROUPS.find(g => g.id === fromGroupId);
+      const toGroup = GROUPS.find(g => g.id === toGroupId);
+      if (!fromGroup || !toGroup) return;
+
+      const photoIdx = fromGroup.photos.findIndex(p => p.id === photoId);
+      if (photoIdx === -1) return;
+
+      const [photo] = fromGroup.photos.splice(photoIdx, 1);
+      toGroup.photos.push(photo);
+
+      // Close any open dropdowns
+      document.querySelectorAll('.move-dropdown').forEach(d => d.remove());
+
+      renderGroup(fromGroup);
+      renderGroup(toGroup);
+      renderGroupProgress();
+      buildGroupUI();
+      showToast(`${photo.fname} → ${toGroup.name || toGroup.label} に移動`, 'green');
     }
 
     // ===== BULK OPERATIONS =====
