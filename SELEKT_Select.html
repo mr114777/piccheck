@@ -3433,9 +3433,13 @@
       // Close any open dropdowns
       document.querySelectorAll('.move-dropdown').forEach(d => d.remove());
 
-      buildGroupUI();
-      renderAll();
-      showToast(`${photo.fname} → ${toGroup.name || toGroup.label} に移動`, 'green');
+      // Re-render only affected groups (don't rebuild entire DOM)
+      renderGroup(fromGroup);
+      renderGroup(toGroup);
+      renderGroupProgress();
+      // Update sidebar counts
+      updateSidebarCounts();
+      showToast(`${photo.fname} \u2192 ${toGroup.name || toGroup.label} \u306b\u79fb\u52d5`, 'green');
     }
 
     // ===== MULTI-SELECT =====
@@ -3528,8 +3532,10 @@
       state.selected.clear();
       state.lastSelectedId = null;
       document.getElementById('bulkMoveDd').style.display = 'none';
-      buildGroupUI();
-      renderAll();
+      // Re-render all groups (don't rebuild entire DOM)
+      GROUPS.forEach(g => renderGroup(g));
+      renderGroupProgress();
+      updateSidebarCounts();
       updateSelectionUI();
       if (movedCount > 0) {
         showToast(movedCount + '\u679a\u3092 ' + (toGroup.name || toGroup.label) + ' \u306b\u79fb\u52d5\u3057\u307e\u3057\u305f', 'green');
@@ -3682,6 +3688,33 @@
       </div>`;
         container.appendChild(div);
       });
+    }
+
+    function updateSidebarCounts() {
+      GROUPS.forEach(g => {
+        // Update sidebar nav count
+        const navSel = document.getElementById('nav-' + g.id);
+        if (navSel) {
+          const okInGroup = g.photos.filter(p => getStatus(p.id) === 'ok').length;
+          navSel.textContent = okInGroup + '/' + (g.limit || g.photos.length);
+        }
+        // Update group section header meta (photo count)
+        const gmeta = document.getElementById('gmeta-' + g.id);
+        if (gmeta) gmeta.textContent = g.photos.length + '\u679a';
+        // Update limit badge
+        const limitBadge = document.getElementById('limit-' + g.id);
+        if (limitBadge) {
+          const okInGroup = g.photos.filter(p => getStatus(p.id) === 'ok').length;
+          limitBadge.textContent = okInGroup + ' OK';
+        }
+      });
+      // Update sidebar stats
+      const totalPhotos = GROUPS.reduce((acc, g) => acc + g.photos.length, 0);
+      const totalLimit = GROUPS.reduce((acc, g) => acc + (g.limit || g.photos.length), 0);
+      const statTotal = document.getElementById('statTotal');
+      const statLimit = document.getElementById('statLimit');
+      if (statTotal) statTotal.textContent = totalPhotos + '\u679a';
+      if (statLimit) statLimit.textContent = totalLimit + '\u679a';
     }
 
     function _makeThumb(photo, group) {
