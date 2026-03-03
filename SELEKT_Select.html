@@ -3616,7 +3616,7 @@
       const total = [...state.status.values()].length;
       if (total === 0) { showToast('リセットする判定がありません', ''); return; }
       document.getElementById('groupResetDesc').textContent =
-        '全グループの OK / 保留 / NG（' + total + '件）の判定がすべて消えます。';
+        'すべてのセレクトステータス（OK / 保留 / NG）がリセットされます。（' + total + '件）';
       _pendingResetGroupId = '__ALL__';
       document.getElementById('groupResetModal').classList.add('open');
     }
