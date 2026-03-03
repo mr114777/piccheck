@@ -410,7 +410,7 @@
             <div style="font-weight:600;font-size:14px" id="menuName">---</div>
             <div style="font-size:11px;color:var(--text-dim)" id="menuId">@---</div>
         </div>
-        <a class="user-menu-item" href="SELEKT_Pricing.html">💎 プラン</a>
+        <a class="user-menu-item" href="SELEKT_Pricing.html">✦ プラン</a>
         <a class="user-menu-item danger" href="#" onclick="logout()">ログアウト</a>
     </div>
 
@@ -440,10 +440,10 @@
 
         // Role labels
         const roleLabels = {
-            photographer: '📷 カメラマン',
-            model: '👤 モデル',
-            company: '🏢 企業',
-            private: '🔒 プライベート',
+            photographer: 'カメラマン',
+            model: 'モデル',
+            company: '企業',
+            private: 'プライベート',
         };
 
         // Check auth
@@ -607,7 +607,7 @@
             const isPhotographer = currentUser.role === 'photographer';
             document.getElementById('projectList').innerHTML = `
       <div class="empty-state">
-        <span class="icon">${isPhotographer ? '📤' : '📥'}</span>
+        <span class="icon" style="font-size:28px;opacity:0.6">${isPhotographer ? '↗' : '↙'}</span>
         <h3>まだプロジェクトがありません</h3>
         <p>${isPhotographer
                     ? '写真をアップロードしてクライアントに共有しましょう'
@@ -641,16 +641,16 @@
                 if (total === 0) {
                     status = '空'; statusClass = 'status-pending';
                 } else if (selected === 0) {
-                    status = '🔴 未セレクト'; statusClass = 'status-pending';
+                    status = '● 未セレクト'; statusClass = 'status-pending';
                 } else if (selected < total) {
-                    status = '🟡 セレクト中'; statusClass = 'status-progress';
+                    status = '● セレクト中'; statusClass = 'status-progress';
                 } else {
-                    status = '🟢 完了'; statusClass = 'status-done';
+                    status = '● 完了'; statusClass = 'status-done';
                 }
 
                 const date = new Date(p.createdAt);
                 const dateStr = `${date.getMonth() + 1}/${date.getDate()}`;
-                const typeLabel = p._type === 'sent' ? '📤 送信' : '📥 受信';
+                const typeLabel = p._type === 'sent' ? '↗ 送信' : '↙ 受信';
                 const progressPct = total > 0 ? Math.round((selected / total) * 100) : 0;
                 const selectUrl = `SELEKT_Select.html?session=${p.id}`;
 
@@ -662,8 +662,8 @@
           </div>
           <div class="project-meta">
             <span>${typeLabel}</span>
-            <span>📅 ${dateStr}</span>
-            <span>📷 ${total}枚</span>
+            <span>${dateStr}</span>
+            <span>${total}枚</span>
             ${p.photographer ? `<span>by ${p.photographer}</span>` : ''}
           </div>
           ${total > 0 ? `
