@@ -2416,7 +2416,8 @@
         <div class="sidebar-label">撮影情報</div>
         <div id="sidebarStats">
           <div class="stat-row"><span class="stat-key">合計枚数</span><span class="stat-val" id="statTotal">0枚</span></div>
-          <div class="stat-row"><span class="stat-key">選択上限</span><span class="stat-val yellow" id="statLimit">0枚</span>
+          <div class="stat-row"><span class="stat-key">希望セレクト枚数</span><span class="stat-val yellow"
+              id="statLimit">0枚</span>
           </div>
         </div>
       </div>
@@ -2452,6 +2453,8 @@
             style="font-size:10px;color:var(--text-dim);border:1px solid var(--border);border-radius:5px;padding:3px 8px;white-space:nowrap;cursor:help"
             title="モーダル内で使用可能">⌨ O=OK H=保留 N=NG ←→=前後</span>
 
+          <button class="tb-btn" style="background:var(--green);color:#fff;font-weight:700"
+            onclick="confirmComplete()">✓ セレクト完了</button>
         </div>
       </div>
 
@@ -3090,6 +3093,7 @@
                 <button class="group-bulk-btn gbtn-ng" onclick="bulkSetGroup('${g.id}','ng')">全NG</button>
                 <button class="group-bulk-btn gbtn-reset" onclick="confirmGroupReset('${g.id}')">リセット</button>
               </div>
+              <span class="group-desired" id="desired-${g.id}" style="font-size:11px;color:var(--text-sub);cursor:pointer;margin-left:8px" onclick="event.stopPropagation();editGroupDesired('${g.id}')" title="クリックで変更">希望: ${g.limit || 0}枚</span>
               <div class="group-limit-badge" id="limit-${g.id}">0 OK</div>
             </div>
             <div class="photo-grid" id="grid-${g.id}"></div>
@@ -3674,6 +3678,38 @@
 
     // ===== GROUP RESET CONFIRM =====
     let _pendingResetGroupId = null;
+
+    function editGroupDesired(groupId) {
+      const group = GROUPS.find(g => g.id === groupId);
+      if (!group) return;
+      const current = group.limit || 0;
+      const val = prompt('希望セレクト枚数を入力（' + group.name + '）', current);
+      if (val === null) return;
+      const num = parseInt(val) || 0;
+      group.limit = num;
+      const el = document.getElementById('desired-' + groupId);
+      if (el) el.textContent = '希望: ' + num + '枚';
+      // Update total in sidebar
+      const totalLimit = GROUPS.reduce((s, g) => s + (parseInt(g.limit) || 0), 0);
+      const statLimit = document.getElementById('statLimit');
+      if (statLimit) statLimit.textContent = totalLimit + '枚';
+      save();
+    }
+
+    function confirmComplete() {
+      const total = GROUPS.reduce((s, g) => s + g.photos.length, 0);
+      const judged = state.status.size;
+      const unjudged = total - judged;
+      let msg = 'このセッションのステータスをセレクト完了に変更しますか？';
+      if (unjudged > 0) {
+        msg += '\n\n⚠️ まだ ' + unjudged + '枚が未判定ですが、完了になります。';
+      }
+      if (!confirm(msg)) return;
+      // Mark as complete
+      localStorage.setItem('selekt_session_complete', 'true');
+      showToast('セレクト完了しました！', 'green');
+      // Could call API here in the future
+    }
 
     function confirmGroupReset(groupId) {
       const group = GROUPS.find(g => g.id === groupId);
