@@ -2810,7 +2810,7 @@
             label: g.label,
             name: g.name,
             color: g.color,
-            limit: g.limit || g.photoCount,
+            limit: g.limit || 0,
             photos: meta.photos
               .filter(p => p.groupId === g.id)
               .map((p, idx) => ({
@@ -2920,7 +2920,7 @@
             label: g.label || defaultLabels[i] || String.fromCharCode(65 + i),
             name: g.name || g.label || `グループ ${defaultLabels[i] || i + 1}`,
             color: g.color || defaultColors[i % defaultColors.length],
-            limit: typeof g.limit === 'number' ? g.limit : (parseInt(g.limit) || 1),
+            limit: typeof g.limit === 'number' ? g.limit : 0,
             photos: (g.photos || []).map((p, j) => ({
               id: p.id || `${(g.label || defaultLabels[i] || 'x').toLowerCase()}${j + 1}`,
               fname: p.fname || `photo_${j + 1}.jpg`,
@@ -3016,10 +3016,7 @@
       if (!newGroups || !Array.isArray(newGroups)) return;
       GROUPS = newGroups;
 
-      // Ensure limits are set to max photos per group
-      GROUPS.forEach(g => {
-        if (!g.limit || g.limit < g.photos.length) g.limit = g.photos.length;
-      });
+      // Keep existing limit, don't force override
 
       // Reset state
       if (state && state.status) state.status.clear();
@@ -3064,11 +3061,11 @@
 
       // 2. Stats
       const totalPhotos = GROUPS.reduce((acc, g) => acc + g.photos.length, 0);
-      const totalLimit = GROUPS.reduce((acc, g) => acc + (g.limit || g.photos.length), 0);
+      const totalLimit = GROUPS.reduce((acc, g) => acc + (g.limit || 0), 0);
       const statTotal = document.getElementById('statTotal');
       const statLimit = document.getElementById('statLimit');
       if (statTotal) statTotal.textContent = totalPhotos + '枚';
-      if (statLimit) statLimit.textContent = totalLimit + '枚';
+      if (statLimit) statLimit.textContent = totalLimit ? totalLimit + '枚' : '未設定';
 
       // 3. Main content group sections
       const container = document.getElementById('groupSections');
@@ -3862,11 +3859,11 @@
       });
       // Update sidebar stats
       const totalPhotos = GROUPS.reduce((acc, g) => acc + g.photos.length, 0);
-      const totalLimit = GROUPS.reduce((acc, g) => acc + (g.limit || g.photos.length), 0);
+      const totalLimit = GROUPS.reduce((acc, g) => acc + (g.limit || 0), 0);
       const statTotal = document.getElementById('statTotal');
       const statLimit = document.getElementById('statLimit');
       if (statTotal) statTotal.textContent = totalPhotos + '\u679a';
-      if (statLimit) statLimit.textContent = totalLimit + '\u679a';
+      if (statLimit) statLimit.textContent = totalLimit ? totalLimit + '枚' : '未設定';
     }
 
     function _makeThumb(photo, group) {
