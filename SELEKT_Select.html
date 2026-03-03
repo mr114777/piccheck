@@ -89,14 +89,14 @@
     .logo {
       font-size: 18px;
       font-weight: 800;
-      color: #fff;
+      color: var(--text);
       letter-spacing: 2px;
       text-transform: uppercase;
       white-space: nowrap;
     }
 
     .logo span {
-      color: rgba(255, 255, 255, 0.5);
+      opacity: 0.5;
     }
 
     .topbar-divider {
@@ -251,23 +251,24 @@
     }
 
     .dl-row-btn {
-      padding: 7px 14px;
-      background: rgba(74, 158, 224, 0.12);
-      border: 1px solid rgba(74, 158, 224, 0.3);
-      color: var(--accent);
+      padding: 8px 16px;
+      background: var(--accent);
+      border: none;
+      color: #fff;
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 700;
       font-family: inherit;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
       transition: all 0.15s;
       white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(74, 158, 224, 0.3);
     }
 
     .dl-row-btn:hover {
-      background: var(--surface3);
-      border-color: var(--accent);
-      color: var(--accent);
+      opacity: 0.85;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(74, 158, 224, 0.4);
     }
 
     .dl-sep {
