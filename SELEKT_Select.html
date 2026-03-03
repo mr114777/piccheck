@@ -2680,42 +2680,42 @@
   <!-- Photo Modal -->
   <div class="modal-overlay" id="modal" onclick="closeModal(event)">
     <div class="modal-photo" id="modalPhoto">
-      <div class="modal-meta">
-        <span class="modal-fname" id="modalFname"></span>
-        <span class="modal-counter" id="modalCounter"
-          style="font-size:12px;color:var(--text-dim);margin-left:8px"></span>
-        <span class="modal-group-tag" id="modalGroupTag"></span>
-        <div class="modal-ai-badges" id="modalAiBadges"></div>
+      <!-- Top bar: meta + actions -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 12px;gap:8px;flex-shrink:0">
+        <div style="display:flex;align-items:center;gap:6px;min-width:0;flex:1">
+          <span class="modal-fname" id="modalFname"
+            style="font-size:11px;color:var(--text-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
+          <span id="modalCounter" style="font-size:11px;color:var(--text-dim);white-space:nowrap"></span>
+          <span class="modal-group-tag" id="modalGroupTag"></span>
+        </div>
+        <div class="modal-actions" style="padding:0;flex-shrink:0">
+          <button class="modal-btn" id="modalOkBtn" style="background:var(--green);color:white"
+            onclick="modalAction('ok')">✓ OK</button>
+          <button class="modal-btn" id="modalNearokBtn" style="background:var(--yellow);color:#111"
+            onclick="modalAction('nearok')">△ 保留</button>
+          <button class="modal-btn" id="modalNgBtn" style="background:var(--coral);color:white"
+            onclick="modalAction('ng')">✕ NG</button>
+          <button class="modal-btn" id="modalDlBtn" style="background:var(--surface3);color:var(--text)"
+            onclick="downloadCurrentPhoto()">💾</button>
+        </div>
+      </div>
+      <div id="modalStatusIndicator"
+        style="display:none;text-align:center;padding:2px 12px;font-size:13px;font-weight:700;letter-spacing:1px;transition:all 0.2s;flex-shrink:0">
       </div>
       <button class="modal-nav modal-nav-prev" id="modalPrev" onclick="modalNav(-1)">‹</button>
-      <div id="modalStatusIndicator"
-        style="display:none;text-align:center;padding:8px 16px;font-size:15px;font-weight:700;letter-spacing:1px;transition:all 0.2s">
-      </div>
       <div class="modal-photo-img" id="modalImg"></div>
-      <div id="modalQualityBar"
-        style="text-align:center;padding:6px 16px;font-size:11px;color:var(--text-dim);display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;">
-        <span id="modalQualityNotice">⚡ プレビュー用に画質を落としています</span>
-        <button id="modalFullsizeBtn" onclick="loadFullSize()"
-          style="background:var(--surface3);border:1px solid var(--border2);color:var(--text-sub);font-size:11px;padding:3px 10px;border-radius:6px;cursor:pointer;">
-          📷 高画質モードに切替
-        </button>
-      </div>
       <button class="modal-nav modal-nav-next" id="modalNext" onclick="modalNav(1)">›</button>
       <button class="modal-close" onclick="closeModal()">✕</button>
-      <div class="modal-actions">
-        <button class="modal-btn" id="modalOkBtn" style="background:var(--green);color:white"
-          onclick="modalAction('ok')">✓ OK</button>
-        <button class="modal-btn" id="modalNearokBtn" style="background:var(--yellow);color:#111"
-          onclick="modalAction('nearok')">△ 保留</button>
-        <button class="modal-btn" id="modalNgBtn" style="background:var(--coral);color:white"
-          onclick="modalAction('ng')">✕ NG</button>
-        <button class="modal-btn" id="modalDlBtn" style="background:var(--surface3);color:var(--text)"
-          onclick="downloadCurrentPhoto()">💾 保存</button>
-      </div>
-      <!-- Comment field -->
-      <div style="padding:0 20px 16px;">
-        <textarea id="modalComment" placeholder="修正指示・コメントを入力（例：目を開けたカットを採用）" oninput="saveComment()"
-          style="width:100%;background:var(--surface3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:inherit;font-size:12px;padding:10px;resize:vertical;min-height:64px;line-height:1.5;outline:none;"></textarea>
+      <!-- Bottom: quality + comment in one compact row -->
+      <div style="display:flex;align-items:center;gap:8px;padding:4px 12px;flex-shrink:0">
+        <div id="modalAiBadges" style="display:flex;gap:4px;flex-shrink:0"></div>
+        <span id="modalQualityNotice" style="font-size:10px;color:var(--text-dim);white-space:nowrap">⚡ プレビュー</span>
+        <button id="modalFullsizeBtn" onclick="loadFullSize()"
+          style="background:var(--surface3);border:1px solid var(--border2);color:var(--text-sub);font-size:10px;padding:2px 8px;border-radius:5px;cursor:pointer;white-space:nowrap;flex-shrink:0">
+          高画質
+        </button>
+        <input id="modalComment" placeholder="コメント..." oninput="saveComment()"
+          style="flex:1;background:var(--surface3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:inherit;font-size:11px;padding:5px 8px;outline:none;min-width:0">
       </div>
     </div>
   </div>
