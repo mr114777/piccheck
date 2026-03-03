@@ -1431,6 +1431,8 @@
     .modal-photo-img.zoomed {
       cursor: zoom-out;
       overflow: scroll;
+      align-items: flex-start !important;
+      justify-content: flex-start !important;
     }
 
     .modal-photo-img.zoomed-dragging {
@@ -2914,7 +2916,8 @@
             label: g.label || defaultLabels[i] || String.fromCharCode(65 + i),
             name: g.name || g.label || `グループ ${defaultLabels[i] || i + 1}`,
             color: g.color || defaultColors[i % defaultColors.length],
-            limit: typeof g.limit === 'number' ? g.limit : 0,
+            limit: g._limitUserSet ? (g.limit || 0) : 0,
+            _limitUserSet: g._limitUserSet || false,
             photos: (g.photos || []).map((p, j) => ({
               id: p.id || `${(g.label || defaultLabels[i] || 'x').toLowerCase()}${j + 1}`,
               fname: p.fname || `photo_${j + 1}.jpg`,
@@ -3685,6 +3688,7 @@
       if (val === null) return;
       const num = parseInt(val) || 0;
       group.limit = num;
+      group._limitUserSet = true;
       const el = document.getElementById('desired-' + groupId);
       if (el) el.textContent = '希望セレクト枚数: ' + (num ? num + '枚' : '未設定');
       // Update total in sidebar
