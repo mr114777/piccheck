@@ -2718,6 +2718,12 @@
   <!-- Selection floating bar -->
   <div class="selection-bar" id="selectionBar">
     <span class="sel-bar-count" id="selBarCount">0枚選択中</span>
+    <button class="sel-bar-btn" style="background:var(--green);color:#fff" onclick="bulkSetSelectedStatus('ok')">✓
+      OK</button>
+    <button class="sel-bar-btn" style="background:var(--yellow);color:#111" onclick="bulkSetSelectedStatus('nearok')">△
+      保留</button>
+    <button class="sel-bar-btn" style="background:var(--coral);color:#fff" onclick="bulkSetSelectedStatus('ng')">✕
+      NG</button>
     <button class="sel-bar-btn" onclick="openBulkMoveDropdown()">📂 グループ移動</button>
     <button class="sel-bar-btn secondary" onclick="clearSelection()">✕ 解除</button>
     <div class="sel-bar-move-dd" id="bulkMoveDd" style="display:none"></div>
@@ -3619,6 +3625,26 @@
         'すべてのセレクトステータス（OK / 保留 / NG）がリセットされます。（' + total + '件）';
       _pendingResetGroupId = '__ALL__';
       document.getElementById('groupResetModal').classList.add('open');
+    }
+
+    function bulkSetSelectedStatus(newStatus) {
+      if (state.selected.size === 0) return;
+      const count = state.selected.size;
+      const affectedGroups = new Set();
+      state.selected.forEach(photoId => {
+        if (newStatus === null) state.status.delete(photoId);
+        else state.status.set(photoId, newStatus);
+        // Find which group this photo belongs to
+        GROUPS.forEach(g => {
+          if (g.photos.some(p => p.id === photoId)) affectedGroups.add(g.id);
+        });
+      });
+      clearSelection();
+      affectedGroups.forEach(gid => renderGroup(gid));
+      updateSidebarCounts();
+      save();
+      const labels = { ok: 'OK', nearok: '保留', ng: 'NG' };
+      showToast(count + '枚を ' + labels[newStatus] + ' に設定しました', newStatus === 'ok' ? 'green' : newStatus === 'ng' ? 'coral' : '');
     }
 
     function bulkSetAll(newStatus) {
