@@ -2337,6 +2337,7 @@
       <button class="btn-complete" onclick="openConfirm()">
         セレクト結果を書き出す →
       </button>
+      <button class="btn-complete" onclick="confirmComplete()">✓ セレクト完了</button>
     </div>
   </div>
 
@@ -2453,8 +2454,7 @@
             style="font-size:10px;color:var(--text-dim);border:1px solid var(--border);border-radius:5px;padding:3px 8px;white-space:nowrap;cursor:help"
             title="モーダル内で使用可能">⌨ O=OK H=保留 N=NG ←→=前後</span>
 
-          <button class="tb-btn" style="background:var(--green);color:#fff;font-weight:700"
-            onclick="confirmComplete()">✓ セレクト完了</button>
+
         </div>
       </div>
 
@@ -3093,7 +3093,7 @@
                 <button class="group-bulk-btn gbtn-ng" onclick="bulkSetGroup('${g.id}','ng')">全NG</button>
                 <button class="group-bulk-btn gbtn-reset" onclick="confirmGroupReset('${g.id}')">リセット</button>
               </div>
-              <span class="group-desired" id="desired-${g.id}" style="font-size:11px;color:var(--text-sub);cursor:pointer;margin-left:8px" onclick="event.stopPropagation();editGroupDesired('${g.id}')" title="クリックで変更">希望: ${g.limit || 0}枚</span>
+              <span class="group-desired" id="desired-${g.id}" style="font-size:11px;color:var(--text-sub);cursor:pointer;margin-left:8px" onclick="event.stopPropagation();editGroupDesired('${g.id}')" title="クリックで変更">希望セレクト枚数: ${g.limit || 0}枚</span>
               <div class="group-limit-badge" id="limit-${g.id}">0 OK</div>
             </div>
             <div class="photo-grid" id="grid-${g.id}"></div>
@@ -3688,7 +3688,7 @@
       const num = parseInt(val) || 0;
       group.limit = num;
       const el = document.getElementById('desired-' + groupId);
-      if (el) el.textContent = '希望: ' + num + '枚';
+      if (el) el.textContent = '希望セレクト枚数: ' + num + '枚';
       // Update total in sidebar
       const totalLimit = GROUPS.reduce((s, g) => s + (parseInt(g.limit) || 0), 0);
       const statLimit = document.getElementById('statLimit');
