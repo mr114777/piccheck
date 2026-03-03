@@ -449,54 +449,116 @@
         // Check auth
         async function init() {
             const token = localStorage.getItem('selekt_token');
-            if (!token) {
-                window.location.href = 'SELEKT_Auth.html';
-                return;
+
+            // Try API first
+            if (token) {
+                try {
+                    const res = await fetch(`${API}/api/auth/me`, {
+                        headers: { 'Authorization': `Bearer ${token}` },
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        currentUser = data.user;
+                        setupUI();
+                        document.getElementById('tabFilter').style.display = 'flex';
+                        await loadProjects(token);
+                        return;
+                    }
+                } catch (err) {
+                    console.log('API unavailable, loading demo mode');
+                }
             }
 
-            try {
-                const res = await fetch(`${API}/api/auth/me`, {
-                    headers: { 'Authorization': `Bearer ${token}` },
-                });
-                if (!res.ok) {
-                    localStorage.removeItem('selekt_token');
-                    localStorage.removeItem('selekt_user');
-                    window.location.href = 'SELEKT_Auth.html';
-                    return;
+            // Demo mode
+            loadDemoMode();
+        }
+
+        function loadDemoMode() {
+            currentUser = {
+                id: 'demo_user',
+                displayName: 'Demo User',
+                role: 'photographer',
+                plan: 'pro'
+            };
+            setupUI();
+            document.getElementById('tabFilter').style.display = 'flex';
+
+            const demoProjects = [
+                {
+                    id: 'BKCS9vx9',
+                    title: '春のポートレート撮影',
+                    photographer: 'Kondou Kouichi',
+                    createdAt: new Date(Date.now() - 1 * 86400000).toISOString(),
+                    photos: new Array(32),
+                    _type: 'sent',
+                    _selected: 28,
+                    _status: 'progress'
+                },
+                {
+                    id: 'XK2mR8p1',
+                    title: '企業プロフィール写真',
+                    photographer: 'Kondou Kouichi',
+                    createdAt: new Date(Date.now() - 3 * 86400000).toISOString(),
+                    photos: new Array(15),
+                    _type: 'sent',
+                    _selected: 15,
+                    _status: 'done'
+                },
+                {
+                    id: 'TN7qW3y4',
+                    title: 'ウェディング前撮り',
+                    photographer: 'Tanaka Yuki',
+                    createdAt: new Date(Date.now() - 5 * 86400000).toISOString(),
+                    photos: new Array(85),
+                    _type: 'received',
+                    _selected: 0,
+                    _status: 'pending'
+                },
+                {
+                    id: 'LP5nJ6w2',
+                    title: 'モデル撮影 vol.3',
+                    photographer: 'Kondou Kouichi',
+                    createdAt: new Date(Date.now() - 7 * 86400000).toISOString(),
+                    photos: new Array(48),
+                    _type: 'sent',
+                    _selected: 12,
+                    _status: 'progress'
+                },
+                {
+                    id: 'QR9bA1c5',
+                    title: '商品カタログ撮影',
+                    photographer: 'Suzuki Aoi',
+                    createdAt: new Date(Date.now() - 14 * 86400000).toISOString(),
+                    photos: new Array(24),
+                    _type: 'received',
+                    _selected: 24,
+                    _status: 'done'
                 }
+            ];
 
-                const data = await res.json();
-                currentUser = data.user;
+            renderProjects(demoProjects);
 
-                // Update UI
-                document.getElementById('welcomeMsg').innerHTML =
-                    `${currentUser.displayName} さん` +
-                    `<span class="role-badge">${roleLabels[currentUser.role] || currentUser.role}</span>`;
-                document.getElementById('welcomeSub').textContent = `@${currentUser.id}`;
-                document.getElementById('userAvatar').textContent = currentUser.displayName.charAt(0).toUpperCase();
-                document.getElementById('menuName').textContent = currentUser.displayName;
-                document.getElementById('menuId').textContent = `@${currentUser.id}  ·  ${currentUser.plan === 'pro' ? 'PRO' : 'FREE'}`;
+            // Show demo banner
+            const banner = document.createElement('div');
+            banner.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--surface3);border:1px solid var(--border);border-radius:10px;padding:8px 20px;font-size:12px;color:var(--text-sub);z-index:999;backdrop-filter:blur(10px)';
+            banner.textContent = '\ud83d\udea7 \u30c7\u30e2\u30e2\u30fc\u30c9 \u2014 API\u63a5\u7d9a\u5f8c\u306b\u5b9f\u30c7\u30fc\u30bf\u306b\u5207\u308a\u66ff\u308f\u308a\u307e\u3059';
+            document.body.appendChild(banner);
+        }
 
-                // Usage (photographer)
-                if (currentUser.role === 'photographer' && data.usage) {
-                    const badge = document.getElementById('usageBadge');
-                    badge.style.display = 'flex';
-                    const usedGB = (data.usage.usedMB / 1024).toFixed(1);
-                    const limitGB = (data.usage.limitMB / 1024).toFixed(0);
-                    document.getElementById('usageText').textContent = `${usedGB} / ${limitGB} GB`;
-                    const pct = Math.min(100, (data.usage.usedMB / data.usage.limitMB) * 100);
-                    document.getElementById('usageBarFill').style.width = pct + '%';
-                    if (pct > 80) document.getElementById('usageBarFill').style.background = '#FF6B6B';
-                }
+        function setupUI() {
+            document.getElementById('welcomeMsg').innerHTML =
+                `${currentUser.displayName} \u3055\u3093` +
+                `<span class="role-badge">${roleLabels[currentUser.role] || currentUser.role}</span>`;
+            document.getElementById('welcomeSub').textContent = `@${currentUser.id}`;
+            document.getElementById('userAvatar').textContent = currentUser.displayName.charAt(0).toUpperCase();
+            document.getElementById('menuName').textContent = currentUser.displayName;
+            document.getElementById('menuId').textContent = `@${currentUser.id}  \u00b7  ${currentUser.plan === 'pro' ? 'PRO' : 'FREE'}`;
 
-                // Load projects
-                document.getElementById('tabFilter').style.display = 'flex';
-                await loadProjects(token);
-            } catch (err) {
-                console.error(err);
-                document.getElementById('projectList').innerHTML =
-                    '<div class="empty-state"><span class="icon">⚠️</span><h3>エラーが発生しました</h3><p>' + err.message + '</p></div>';
-            }
+            // Usage badge (demo)
+            const badge = document.getElementById('usageBadge');
+            badge.style.display = 'flex';
+            document.getElementById('usageText').textContent = '0.8 / 2 GB';
+            document.getElementById('usageBarFill').style.width = '40%';
         }
 
         async function loadProjects(token) {
@@ -574,7 +636,7 @@
             container.innerHTML = filtered.map(p => {
                 // Determine status
                 const total = p.photos?.length || 0;
-                const selected = 0; // TODO: track selection progress
+                const selected = p._selected || 0;
                 let status, statusClass;
                 if (total === 0) {
                     status = '空'; statusClass = 'status-pending';
@@ -583,7 +645,7 @@
                 } else if (selected < total) {
                     status = '🟡 セレクト中'; statusClass = 'status-progress';
                 } else {
-                    status = '🟢 対応済み'; statusClass = 'status-done';
+                    status = '🟢 完了'; statusClass = 'status-done';
                 }
 
                 const date = new Date(p.createdAt);
