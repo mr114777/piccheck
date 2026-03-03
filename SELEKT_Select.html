@@ -1375,7 +1375,7 @@
       max-width: 900px;
       width: 95vw;
       max-height: 96vh;
-      overflow-y: auto;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
       border-radius: 16px;
@@ -1396,9 +1396,9 @@
     }
 
     .modal-photo-img {
-      width: calc(100% - 24px);
-      margin: 8px auto 0;
-      border-radius: 12px;
+      width: calc(100% - 16px);
+      margin: 4px auto 0;
+      border-radius: 10px;
       text-align: center;
       box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
       border: 2px solid var(--border2);
@@ -1439,7 +1439,7 @@
     .modal-photo-img:not(.zoomed) img {
       display: block;
       max-width: 100%;
-      max-height: 78vh;
+      max-height: calc(96vh - 130px);
       width: auto;
       height: auto;
       margin: 0 auto;
@@ -1462,17 +1462,17 @@
 
     .modal-actions {
       display: flex;
-      gap: 6px;
+      gap: 4px;
       justify-content: center;
-      padding: 8px 20px 0;
+      padding: 4px 16px;
     }
 
     .modal-btn {
       flex: 1;
-      padding: 8px 10px;
-      border-radius: 10px;
+      padding: 6px 8px;
+      border-radius: 8px;
       border: none;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
       cursor: pointer;
       font-family: inherit;
