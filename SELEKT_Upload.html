@@ -1058,24 +1058,32 @@
     <div class="topbar">
         <div class="logo">SE<span>LEKT</span></div>
         <div class="topbar-divider"></div>
-        <div class="topbar-title">写真アップロード &amp; グループ設定</div>
+        <div class="topbar-title" data-i18n="topbarTitle">写真アップロード &amp; グループ設定</div>
+        <div style="margin-left:auto;display:flex;gap:4px;">
+            <button class="lang-btn" onclick="setLang('ja')" id="langJa"
+                style="background:none;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);padding:2px 6px;border-radius:4px;font-size:10px;cursor:pointer">🇯🇵</button>
+            <button class="lang-btn" onclick="setLang('en')" id="langEn"
+                style="background:none;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);padding:2px 6px;border-radius:4px;font-size:10px;cursor:pointer">EN</button>
+            <button class="lang-btn" onclick="setLang('zh')" id="langZh"
+                style="background:none;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);padding:2px 6px;border-radius:4px;font-size:10px;cursor:pointer">中</button>
+        </div>
     </div>
 
     <!-- STEP INDICATOR -->
     <div class="steps">
         <div class="step active" id="stepInd1">
             <div class="step-num">1</div>
-            <div class="step-label">写真を選ぶ</div>
+            <div class="step-label" data-i18n="step1">写真を選ぶ</div>
         </div>
         <div class="step-line" id="stepLine1"></div>
         <div class="step" id="stepInd2">
             <div class="step-num">2</div>
-            <div class="step-label">グループ設定</div>
+            <div class="step-label" data-i18n="step2">グループ設定</div>
         </div>
         <div class="step-line" id="stepLine2"></div>
         <div class="step" id="stepInd3">
             <div class="step-num">3</div>
-            <div class="step-label">確認 &amp; 共有</div>
+            <div class="step-label" data-i18n="step3">確認 &amp; 共有</div>
         </div>
     </div>
 
@@ -1097,39 +1105,40 @@
                         <rect x="38" y="16" width="8" height="4" rx="1" fill="rgba(255,255,255,0.2)" />
                         <path d="M24 8h8l3 4H21l3-4z" fill="rgba(255,255,255,0.2)" />
                     </svg></div>
-                <div class="upload-title">写真をドラッグ＆ドロップ</div>
+                <div class="upload-title" data-i18n="dropTitle">写真をドラッグ＆ドロップ</div>
                 <div class="upload-sub">
-                    または下のボタンから選択<br>
+                    <span data-i18n="dropSub">または下のボタンから選択</span><br>
                     JPG / PNG 対応 ・ 複数ファイル一括OK
                 </div>
                 <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
                     <button class="upload-btn"
                         onclick="document.getElementById('fileInput').click(); event.stopPropagation();">
-                        🖼️ ファイルを選択
+                        <span data-i18n="selectFiles">🖼️ ファイルを選択</span>
                     </button>
                     <button class="upload-btn" style="background:rgba(255,255,255,0.08);"
                         onclick="document.getElementById('folderInput').click(); event.stopPropagation();">
-                        📁 フォルダを選択
+                        <span data-i18n="selectFolder">📁 フォルダを選択</span>
                     </button>
                 </div>
             </div>
 
             <div class="preview-section" id="previewSection">
                 <div class="preview-header">
-                    <div class="preview-count"><span id="photoCount">0</span> 枚の写真を選択中</div>
-                    <button class="btn-secondary" style="padding:8px 16px;font-size:13px"
-                        onclick="clearAll()">すべて削除</button>
+                    <div class="preview-count"><span id="photoCount">0</span> <span
+                            data-i18n="photosSelected">枚の写真を選択中</span></div>
+                    <button class="btn-secondary" style="padding:8px 16px;font-size:13px" onclick="clearAll()"
+                        data-i18n="clearAll">すべて削除</button>
                 </div>
                 <div class="preview-grid" id="previewGrid"></div>
             </div>
 
             <div class="action-bar" style="display:flex;gap:12px;flex-wrap:wrap">
                 <button class="btn-primary" id="skipGroupBtn" disabled onclick="skipGrouping()">
-                    次へ進む →
+                    <span data-i18n="nextStep">次へ進む →</span>
                 </button>
                 <button class="btn-secondary" id="step1Next" disabled onclick="startAI()"
                     style="padding:14px 24px;font-size:13px;font-weight:600;border-radius:12px;cursor:pointer">
-                    🤖 AIで簡易グループ分け
+                    <span data-i18n="aiGrouping">🤖 AIで簡易グループ分け</span>
                 </button>
             </div>
         </div>
@@ -1138,57 +1147,59 @@
         <div class="step-panel" id="panel2">
             <div class="ai-processing">
                 <div class="ai-spinner"></div>
-                <div class="ai-title">AIがグループ化中...</div>
-                <div class="ai-sub">写真の構図・撮影時刻・色を解析しています</div>
+                <div class="ai-title" data-i18n="aiProcessing">AIがグループ化中...</div>
+                <div class="ai-sub" data-i18n="aiAnalyzing">写真の構図・撮影時刻・色を解析しています</div>
                 <div class="ai-progress-bar">
                     <div class="ai-progress-fill" id="aiProgressFill"></div>
                 </div>
-                <div class="ai-log" id="aiLog">モデルを読み込み中...</div>
+                <div class="ai-log" id="aiLog" data-i18n="aiLoading">モデルを読み込み中...</div>
             </div>
         </div>
 
         <!-- ===== STEP 3: GROUP CONFIRM ===== -->
         <div class="step-panel" id="panel3">
             <div class="group-confirm-header">
-                <div class="group-confirm-title">グループを確認してください</div>
-                <div class="group-confirm-sub">写真をドラッグ&ドロップでグループ間を移動できます</div>
+                <div class="group-confirm-title" data-i18n="confirmTitle">グループを確認してください</div>
+                <div class="group-confirm-sub" data-i18n="confirmSub">写真をドラッグ&ドロップでグループ間を移動できます</div>
             </div>
 
             <div class="summary-bar" id="summaryBar">
                 <div class="summary-item">
                     <div class="summary-val" id="sumPhotos">0</div>
-                    <div class="summary-key">枚の写真</div>
+                    <div class="summary-key" data-i18n="sumPhotos">枚の写真</div>
                 </div>
                 <div class="summary-item">
                     <div class="summary-val" id="sumGroups">0</div>
-                    <div class="summary-key">グループ</div>
+                    <div class="summary-key" data-i18n="sumGroups">グループ</div>
                 </div>
                 <div class="summary-item">
                     <div class="summary-val" id="sumLimit">0</div>
-                    <div class="summary-key">希望セレクト枚数（合計）</div>
+                    <div class="summary-key" data-i18n="sumLimit">希望セレクト枚数（合計）</div>
                 </div>
             </div>
 
             <div class="group-list" id="groupList"></div>
-            <button class="btn-add-group" onclick="addNewGroup()">＋ 新しいグループを追加</button>
+            <button class="btn-add-group" onclick="addNewGroup()" data-i18n="addGroup">＋ 新しいグループを追加</button>
 
             <div
                 style="margin:20px 0;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;">
-                <div style="font-size:13px;font-weight:700;margin-bottom:12px;color:var(--text);">📋
-                    セッション情報（セレクト画面に表示されます）</div>
+                <div style="font-size:13px;font-weight:700;margin-bottom:12px;color:var(--text);"><span
+                        data-i18n="sessionInfo">📋 セッション情報（セレクト画面に表示されます）</span></div>
                 <div style="display:flex;flex-direction:column;gap:10px;">
-                    <input type="text" id="sessionTitle" placeholder="プロジェクト名（任意）" maxlength="50"
+                    <input type="text" id="sessionTitle" data-i18n-placeholder="projectNamePh" placeholder="プロジェクト名（任意）"
+                        maxlength="50"
                         style="width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;font-family:inherit;box-sizing:border-box;">
-                    <input type="text" id="photographerName" placeholder="カメラマン名（任意）" maxlength="30"
+                    <input type="text" id="photographerName" data-i18n-placeholder="photographerPh"
+                        placeholder="カメラマン名（任意）" maxlength="30"
                         style="width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;font-family:inherit;box-sizing:border-box;">
                 </div>
             </div>
 
             <div class="action-bar">
-                <button class="btn-secondary" onclick="goToStep(1)">← やり直す</button>
-                <button class="btn-undo" id="undoBtn" disabled onclick="undo()">↩ 元に戻す</button>
+                <button class="btn-secondary" onclick="goToStep(1)" data-i18n="goBack">← やり直す</button>
+                <button class="btn-undo" id="undoBtn" disabled onclick="undo()" data-i18n="undo">↩ 元に戻す</button>
                 <button class="btn-primary" id="previewBtn" onclick="previewSelect()">
-                    共有リンクを発行 & セレクト →
+                    <span data-i18n="shareLink">共有リンクを発行 &amp; セレクト →</span>
                 </button>
             </div>
         </div>
@@ -1338,11 +1349,11 @@
         // ===== AI GROUPING =====
         async function startAI() {
             goToStep(2);
-            setProgress(0, 'EXIFデータを読み取り中...');
+            setProgress(0, ut('aiExif'));
 
             // Step A: Read EXIF
             await readAllExif();
-            setProgress(15, '顔検出モデルを準備中...');
+            setProgress(15, ut('aiFace'));
 
             // Step B: Load face-api models (face detection + landmarks + recognition)
             await loadFaceApi();
@@ -1350,16 +1361,16 @@
 
             // Step C: Detect faces + extract descriptors
             await detectAllFaces();
-            setProgress(70, '色を解析中...');
+            setProgress(70, ut('aiColor'));
 
             // Step D: Color analysis
             await analyzeColors();
-            setProgress(85, '人物・構図でグループ化中...');
+            setProgress(85, ut('aiCluster'));
 
             // Step E: Group by person × shot type
             await new Promise(r => setTimeout(r, 300));
             groups = buildGroups();
-            setProgress(100, `${groups.length}グループに分類完了！`);
+            setProgress(100, `${groups.length}${ut('aiDone')}`);
 
             await new Promise(r => setTimeout(r, 600));
             renderGroupConfirm();
@@ -1675,7 +1686,7 @@
                 photos: s.photoIndices.map(i => uploadedFiles[i]).filter(Boolean)
             }));
             renderGroupConfirm();
-            showToast('元に戻しました ✓');
+            showToast(ut('undone'));
             updateUndoButton();
         }
 
@@ -1860,7 +1871,7 @@
                 reassignLabels();
             }
             renderGroupConfirm();
-            showToast('写真を移動しました ✓');
+            showToast(ut('photoMoved'));
         }
 
         function moveSelectedPhotos(toGroupIdx) {
@@ -1894,7 +1905,7 @@
             }
             reassignLabels();
             renderGroupConfirm();
-            showToast(`${movedCount}枚を移動しました ✓`);
+            showToast(`${movedCount}${ut('photosMoved')}`);
         }
 
         function addNewGroup() {
@@ -1910,7 +1921,7 @@
                 photos: []
             });
             renderGroupConfirm();
-            showToast('グループを追加しました');
+            showToast(ut('groupAdded'));
         }
 
         function deleteGroup(gi) {
@@ -1924,7 +1935,7 @@
             }
             reassignLabels();
             renderGroupConfirm();
-            showToast('グループを削除しました');
+            showToast(ut('groupDeleted'));
         }
 
         function reassignLabels() {
@@ -2267,7 +2278,7 @@
 
             const totalPhotos = groups.reduce((s, g) => s + g.photos.length, 0);
             if (totalPhotos === 0) {
-                showToast('写真がありません');
+                showToast(ut('noPhotos'));
                 return;
             }
 
@@ -2280,7 +2291,7 @@
                 await _doPreviewSelect(null);
             } catch (err) {
                 console.error('Preview error:', err);
-                showToast('エラーが発生しました: ' + err.message);
+                showToast(ut('errorOccurred') + ': ' + err.message);
             } finally {
                 if (btn) {
                     btn.disabled = false;
@@ -2406,7 +2417,7 @@
             let sessionId = null;
 
             try {
-                if (btn) btn.textContent = 'クラウドにセッション作成中…';
+                if (btn) btn.textContent = ut('creatingSession');
 
                 // Create session
                 const sessionRes = await fetch(`${API_BASE}/api/session`, {
@@ -2434,7 +2445,7 @@
                     const g = groups[i];
                     for (let j = 0; j < g.photos.length; j++) {
                         uploaded++;
-                        if (btn) btn.textContent = `クラウドにアップロード中… ${uploaded}/${totalPhotos}`;
+                        if (btn) btn.textContent = `${ut('uploading')} ${uploaded}/${totalPhotos}`;
 
                         const p = g.photos[j];
                         const photoData = data[i].photos[j];
@@ -2466,7 +2477,7 @@
 
             } catch (cloudErr) {
                 console.warn('[SELEKT] Cloud upload failed, using local mode:', cloudErr);
-                showToast('クラウドアップロード失敗。ローカルモードで続行します');
+                showToast(ut('uploadFailed'));
             }
 
             // Build the select URL
@@ -2486,7 +2497,7 @@
                         <div style="font-size:32px;margin-bottom:12px;">✅</div>
                         <div style="font-size:18px;font-weight:700;margin-bottom:8px;">クラウドアップロード完了！</div>
                         <div style="font-size:13px;color:var(--text-sub);margin-bottom:20px;">
-                            以下のURLを共有すると、他の人も写真を閲覧できます
+                            ${ut('shareDesc')}
                         </div>
                         <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:16px;word-break:break-all;font-family:'Space Mono',monospace;font-size:12px;color:var(--text);text-align:left;" id="shareUrlText">
                             ${fullShareUrl}
@@ -2494,11 +2505,11 @@
                         <div style="display:flex;gap:10px;justify-content:center;">
                             <button id="copyShareBtn"
                                 style="padding:12px 24px;background:var(--coral);color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">
-                                📋 URLをコピー
+                                ${ut('copyUrl')}
                             </button>
                             <button id="goSelectBtn"
                                 style="padding:12px 24px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">
-                                セレクト画面へ →
+                                ${ut('goSelect')}
                             </button>
                         </div>
                     </div>
@@ -2508,7 +2519,7 @@
                 // Attach event listeners (proper JS, not inline onclick)
                 document.getElementById('copyShareBtn').addEventListener('click', function () {
                     navigator.clipboard.writeText(fullShareUrl).then(() => {
-                        this.textContent = '✓ コピー済み';
+                        this.textContent = ut('copied');
                         this.style.background = 'var(--green)';
                     }).catch(() => {
                         // Fallback: select text
@@ -2516,7 +2527,7 @@
                         range.selectNodeContents(document.getElementById('shareUrlText'));
                         window.getSelection().removeAllRanges();
                         window.getSelection().addRange(range);
-                        this.textContent = '選択済み（Ctrl+Cでコピー）';
+                        this.textContent = ut('selected');
                     });
                 });
                 document.getElementById('goSelectBtn').addEventListener('click', function () {
@@ -2542,6 +2553,130 @@
             clearTimeout(toastTimer);
             toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
         }
+        // ===== I18N =====
+        const UPL_I18N = {
+            ja: {
+                topbarTitle: '写真アップロード & グループ設定',
+                step1: '写真を選ぶ', step2: 'グループ設定', step3: '確認 & 共有',
+                dropTitle: '写真をドラッグ＆ドロップ', dropSub: 'または下のボタンから選択',
+                selectFiles: '🖼️ ファイルを選択', selectFolder: '📁 フォルダを選択',
+                photosSelected: '枚の写真を選択中', clearAll: 'すべて削除',
+                nextStep: '次へ進む →', aiGrouping: '🤖 AIで簡易グループ分け',
+                aiProcessing: 'AIがグループ化中...', aiAnalyzing: '写真の構図・撮影時刻・色を解析しています',
+                aiLoading: 'モデルを読み込み中...',
+                aiExif: 'EXIFデータを読み取り中...', aiFace: '顔検出モデルを準備中...',
+                aiColor: '色を解析中...', aiCluster: '人物・構図でグループ化中...',
+                aiDone: 'グループに分類完了！', aiFaceLoad: '顔認識モデルを読み込み中...',
+                aiFaceDetect: '顔を検出中...',
+                confirmTitle: 'グループを確認してください',
+                confirmSub: '写真をドラッグ&ドロップでグループ間を移動できます',
+                sumPhotos: '枚の写真', sumGroups: 'グループ', sumLimit: '希望セレクト枚数（合計）',
+                addGroup: '＋ 新しいグループを追加',
+                sessionInfo: '📋 セッション情報（セレクト画面に表示されます）',
+                projectNamePh: 'プロジェクト名（任意）', photographerPh: 'カメラマン名（任意）',
+                goBack: '← やり直す', undo: '↩ 元に戻す', shareLink: '共有リンクを発行 & セレクト →',
+                undone: '元に戻しました ✓', photoMoved: '写真を移動しました ✓',
+                photosMoved: '枚を移動しました ✓', groupAdded: 'グループを追加しました',
+                groupDeleted: 'グループを削除しました', noPhotos: '写真がありません',
+                errorOccurred: 'エラーが発生しました',
+                creatingSession: 'クラウドにセッション作成中…',
+                uploading: 'クラウドにアップロード中…',
+                uploadFailed: 'クラウドアップロード失敗。ローカルモードで続行します',
+                shareDesc: '以下のURLを共有すると、他の人も写真を閲覧できます',
+                copyUrl: '📋 URLをコピー', goSelect: 'セレクト画面へ →',
+                copied: '✓ コピー済み', selected: '選択済み（Ctrl+Cでコピー）',
+                selPhotos: '枚を選択中',
+                limitLabel: '希望セレクト枚数', photos: '枚',
+                closeUp: '寄り', others: 'その他', person: '人物',
+                fullBody: '全身', bustUp: 'バストアップ',
+            },
+            en: {
+                topbarTitle: 'Photo Upload & Group Settings',
+                step1: 'Select Photos', step2: 'Group Settings', step3: 'Confirm & Share',
+                dropTitle: 'Drag & Drop Photos', dropSub: 'Or select using the buttons below',
+                selectFiles: '🖼️ Select Files', selectFolder: '📁 Select Folder',
+                photosSelected: 'photos selected', clearAll: 'Clear All',
+                nextStep: 'Next →', aiGrouping: '🤖 AI Auto-Grouping',
+                aiProcessing: 'AI is grouping...', aiAnalyzing: 'Analyzing composition, time, and colors',
+                aiLoading: 'Loading model...',
+                aiExif: 'Reading EXIF data...', aiFace: 'Preparing face detection...',
+                aiColor: 'Analyzing colors...', aiCluster: 'Grouping by person & composition...',
+                aiDone: 'groups created!', aiFaceLoad: 'Loading face recognition model...',
+                aiFaceDetect: 'Detecting faces...',
+                confirmTitle: 'Review your groups',
+                confirmSub: 'Drag & drop photos to move between groups',
+                sumPhotos: 'Photos', sumGroups: 'Groups', sumLimit: 'Desired Selection (Total)',
+                addGroup: '+ Add New Group',
+                sessionInfo: '📋 Session Info (shown on selection screen)',
+                projectNamePh: 'Project Name (optional)', photographerPh: 'Photographer Name (optional)',
+                goBack: '← Go Back', undo: '↩ Undo', shareLink: 'Generate Share Link & Select →',
+                undone: 'Undone ✓', photoMoved: 'Photo moved ✓',
+                photosMoved: 'photos moved ✓', groupAdded: 'Group added',
+                groupDeleted: 'Group deleted', noPhotos: 'No photos',
+                errorOccurred: 'An error occurred',
+                creatingSession: 'Creating cloud session…',
+                uploading: 'Uploading to cloud…',
+                uploadFailed: 'Cloud upload failed. Continuing in local mode',
+                shareDesc: 'Share this URL to let others view the photos',
+                copyUrl: '📋 Copy URL', goSelect: 'Go to Select →',
+                copied: '✓ Copied', selected: 'Selected (Ctrl+C to copy)',
+                selPhotos: 'selected',
+                limitLabel: 'Desired Selection', photos: '',
+                closeUp: 'Close-up', others: 'Others', person: 'Person',
+                fullBody: 'Full Body', bustUp: 'Bust Up',
+            },
+            zh: {
+                topbarTitle: '照片上传 & 分组设置',
+                step1: '选择照片', step2: '分组设置', step3: '确认 & 分享',
+                dropTitle: '拖放照片', dropSub: '或点击下方按钮选择',
+                selectFiles: '🖼️ 选择文件', selectFolder: '📁 选择文件夹',
+                photosSelected: '张照片已选择', clearAll: '全部清除',
+                nextStep: '下一步 →', aiGrouping: '🤖 AI自动分组',
+                aiProcessing: 'AI正在分组...', aiAnalyzing: '正在分析构图、时间和颜色',
+                aiLoading: '正在加载模型...',
+                aiExif: '正在读取EXIF数据...', aiFace: '正在准备人脸检测...',
+                aiColor: '正在分析颜色...', aiCluster: '按人物和构图分组中...',
+                aiDone: '个分组创建完成！', aiFaceLoad: '正在加载人脸识别模型...',
+                aiFaceDetect: '正在检测人脸...',
+                confirmTitle: '请确认分组',
+                confirmSub: '拖放照片可在分组间移动',
+                sumPhotos: '张照片', sumGroups: '个分组', sumLimit: '期望筛选数量（合计）',
+                addGroup: '+ 添加新分组',
+                sessionInfo: '📋 会话信息（显示在筛选页面）',
+                projectNamePh: '项目名称（可选）', photographerPh: '摄影师名称（可选）',
+                goBack: '← 返回', undo: '↩ 撤销', shareLink: '生成分享链接 & 筛选 →',
+                undone: '已撤销 ✓', photoMoved: '照片已移动 ✓',
+                photosMoved: '张已移动 ✓', groupAdded: '分组已添加',
+                groupDeleted: '分组已删除', noPhotos: '没有照片',
+                errorOccurred: '发生错误',
+                creatingSession: '正在创建云会话…',
+                uploading: '正在上传到云端…',
+                uploadFailed: '云端上传失败，将使用本地模式继续',
+                shareDesc: '分享此URL可让其他人查看照片',
+                copyUrl: '📋 复制URL', goSelect: '前往筛选 →',
+                copied: '✓ 已复制', selected: '已选择（Ctrl+C复制）',
+                selPhotos: '已选择',
+                limitLabel: '期望筛选数量', photos: '张',
+                closeUp: '特写', others: '其他', person: '人物',
+                fullBody: '全身', bustUp: '半身',
+            }
+        };
+
+        let _uplLang = localStorage.getItem('selekt-lang') || 'ja';
+        function ut(key) { return (UPL_I18N[_uplLang] && UPL_I18N[_uplLang][key]) || UPL_I18N.ja[key] || key; }
+
+        function setLang(lang) {
+            _uplLang = lang;
+            localStorage.setItem('selekt-lang', lang);
+            document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = ut(el.dataset.i18n));
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                el.placeholder = ut(el.dataset.i18nPlaceholder);
+            });
+            document.querySelectorAll('.lang-btn').forEach(b => b.style.borderColor = 'rgba(255,255,255,0.15)');
+            const active = document.getElementById('lang' + lang.charAt(0).toUpperCase() + lang.slice(1));
+            if (active) active.style.borderColor = '#4A9EE0';
+        }
+        setLang(_uplLang);
     </script>
 </body>
 
