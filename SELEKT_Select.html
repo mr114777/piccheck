@@ -2871,6 +2871,14 @@
     }
 
     function loadGroupData() {
+      // If a cloud session is specified, skip all local data sources
+      // to avoid showing stale data from a different session
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('session')) {
+        console.log('[loadGroupData] Cloud session detected, skipping local data');
+        return null;
+      }
+
       let raw = null;
 
       // 1. Check direct injection (window property, set before navigation)
