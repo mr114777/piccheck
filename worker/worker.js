@@ -81,21 +81,21 @@ function getPlanLimits(plan, env) {
     case 'pro':
       return {
         storageMB: parseInt(env.PRO_MONTHLY_STORAGE_MB || '204800'),
-        maxPhotos: parseInt(env.PRO_MAX_PHOTOS || '200'),
+        maxPhotos: parseInt(env.PRO_MAX_PHOTOS || '1500'),
         ttlDays: parseInt(env.PRO_SESSION_TTL || '30'),
         maxSessions: parseInt(env.PRO_MAX_SESSIONS || '9999'),
       };
     case 'basic':
       return {
         storageMB: parseInt(env.BASIC_MONTHLY_STORAGE_MB || '10240'),
-        maxPhotos: parseInt(env.BASIC_MAX_PHOTOS || '100'),
+        maxPhotos: parseInt(env.BASIC_MAX_PHOTOS || '800'),
         ttlDays: parseInt(env.BASIC_SESSION_TTL || '14'),
         maxSessions: parseInt(env.BASIC_MAX_SESSIONS || '15'),
       };
     default: // free
       return {
         storageMB: parseInt(env.FREE_MONTHLY_STORAGE_MB || '5120'),
-        maxPhotos: parseInt(env.FREE_MAX_PHOTOS || '50'),
+        maxPhotos: parseInt(env.FREE_MAX_PHOTOS || '300'),
         ttlDays: parseInt(env.FREE_SESSION_TTL || '7'),
         maxSessions: parseInt(env.FREE_MAX_SESSIONS || '3'),
       };
