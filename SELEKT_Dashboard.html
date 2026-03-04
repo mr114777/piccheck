@@ -628,7 +628,8 @@
             document.getElementById('welcomeSub').textContent = `@${currentUser.id}`;
             document.getElementById('userAvatar').textContent = currentUser.displayName.charAt(0).toUpperCase();
             document.getElementById('menuName').textContent = currentUser.displayName;
-            document.getElementById('menuId').textContent = `@${currentUser.id}  \u00b7  ${currentUser.plan === 'pro' ? 'PRO' : 'FREE'}`;
+            const planLabel = { pro: 'PRO', basic: 'BASIC' }[currentUser.plan] || 'FREE';
+            document.getElementById('menuId').textContent = `@${currentUser.id}  \u00b7  ${planLabel}`;
 
             // Usage badge (demo)
             const badge = document.getElementById('usageBadge');

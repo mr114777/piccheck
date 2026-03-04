@@ -3,11 +3,27 @@ main = "worker.js"
 compatibility_date = "2024-01-01"
 
 [vars]
-MAX_PHOTOS_PER_SESSION = "50"
 MAX_FILE_SIZE_MB = "30"
-SESSION_TTL_DAYS = "7"
-FREE_MONTHLY_STORAGE_MB = "2048"
+
+# Storage (MB/month)
+FREE_MONTHLY_STORAGE_MB = "5120"
+BASIC_MONTHLY_STORAGE_MB = "10240"
 PRO_MONTHLY_STORAGE_MB = "204800"
+
+# Photos per session
+FREE_MAX_PHOTOS = "50"
+BASIC_MAX_PHOTOS = "100"
+PRO_MAX_PHOTOS = "200"
+
+# Session TTL (days)
+FREE_SESSION_TTL = "7"
+BASIC_SESSION_TTL = "14"
+PRO_SESSION_TTL = "30"
+
+# Sessions per month
+FREE_MAX_SESSIONS = "3"
+BASIC_MAX_SESSIONS = "15"
+PRO_MAX_SESSIONS = "9999"
 
 [[r2_buckets]]
 binding = "PHOTOS"

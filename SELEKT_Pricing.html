@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SELEKT — Plans</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --surface: #14141f;
+            --surface2: #1a1a2e;
+            --surface3: #22223a;
+            --border: rgba(255, 255, 255, 0.06);
+            --border2: rgba(255, 255, 255, 0.12);
+            --text: #f0f0f5;
+            --text-sub: rgba(255, 255, 255, 0.5);
+            --text-dim: rgba(255, 255, 255, 0.3);
+            --coral: #E8634A;
+            --accent: #4A9EE0;
+            --green: #3CB371;
+            --gold: #F5A623;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* Topbar */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 20px;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-size: 17px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: var(--coral);
+        }
+
+        .logo span {
+            color: var(--text);
+        }
+
+        .topbar-divider {
+            width: 1px;
+            height: 20px;
+            background: var(--border2);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 4px;
+        }
+
+        .nav-link {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-sub);
+            text-decoration: none;
+            transition: all 0.15s;
+        }
+
+        .nav-link:hover {
+            background: var(--surface2);
+            color: var(--text);
+        }
+
+        .nav-link.active {
+            background: var(--surface2);
+            color: var(--text);
+        }
+
+        .topbar-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Main Content */
+        .main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 48px 20px 80px;
+        }
+
+        .page-title {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .page-sub {
+            text-align: center;
+            font-size: 15px;
+            color: var(--text-sub);
+            margin-bottom: 48px;
+        }
+
+        /* Plan Grid */
+        .plan-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .plan-card {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 20px;
+            padding: 32px 24px;
+            position: relative;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .plan-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .plan-card.recommended {
+            border-color: var(--accent);
+            box-shadow: 0 0 40px rgba(74, 158, 224, 0.1);
+        }
+
+        .plan-card.pro {
+            border-color: var(--gold);
+            box-shadow: 0 0 40px rgba(245, 166, 35, 0.08);
+        }
+
+        .plan-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .plan-badge.rec {
+            background: var(--accent);
+            color: white;
+        }
+
+        .plan-badge.best {
+            background: var(--gold);
+            color: #1a1a2e;
+        }
+
+        .plan-name {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            text-align: center;
+        }
+
+        .plan-desc {
+            font-size: 12px;
+            color: var(--text-sub);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .plan-price {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .price-amount {
+            font-size: 40px;
+            font-weight: 800;
+        }
+
+        .price-currency {
+            font-size: 16px;
+            font-weight: 600;
+            vertical-align: super;
+            color: var(--text-sub);
+        }
+
+        .price-period {
+            font-size: 13px;
+            color: var(--text-dim);
+        }
+
+        .price-free {
+            font-size: 40px;
+            font-weight: 800;
+            color: var(--green);
+        }
+
+        .plan-features {
+            list-style: none;
+            margin-bottom: 28px;
+        }
+
+        .plan-features li {
+            padding: 8px 0;
+            font-size: 13px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .plan-features li:last-child {
+            border-bottom: none;
+        }
+
+        .feat-icon {
+            font-size: 14px;
+            width: 20px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .feat-val {
+            margin-left: auto;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-sub);
+            white-space: nowrap;
+        }
+
+        .plan-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            text-align: center;
+            text-decoration: none;
+            transition: opacity 0.15s;
+        }
+
+        .plan-btn:hover {
+            opacity: 0.85;
+        }
+
+        .plan-btn.free {
+            background: var(--surface3);
+            color: var(--text);
+        }
+
+        .plan-btn.basic {
+            background: var(--accent);
+            color: white;
+        }
+
+        .plan-btn.pro-btn {
+            background: var(--gold);
+            color: #1a1a2e;
+        }
+
+        .current-badge {
+            display: none;
+            text-align: center;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            background: var(--surface3);
+            color: var(--text-sub);
+            border: 1px solid var(--border2);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .plan-grid {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+                margin: 0 auto;
+            }
+
+            .page-title {
+                font-size: 24px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Topbar -->
+    <div class="topbar">
+        <div class="logo">SE<span>LEKT</span></div>
+        <div class="topbar-divider"></div>
+        <div class="nav-links">
+            <a class="nav-link" href="SELEKT_Dashboard.html" data-i18n="navDashboard">ダッシュボード</a>
+            <a class="nav-link" href="SELEKT_Upload.html" data-i18n="navUpload">アップロード</a>
+            <a class="nav-link active" href="SELEKT_Pricing.html" data-i18n="navPlan">プラン</a>
+        </div>
+        <div class="topbar-right">
+            <div style="display:flex;gap:4px;">
+                <button class="lang-btn" onclick="setLang('ja')" id="langJa"
+                    style="background:none;border:1px solid var(--border2);color:var(--text-sub);padding:2px 6px;border-radius:4px;font-size:10px;cursor:pointer">🇯🇵</button>
+                <button class="lang-btn" onclick="setLang('en')" id="langEn"
+                    style="background:none;border:1px solid var(--border2);color:var(--text-sub);padding:2px 6px;border-radius:4px;font-size:10px;cursor:pointer">EN</button>
+                <button class="lang-btn" onclick="setLang('zh')" id="langZh"
+                    style="background:none;border:1px solid var(--border2);color:var(--text-sub);padding:2px 6px;border-radius:4px;font-size:10px;cursor:pointer">中</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+        <div class="page-title" data-i18n="pageTitle">料金プラン</div>
+        <div class="page-sub" data-i18n="pageSub">あなたのワークフローに合ったプランを選べます</div>
+
+        <div class="plan-grid">
+
+            <!-- FREE -->
+            <div class="plan-card" id="cardFree">
+                <div class="plan-name">FREE</div>
+                <div class="plan-desc" data-i18n="freeDesc">まずは無料で試す</div>
+                <div class="plan-price">
+                    <span class="price-free">¥0</span>
+                </div>
+                <ul class="plan-features">
+                    <li><span class="feat-icon">📦</span> <span data-i18n="storage">月間容量</span> <span class="feat-val">5
+                            GB</span></li>
+                    <li><span class="feat-icon">📸</span> <span data-i18n="sessionsMonth">月間セッション</span> <span
+                            class="feat-val" data-i18n="free3">3回</span></li>
+                    <li><span class="feat-icon">🖼️</span> <span data-i18n="photosSession">写真/セッション</span> <span
+                            class="feat-val" data-i18n="free50">50枚</span></li>
+                    <li><span class="feat-icon">⏰</span> <span data-i18n="ttl">有効期限</span> <span class="feat-val"
+                            data-i18n="free7d">7日</span></li>
+                    <li><span class="feat-icon">🤖</span> <span data-i18n="aiDetect">AIセンシティブ判定</span> <span
+                            class="feat-val">✓</span></li>
+                    <li><span class="feat-icon">🔒</span> <span data-i18n="pwProtect">パスワード保護</span> <span
+                            class="feat-val" style="color:var(--text-dim)">—</span></li>
+                </ul>
+                <a class="plan-btn free" href="SELEKT_Auth.html" data-i18n="btnFree">無料で始める</a>
+                <div class="current-badge" id="badgeFree" data-i18n="currentPlan">現在のプラン</div>
+            </div>
+
+            <!-- BASIC -->
+            <div class="plan-card recommended" id="cardBasic">
+                <div class="plan-badge rec" data-i18n="recommended">おすすめ</div>
+                <div class="plan-name">BASIC</div>
+                <div class="plan-desc" data-i18n="basicDesc">フリーランスカメラマンに</div>
+                <div class="plan-price">
+                    <span class="price-currency">¥</span><span class="price-amount">980</span>
+                    <span class="price-period" data-i18n="perMonth">/ 月</span>
+                </div>
+                <ul class="plan-features">
+                    <li><span class="feat-icon">📦</span> <span data-i18n="storage">月間容量</span> <span
+                            class="feat-val">10 GB</span></li>
+                    <li><span class="feat-icon">📸</span> <span data-i18n="sessionsMonth">月間セッション</span> <span
+                            class="feat-val" data-i18n="basic15">15回</span></li>
+                    <li><span class="feat-icon">🖼️</span> <span data-i18n="photosSession">写真/セッション</span> <span
+                            class="feat-val" data-i18n="basic100">100枚</span></li>
+                    <li><span class="feat-icon">⏰</span> <span data-i18n="ttl">有効期限</span> <span class="feat-val"
+                            data-i18n="basic14d">14日</span></li>
+                    <li><span class="feat-icon">🤖</span> <span data-i18n="aiDetect">AIセンシティブ判定</span> <span
+                            class="feat-val">✓</span></li>
+                    <li><span class="feat-icon">🔒</span> <span data-i18n="pwProtect">パスワード保護</span> <span
+                            class="feat-val" style="color:var(--text-dim)">—</span></li>
+                </ul>
+                <a class="plan-btn basic" href="#" data-i18n="btnBasic">BASICにアップグレード</a>
+                <div class="current-badge" id="badgeBasic" data-i18n="currentPlan">現在のプラン</div>
+            </div>
+
+            <!-- PRO -->
+            <div class="plan-card pro" id="cardPro">
+                <div class="plan-badge best" data-i18n="bestValue">最高のコスパ</div>
+                <div class="plan-name">PRO</div>
+                <div class="plan-desc" data-i18n="proDesc">プロフェッショナル向け</div>
+                <div class="plan-price">
+                    <span class="price-currency">¥</span><span class="price-amount">2,980</span>
+                    <span class="price-period" data-i18n="perMonth">/ 月</span>
+                </div>
+                <ul class="plan-features">
+                    <li><span class="feat-icon">📦</span> <span data-i18n="storage">月間容量</span> <span
+                            class="feat-val">200 GB</span></li>
+                    <li><span class="feat-icon">📸</span> <span data-i18n="sessionsMonth">月間セッション</span> <span
+                            class="feat-val" data-i18n="proUnlimited">無制限</span></li>
+                    <li><span class="feat-icon">🖼️</span> <span data-i18n="photosSession">写真/セッション</span> <span
+                            class="feat-val" data-i18n="pro200">200枚</span></li>
+                    <li><span class="feat-icon">⏰</span> <span data-i18n="ttl">有効期限</span> <span class="feat-val"
+                            data-i18n="pro30d">30日</span></li>
+                    <li><span class="feat-icon">🤖</span> <span data-i18n="aiDetect">AIセンシティブ判定</span> <span
+                            class="feat-val">✓</span></li>
+                    <li><span class="feat-icon">🔒</span> <span data-i18n="pwProtect">パスワード保護</span> <span
+                            class="feat-val" style="color:var(--green)">✓</span></li>
+                </ul>
+                <a class="plan-btn pro-btn" href="#" data-i18n="btnPro">PROにアップグレード</a>
+                <div class="current-badge" id="badgePro" data-i18n="currentPlan">現在のプラン</div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ===== I18N =====
+        const PRC_I18N = {
+            ja: {
+                navDashboard: 'ダッシュボード', navUpload: 'アップロード', navPlan: 'プラン',
+                pageTitle: '料金プラン', pageSub: 'あなたのワークフローに合ったプランを選べます',
+                freeDesc: 'まずは無料で試す', basicDesc: 'フリーランスカメラマンに', proDesc: 'プロフェッショナル向け',
+                recommended: 'おすすめ', bestValue: '最高のコスパ', perMonth: '/ 月',
+                storage: '月間容量', sessionsMonth: '月間セッション', photosSession: '写真/セッション',
+                ttl: '有効期限', aiDetect: 'AIセンシティブ判定', pwProtect: 'パスワード保護',
+                free3: '3回', free50: '50枚', free7d: '7日',
+                basic15: '15回', basic100: '100枚', basic14d: '14日',
+                proUnlimited: '無制限', pro200: '200枚', pro30d: '30日',
+                btnFree: '無料で始める', btnBasic: 'BASICにアップグレード', btnPro: 'PROにアップグレード',
+                currentPlan: '現在のプラン',
+            },
+            en: {
+                navDashboard: 'Dashboard', navUpload: 'Upload', navPlan: 'Plans',
+                pageTitle: 'Pricing Plans', pageSub: 'Choose the plan that fits your workflow',
+                freeDesc: 'Try it free', basicDesc: 'For freelance photographers', proDesc: 'For professionals',
+                recommended: 'Recommended', bestValue: 'Best Value', perMonth: '/ mo',
+                storage: 'Monthly Storage', sessionsMonth: 'Sessions / Month', photosSession: 'Photos / Session',
+                ttl: 'Expiry', aiDetect: 'AI Content Filter', pwProtect: 'Password Protection',
+                free3: '3', free50: '50', free7d: '7 days',
+                basic15: '15', basic100: '100', basic14d: '14 days',
+                proUnlimited: 'Unlimited', pro200: '200', pro30d: '30 days',
+                btnFree: 'Get Started Free', btnBasic: 'Upgrade to BASIC', btnPro: 'Upgrade to PRO',
+                currentPlan: 'Current Plan',
+            },
+            zh: {
+                navDashboard: '仪表板', navUpload: '上传', navPlan: '方案',
+                pageTitle: '定价方案', pageSub: '选择适合您工作流程的方案',
+                freeDesc: '免费试用', basicDesc: '适合自由摄影师', proDesc: '专业版',
+                recommended: '推荐', bestValue: '最佳性价比', perMonth: '/ 月',
+                storage: '月度容量', sessionsMonth: '每月会话数', photosSession: '每会话照片数',
+                ttl: '有效期', aiDetect: 'AI内容过滤', pwProtect: '密码保护',
+                free3: '3次', free50: '50张', free7d: '7天',
+                basic15: '15次', basic100: '100张', basic14d: '14天',
+                proUnlimited: '无限', pro200: '200张', pro30d: '30天',
+                btnFree: '免费开始', btnBasic: '升级到BASIC', btnPro: '升级到PRO',
+                currentPlan: '当前方案',
+            }
+        };
+
+        let _prcLang = localStorage.getItem('selekt-lang') || 'ja';
+        function pt(key) { return (PRC_I18N[_prcLang] && PRC_I18N[_prcLang][key]) || PRC_I18N.ja[key] || key; }
+
+        function setLang(lang) {
+            _prcLang = lang;
+            localStorage.setItem('selekt-lang', lang);
+            document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = pt(el.dataset.i18n));
+            document.querySelectorAll('.lang-btn').forEach(b => b.style.borderColor = 'var(--border2)');
+            const active = document.getElementById('lang' + lang.charAt(0).toUpperCase() + lang.slice(1));
+            if (active) active.style.borderColor = 'var(--accent)';
+        }
+
+        // Show current plan badge
+        function showCurrentPlan() {
+            try {
+                const user = JSON.parse(localStorage.getItem('selekt_user'));
+                if (!user || !user.plan) return;
+                const plan = user.plan; // 'free', 'basic', 'pro'
+                const cardId = 'card' + plan.charAt(0).toUpperCase() + plan.slice(1);
+                const badgeId = 'badge' + plan.charAt(0).toUpperCase() + plan.slice(1);
+                const card = document.getElementById(cardId);
+                const badge = document.getElementById(badgeId);
+                if (card) {
+                    // Hide the upgrade button, show badge
+                    const btn = card.querySelector('.plan-btn');
+                    if (btn) btn.style.display = 'none';
+                    if (badge) badge.style.display = 'block';
+                }
+            } catch (e) { }
+        }
+
+        setLang(_prcLang);
+        showCurrentPlan();
+    </script>
+</body>
+
+</html>

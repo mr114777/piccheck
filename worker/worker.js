@@ -75,6 +75,33 @@ function getMonthKey() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
 
+// Get plan-specific limits
+function getPlanLimits(plan, env) {
+  switch (plan) {
+    case 'pro':
+      return {
+        storageMB: parseInt(env.PRO_MONTHLY_STORAGE_MB || '204800'),
+        maxPhotos: parseInt(env.PRO_MAX_PHOTOS || '200'),
+        ttlDays: parseInt(env.PRO_SESSION_TTL || '30'),
+        maxSessions: parseInt(env.PRO_MAX_SESSIONS || '9999'),
+      };
+    case 'basic':
+      return {
+        storageMB: parseInt(env.BASIC_MONTHLY_STORAGE_MB || '10240'),
+        maxPhotos: parseInt(env.BASIC_MAX_PHOTOS || '100'),
+        ttlDays: parseInt(env.BASIC_SESSION_TTL || '14'),
+        maxSessions: parseInt(env.BASIC_MAX_SESSIONS || '15'),
+      };
+    default: // free
+      return {
+        storageMB: parseInt(env.FREE_MONTHLY_STORAGE_MB || '5120'),
+        maxPhotos: parseInt(env.FREE_MAX_PHOTOS || '50'),
+        ttlDays: parseInt(env.FREE_SESSION_TTL || '7'),
+        maxSessions: parseInt(env.FREE_MAX_SESSIONS || '3'),
+      };
+  }
+}
+
 export default {
   async fetch(request, env) {
     // Handle CORS preflight
@@ -181,14 +208,26 @@ export default {
         // Include usage info
         const monthKey = getMonthKey();
         const usage = await env.USERS.get(`users/${user.id}/usage/${monthKey}`, 'json') || { uploadedBytes: 0 };
-        const limitMB = user.plan === 'pro' ? parseInt(env.PRO_MONTHLY_STORAGE_MB || '204800') : parseInt(env.FREE_MONTHLY_STORAGE_MB || '2048');
+        const limits = getPlanLimits(user.plan, env);
+        const sessionCount = await env.USERS.get(`users/${user.id}/sessions-count/${monthKey}`, 'json') || { count: 0 };
 
         return jsonResponse({
           user: safeUser,
           usage: {
             usedMB: Math.round(usage.uploadedBytes / 1048576),
-            limitMB,
-            remainingMB: Math.max(0, limitMB - Math.round(usage.uploadedBytes / 1048576)),
+            limitMB: limits.storageMB,
+            remainingMB: Math.max(0, limits.storageMB - Math.round(usage.uploadedBytes / 1048576)),
+          },
+          sessions: {
+            used: sessionCount.count,
+            limit: limits.maxSessions,
+            remaining: Math.max(0, limits.maxSessions - sessionCount.count),
+          },
+          planLimits: {
+            maxPhotos: limits.maxPhotos,
+            ttlDays: limits.ttlDays,
+            maxSessions: limits.maxSessions,
+            storageMB: limits.storageMB,
           },
         });
       }
@@ -280,8 +319,26 @@ export default {
         const body = await request.json();
         const sessionId = generateId(8);
         const now = new Date().toISOString();
-        const ttlDays = parseInt(env.SESSION_TTL_DAYS || '7');
-        const expiresAt = new Date(Date.now() + ttlDays * 86400000).toISOString();
+
+        // Get plan limits (use creator's plan if authenticated)
+        let creatorPlan = 'free';
+        const creator = await getUserFromToken(request, env);
+        if (creator) creatorPlan = creator.plan || 'free';
+        const limits = getPlanLimits(creatorPlan, env);
+
+        // Check monthly session limit
+        if (creator) {
+          const monthKey = getMonthKey();
+          const sessionCountKey = `users/${creator.id}/sessions-count/${monthKey}`;
+          const count = await env.USERS.get(sessionCountKey, 'json') || { count: 0 };
+          if (count.count >= limits.maxSessions) {
+            return errorResponse(`Monthly session limit reached (${limits.maxSessions} sessions). Please upgrade your plan.`, 429);
+          }
+          count.count++;
+          await env.USERS.put(sessionCountKey, JSON.stringify(count), { expirationTtl: 86400 * 35 });
+        }
+
+        const expiresAt = new Date(Date.now() + limits.ttlDays * 86400000).toISOString();
 
         const meta = {
           id: sessionId,
@@ -292,6 +349,7 @@ export default {
           expiresAt,
           photoCount: 0,
           photos: [],
+          plan: creatorPlan,
         };
 
         await env.PHOTOS.put(
@@ -330,10 +388,10 @@ export default {
         if (!metaObj) return errorResponse('Session not found', 404);
         const meta = JSON.parse(await metaObj.text());
 
-        // Check photo limit
-        const maxPhotos = parseInt(env.MAX_PHOTOS_PER_SESSION || '50');
-        if (meta.photoCount >= maxPhotos) {
-          return errorResponse(`Maximum ${maxPhotos} photos per session`, 429);
+        // Check photo limit (use session's plan)
+        const planLimits = getPlanLimits(meta.plan || 'free', env);
+        if (meta.photoCount >= planLimits.maxPhotos) {
+          return errorResponse(`Maximum ${planLimits.maxPhotos} photos per session`, 429);
         }
 
         // Parse multipart form
