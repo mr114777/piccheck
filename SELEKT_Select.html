@@ -159,7 +159,7 @@
 
     .btn-complete {
       background: transparent;
-      color: #fff;
+      color: var(--text);
       border: 1px solid var(--border2);
       padding: 8px 20px;
       border-radius: 8px;
@@ -256,7 +256,7 @@
       padding: 8px 18px;
       background: transparent;
       border: 1px solid var(--border2);
-      color: #fff;
+      color: var(--text);
       font-size: 12px;
       font-weight: 700;
       font-family: inherit;
@@ -2709,7 +2709,7 @@
       <button class="modal-nav modal-nav-prev" id="modalPrev" onclick="modalNav(-1)">‹</button>
       <div class="modal-photo-img" id="modalImg"></div>
       <button class="modal-nav modal-nav-next" id="modalNext" onclick="modalNav(1)">›</button>
-      <!-- Bottom: quality + comment in one compact row -->
+      <!-- Bottom: quality + shortcuts + comment -->
       <div style="display:flex;align-items:center;gap:8px;padding:4px 12px;flex-shrink:0">
         <div id="modalAiBadges" style="display:flex;gap:4px;flex-shrink:0"></div>
         <span id="modalQualityNotice" style="font-size:10px;color:var(--text-dim);white-space:nowrap">⚡ プレビュー</span>
@@ -2717,6 +2717,8 @@
           style="background:var(--surface3);border:1px solid var(--border2);color:var(--text-sub);font-size:10px;padding:2px 8px;border-radius:5px;cursor:pointer;white-space:nowrap;flex-shrink:0">
           高画質
         </button>
+        <span style="font-size:9px;color:var(--text-dim);white-space:nowrap;opacity:0.6">←→移動 O=OK H=保留 N=NG
+          ESC=閉じる</span>
         <input id="modalComment" placeholder="コメント..." oninput="saveComment()"
           style="flex:1;background:var(--surface3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:inherit;font-size:11px;padding:5px 8px;outline:none;min-width:0">
       </div>
@@ -3094,7 +3096,7 @@
                 <button class="group-bulk-btn gbtn-ng" onclick="bulkSetGroup('${g.id}','ng')">全NG</button>
                 <button class="group-bulk-btn gbtn-reset" onclick="confirmGroupReset('${g.id}')">リセット</button>
               </div>
-              <span class="group-desired" id="desired-${g.id}" style="font-size:11px;color:var(--text-sub);cursor:pointer;margin-left:8px" onclick="event.stopPropagation();editGroupDesired('${g.id}')" title="クリックで変更">希望セレクト枚数: ${g.limit ? g.limit + '枚' : '未設定'}</span>
+              <span class="group-desired" id="desired-${g.id}" style="font-size:11px;color:var(--text-sub);cursor:pointer;margin-left:8px" onclick="event.stopPropagation();editGroupDesired('${g.id}')" title="${t('clickToChange')}">${t('desiredCountLabel')}: ${g.limit ? g.limit + t('photos') : t('desiredUnset')}</span>
               <div class="group-limit-badge" id="limit-${g.id}">0 OK</div>
             </div>
             <div class="photo-grid" id="grid-${g.id}"></div>
@@ -3486,11 +3488,10 @@
       const old = getStatus(photoId);
       if (newStatus === null) {
         state.status.delete(photoId);
-        showToast('ステータスを解除しました', '');
+        showToast(t('statusCleared'), '');
       } else if (old === newStatus) {
-        // Toggle off
-        state.status.delete(photoId);
-        showToast('ステータスを解除しました', '');
+        // Same status — keep as is (no toggle)
+        return;
       } else {
         state.status.set(photoId, newStatus);
         const msgs = { ok: 'OK ✓', nearok: '保留 △ — 修正してOKに', ng: 'NG ✕' };
@@ -3628,7 +3629,7 @@
       const total = [...state.status.values()].length;
       if (total === 0) { showToast('リセットする判定がありません', ''); return; }
       document.getElementById('groupResetDesc').textContent =
-        'すべてのセレクトステータス（OK / 保留 / NG）がリセットされます。（' + total + '件）';
+        t('resetAllStatuses') + '（' + total + '件）';
       _pendingResetGroupId = '__ALL__';
       document.getElementById('groupResetModal').classList.add('open');
     }
@@ -3684,12 +3685,12 @@
       const group = GROUPS.find(g => g.id === groupId);
       if (!group) return;
       const current = group.limit || 0;
-      const val = prompt('希望セレクト枚数を入力（' + group.name + '）', current);
+      const val = prompt(t('desiredCountPrompt') + '（' + group.name + '）', current);
       if (val === null) return;
       const num = parseInt(val) || 0;
       group.limit = num;
       const el = document.getElementById('desired-' + groupId);
-      if (el) el.textContent = '希望セレクト枚数: ' + (num ? num + '枚' : '未設定');
+      if (el) el.textContent = t('desiredCountLabel') + ': ' + (num ? num + t('photos') : t('desiredUnset'));
       // Update total in sidebar
       const totalLimit = GROUPS.reduce((s, g) => s + (parseInt(g.limit) || 0), 0);
       const statLimit = document.getElementById('statLimit');
@@ -3701,14 +3702,14 @@
       const total = GROUPS.reduce((s, g) => s + g.photos.length, 0);
       const judged = state.status.size;
       const unjudged = total - judged;
-      let msg = 'このセッションのステータスをセレクト完了に変更しますか？';
+      let msg = t('selCompleteConfirm');
       if (unjudged > 0) {
-        msg += '\n\n⚠️ まだ ' + unjudged + '枚が未判定ですが、完了になります。';
+        msg += '\n\n⚠️ ' + t('selCompleteUnjudged').replace('{n}', unjudged);
       }
       if (!confirm(msg)) return;
       // Mark as complete
       localStorage.setItem('selekt_session_complete', 'true');
-      showToast('セレクト完了しました！', 'green');
+      showToast(t('selCompleteDone'), 'green');
       // Could call API here in the future
     }
 
@@ -3779,7 +3780,7 @@
       const fill = document.getElementById('progressFill');
       const cnt = document.getElementById('progressCount');
       if (fill) fill.style.width = pct + '%';
-      if (cnt) cnt.textContent = `セレクト済 ${judged} / ${total}`;
+      if (cnt) cnt.textContent = `${t('selSelected')} ${judged} / ${total}`;
       document.getElementById('selCountBadge').textContent = ok;
       const nearokBadge = document.getElementById('nearokCountBadge');
       if (nearokBadge) nearokBadge.textContent = nearok;
@@ -4937,7 +4938,12 @@
         groupList: '\u30b0\u30eb\u30fc\u30d7\u4e00\u89a7',
         addGroup: '\uff0b \u30b0\u30eb\u30fc\u30d7\u8ffd\u52a0',
         totalPhotos: '\u5408\u8a08\u679a\u6570',
-        selectLimit: '\u9078\u629e\u4e0a\u9650',
+        selectLimit: '希望セレクト枚数',
+        selComplete: '✓ セレクト完了',
+        selSelected: 'セレクト済',
+        desiredUnset: '未設定',
+        selCompleteConfirm: 'このセッションのステータスをセレクト完了に変更しますか？',
+        selCompleteUnjudged: 'まだ {n}枚が未判定ですが、完了になります。',
         selectProgress: '\u30bb\u30ec\u30af\u30c8\u9032\u6357',
         dlFull: '\u30d5\u30eb\u30b5\u30a4\u30ba\uff08\u539f\u5bf8\uff09',
         dlSns: 'SNS\u7528\uff081\u301c3MB\u5727\u7e2e\uff09',
@@ -4970,10 +4976,23 @@
         groupHold: '\u5168\u4fdd\u7559',
         groupNg: '\u5168NG',
         groupReset: '\u30ea\u30bb\u30c3\u30c8',
-        selCount: '\u679a\u9078\u629e\u4e2d',
-        groupMove: '\ud83d\udcc2 \u30b0\u30eb\u30fc\u30d7\u79fb\u52d5',
-        clearSel: '\u2715 \u89e3\u9664',
-        photos: '\u679a',
+        selCount: '枚選択中',
+        groupMove: '📂 グループ移動',
+        clearSel: '✕ 解除',
+        photos: '枚',
+        statusCleared: 'ステータスを解除しました',
+        resetAllStatuses: 'すべてのセレクトステータス（OK / 保留 / NG）がリセットされます。',
+        desiredCountLabel: '希望セレクト枚数',
+        desiredCountPrompt: '希望セレクト枚数を入力',
+        clickToChange: 'クリックで変更',
+        modalShortcutHint: '←→移動 O=OK H=保留 N=NG ESC=閉じる',
+        commentShort: 'コメント...',
+        bulkOk: '✓ OK',
+        bulkHold: '△ 保留',
+        bulkNg: '✕ NG',
+        selCompleteDone: 'セレクト完了しました！',
+        highQuality: '高画質',
+        previewNotice: '⚡ プレビュー',
       },
       en: {
         title: 'SELEKT \u2014 Photo Selection',
@@ -5003,7 +5022,12 @@
         groupList: 'Groups',
         addGroup: '+ Add Group',
         totalPhotos: 'Total Photos',
-        selectLimit: 'Selection Limit',
+        selectLimit: 'Desired Selection Count',
+        selComplete: '✓ Selection Complete',
+        selSelected: 'Selected',
+        desiredUnset: 'Not Set',
+        selCompleteConfirm: 'Mark this session as selection completed?',
+        selCompleteUnjudged: '{n} photos are still unjudged but will be completed.',
         selectProgress: 'Selection Progress',
         dlFull: 'Full Size (Original)',
         dlSns: 'SNS (1-3MB Compressed)',
@@ -5036,10 +5060,23 @@
         groupHold: 'All Hold',
         groupNg: 'All NG',
         groupReset: 'Reset',
-        selCount: ' selected',
-        groupMove: '\ud83d\udcc2 Move Group',
-        clearSel: '\u2715 Clear',
+        selCount: 'selected',
+        groupMove: '📂 Move Group',
+        clearSel: '✕ Clear',
         photos: '',
+        statusCleared: 'Status cleared',
+        resetAllStatuses: 'All selection statuses (OK / Hold / NG) will be reset.',
+        desiredCountLabel: 'Desired Count',
+        desiredCountPrompt: 'Enter desired selection count',
+        clickToChange: 'Click to change',
+        modalShortcutHint: '←→Nav O=OK H=Hold N=NG ESC=Close',
+        commentShort: 'Comment...',
+        bulkOk: '✓ OK',
+        bulkHold: '△ Hold',
+        bulkNg: '✕ NG',
+        selCompleteDone: 'Selection completed!',
+        highQuality: 'HD',
+        previewNotice: '⚡ Preview',
       },
       zh: {
         title: 'SELEKT \u2014 \u7167\u7247\u7b5b\u9009',
@@ -5069,7 +5106,12 @@
         groupList: '\u5206\u7ec4\u5217\u8868',
         addGroup: '+ \u6dfb\u52a0\u5206\u7ec4',
         totalPhotos: '\u603b\u7167\u7247\u6570',
-        selectLimit: '\u9009\u62e9\u4e0a\u9650',
+        selectLimit: '期望选择数量',
+        selComplete: '✓ 选择完成',
+        selSelected: '已选择',
+        desiredUnset: '未设置',
+        selCompleteConfirm: '确定将此会话标记为选择完成吗？',
+        selCompleteUnjudged: '还有 {n} 张照片未判定，但将标记为完成。',
         selectProgress: '\u7b5b\u9009\u8fdb\u5ea6',
         dlFull: '\u539f\u59cb\u5c3a\u5bf8',
         dlSns: 'SNS\u7528\uff081-3MB\u538b\u7f29\uff09',
@@ -5103,9 +5145,22 @@
         groupNg: '\u5168NG',
         groupReset: '\u91cd\u7f6e',
         selCount: ' \u5df2\u9009',
-        groupMove: '\ud83d\udcc2 \u79fb\u52a8\u5206\u7ec4',
+        groupMove: '📂 \u79fb\u52a8\u5206\u7ec4',
         clearSel: '\u2715 \u53d6\u6d88',
         photos: '\u5f20',
+        statusCleared: '已清除状态',
+        resetAllStatuses: '所有选择状态（OK / 待定 / NG）将被重置。',
+        desiredCountLabel: '期望数量',
+        desiredCountPrompt: '请输入期望选择数量',
+        clickToChange: '点击修改',
+        modalShortcutHint: '←→导航 O=OK H=待定 N=NG ESC=关闭',
+        commentShort: '评论...',
+        bulkOk: '✓ OK',
+        bulkHold: '△ 待定',
+        bulkNg: '✕ NG',
+        selCompleteDone: '选择已完成！',
+        highQuality: '高清',
+        previewNotice: '⚡ 预览',
       }
     };
 
