@@ -4751,9 +4751,10 @@
 
             const predictions = await nsfwModel.classify(imgEl);
 
-            // Check for sensitive categories (Porn, Hentai, Sexy)
+            // Check for sensitive categories (Porn, Hentai at 0.5, Sexy at 0.8)
+            const sensitiveThresholds = { Porn: 0.5, Hentai: 0.5, Sexy: 0.8 };
             const sensitive = predictions.filter(p =>
-              ['Porn', 'Hentai', 'Sexy'].includes(p.className) && p.probability > 0.5
+              sensitiveThresholds[p.className] && p.probability > sensitiveThresholds[p.className]
             );
 
             if (sensitive.length > 0) {
