@@ -2795,6 +2795,23 @@
     // ===== DATA =====
     const SELEKT_API = 'https://selekt-api.mr-mail114.workers.dev';
 
+    // Early i18n stub (full I18N dict loaded later, but t() must exist before buildGroupUI)
+    let currentLang = localStorage.getItem('selekt-lang') || 'ja';
+    let _I18N_READY = false;
+    function t(key) {
+      if (_I18N_READY) return (I18N[currentLang] && I18N[currentLang][key]) || I18N.ja[key] || key;
+      // Fallback before I18N is loaded
+      const fallback = {
+        clickToChange: 'クリックで変更', desiredCountLabel: '希望セレクト枚数',
+        photos: '枚', desiredUnset: '未設定', selSelected: 'セレクト済',
+        statusCleared: 'ステータスを解除しました', selCompleteDone: 'セレクト完了しました！',
+        resetAllStatuses: 'すべてのセレクトステータス（OK / 保留 / NG）がリセットされます。',
+        desiredCountPrompt: '希望セレクト枚数を入力', selCompleteConfirm: 'このセッションのステータスをセレクト完了に変更しますか？',
+        selCompleteUnjudged: 'まだ {n}枚が未判定ですが、完了になります。',
+      };
+      return fallback[key] || key;
+    }
+
     // Async cloud session loader (runs after init if ?session= present)
     async function loadCloudSession(sessionId) {
       try {
@@ -5164,8 +5181,8 @@
       }
     };
 
-    let currentLang = 'ja';
-    function t(key) { return (I18N[currentLang] && I18N[currentLang][key]) || I18N.ja[key] || key; }
+    // I18N is now loaded — activate full translations
+    _I18N_READY = true;
 
     function setLang(lang) {
       currentLang = lang;
