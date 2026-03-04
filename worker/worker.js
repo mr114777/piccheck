@@ -181,7 +181,7 @@ export default {
         // Include usage info
         const monthKey = getMonthKey();
         const usage = await env.USERS.get(`users/${user.id}/usage/${monthKey}`, 'json') || { uploadedBytes: 0 };
-        const limitMB = user.plan === 'pro' ? parseInt(env.PRO_MONTHLY_STORAGE_MB || '204800') : parseInt(env.FREE_MONTHLY_STORAGE_MB || '30');
+        const limitMB = user.plan === 'pro' ? parseInt(env.PRO_MONTHLY_STORAGE_MB || '204800') : parseInt(env.FREE_MONTHLY_STORAGE_MB || '2048');
 
         return jsonResponse({
           user: safeUser,
@@ -346,7 +346,7 @@ export default {
         if (!file) return errorResponse('No file provided');
 
         // Check file size
-        const maxSize = parseInt(env.MAX_FILE_SIZE_MB || '25') * 1024 * 1024;
+        const maxSize = parseInt(env.MAX_FILE_SIZE_MB || '30') * 1024 * 1024;
         if (file.size > maxSize) {
           return errorResponse(`File too large (max ${env.MAX_FILE_SIZE_MB}MB)`);
         }
