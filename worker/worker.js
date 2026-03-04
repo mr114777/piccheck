@@ -181,7 +181,7 @@ export default {
         // Include usage info
         const monthKey = getMonthKey();
         const usage = await env.USERS.get(`users/${user.id}/usage/${monthKey}`, 'json') || { uploadedBytes: 0 };
-        const limitMB = user.plan === 'pro' ? parseInt(env.PRO_MONTHLY_STORAGE_MB || '102400') : parseInt(env.FREE_MONTHLY_STORAGE_MB || '2048');
+        const limitMB = user.plan === 'pro' ? parseInt(env.PRO_MONTHLY_STORAGE_MB || '51200') : parseInt(env.FREE_MONTHLY_STORAGE_MB || '30');
 
         return jsonResponse({
           user: safeUser,
