@@ -2425,8 +2425,13 @@
         <div class="sidebar-label">撮影情報</div>
         <div id="sidebarStats">
           <div class="stat-row"><span class="stat-key">合計枚数</span><span class="stat-val" id="statTotal">0枚</span></div>
-          <div class="stat-row"><span class="stat-key">希望セレクト枚数</span><span class="stat-val yellow"
-              id="statLimit">未設定</span>
+          <div class="stat-row" style="cursor:pointer" onclick="editTotalDesired()" title="クリックで変更"><span
+              class="stat-key">希望セレクト枚数 <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                style="opacity:0.35;vertical-align:middle">
+                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                <path d="m15 5 4 4" />
+              </svg></span><span class="stat-val yellow" id="statLimit">未設定</span>
           </div>
         </div>
       </div>
@@ -3807,6 +3812,35 @@
       const totalLimit = GROUPS.reduce((s, g) => s + (parseInt(g.limit) || 0), 0);
       const statLimit = document.getElementById('statLimit');
       if (statLimit) statLimit.textContent = totalLimit ? totalLimit + '枚' : '未設定';
+      save();
+    }
+
+    function editTotalDesired() {
+      const currentTotal = GROUPS.reduce((s, g) => s + (parseInt(g.limit) || 0), 0);
+      const val = prompt('希望セレクト枚数を入力:', currentTotal || '');
+      if (val === null) return;
+      const num = parseInt(val) || 0;
+
+      if (GROUPS.length === 1) {
+        GROUPS[0].limit = num;
+      } else {
+        // Distribute evenly across groups
+        const per = Math.floor(num / GROUPS.length);
+        const remainder = num % GROUPS.length;
+        GROUPS.forEach((g, i) => {
+          g.limit = per + (i < remainder ? 1 : 0);
+        });
+      }
+
+      // Update per-group displays
+      GROUPS.forEach(g => {
+        const el = document.getElementById('desired-' + g.id);
+        if (el) el.textContent = t('desiredCountLabel') + ': ' + (g.limit ? g.limit + t('photos') : t('desiredUnset'));
+      });
+
+      // Update sidebar total
+      const statLimit = document.getElementById('statLimit');
+      if (statLimit) statLimit.textContent = num ? num + '枚' : '未設定';
       save();
     }
 
