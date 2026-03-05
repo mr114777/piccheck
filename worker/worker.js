@@ -461,6 +461,43 @@ export default {
         });
       }
 
+      // === DELETE /api/session/:id/photos — Delete photos ===
+      const deletePhotosMatch = path.match(/^\/api\/session\/([a-zA-Z0-9]+)\/photos$/);
+      if (deletePhotosMatch && request.method === 'DELETE') {
+        const [, sessionId] = deletePhotosMatch;
+        const metaKey = `sessions/${sessionId}/meta.json`;
+        const metaObj = await env.PHOTOS.get(metaKey);
+        if (!metaObj) return errorResponse('Session not found', 404);
+
+        const meta = await metaObj.json();
+        const { fnames } = await request.json();
+        if (!fnames || !Array.isArray(fnames)) {
+          return errorResponse('fnames array required', 400);
+        }
+
+        let deleted = 0;
+        for (const fname of fnames) {
+          // Delete photo from R2
+          try { await env.PHOTOS.delete(`sessions/${sessionId}/photos/${fname}`); } catch (e) { }
+          // Delete thumbnail from R2
+          try { await env.PHOTOS.delete(`sessions/${sessionId}/thumbs/${fname}`); } catch (e) { }
+          // Remove from meta
+          const idx = meta.photos.findIndex(p => p.fname === fname);
+          if (idx !== -1) {
+            meta.photos.splice(idx, 1);
+            meta.photoCount = Math.max(0, (meta.photoCount || 0) - 1);
+            deleted++;
+          }
+        }
+
+        // Save updated meta
+        await env.PHOTOS.put(metaKey, JSON.stringify(meta), {
+          httpMetadata: { contentType: 'application/json' },
+        });
+
+        return jsonResponse({ ok: true, deleted });
+      }
+
       // === GET /api/session/:id/photo/:fname — Get full photo ===
       const photoMatch = path.match(/^\/api\/session\/([a-zA-Z0-9]+)\/photo\/(.+)$/);
       if (photoMatch && request.method === 'GET') {

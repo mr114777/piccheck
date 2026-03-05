@@ -2735,8 +2735,23 @@
     <button class="sel-bar-btn" style="background:var(--coral);color:#fff" onclick="bulkSetSelectedStatus('ng')">✕
       NG</button>
     <button class="sel-bar-btn" onclick="openBulkMoveDropdown()">📂 グループ移動</button>
+    <button class="sel-bar-btn" style="background:#c0392b;color:#fff" onclick="deleteSelectedPhotos()">🗑 削除</button>
     <button class="sel-bar-btn secondary" onclick="clearSelection()">✕ 解除</button>
     <div class="sel-bar-move-dd" id="bulkMoveDd" style="display:none"></div>
+  </div>
+
+  <!-- Delete Confirm Modal -->
+  <div class="confirm-overlay" id="deleteConfirmModal">
+    <div class="confirm-box">
+      <div class="confirm-icon">🗑</div>
+      <div class="confirm-title" id="deleteConfirmTitle">写真を削除しますか？</div>
+      <div class="confirm-desc" id="deleteConfirmDesc">この操作は取り消せません。</div>
+      <div class="confirm-btns">
+        <button class="confirm-btn" style="background:var(--surface3);color:var(--text)"
+          onclick="closeDeleteConfirm()">キャンセル</button>
+        <button class="confirm-btn" style="background:#c0392b;color:white" onclick="doDeletePhotos()">削除する</button>
+      </div>
+    </div>
   </div>
 
   <!-- Confirm Modal -->
@@ -3385,7 +3400,7 @@
         imgEl.alt = photo.fname || '';
         imgEl.loading = 'lazy';
         imgEl.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;';
-        imgEl.onerror = function() {
+        imgEl.onerror = function () {
           // Fallback: try fullUrl if thumb failed
           if (photo.fullUrl && this.src !== photo.fullUrl) {
             this.src = photo.fullUrl;
@@ -3691,6 +3706,62 @@
       save();
       const labels = { ok: 'OK', nearok: '保留', ng: 'NG' };
       showToast(count + '枚を ' + labels[newStatus] + ' に設定しました', newStatus === 'ok' ? 'green' : newStatus === 'ng' ? 'coral' : '');
+    }
+
+    function deleteSelectedPhotos() {
+      if (state.selected.size === 0) return;
+      const count = state.selected.size;
+      document.getElementById('deleteConfirmTitle').textContent = count + '枚の写真を削除しますか？';
+      document.getElementById('deleteConfirmDesc').textContent = 'この操作は取り消せません。選択した写真がセッションから完全に削除されます。';
+      document.getElementById('deleteConfirmModal').classList.add('open');
+    }
+
+    function closeDeleteConfirm() {
+      document.getElementById('deleteConfirmModal').classList.remove('open');
+    }
+
+    async function doDeletePhotos() {
+      closeDeleteConfirm();
+      const count = state.selected.size;
+      const sessionId = window._selektSessionId;
+      const deletedFnames = [];
+
+      // Collect photos to delete and their filenames
+      state.selected.forEach(photoId => {
+        for (const g of GROUPS) {
+          const idx = g.photos.findIndex(p => p.id === photoId);
+          if (idx !== -1) {
+            const photo = g.photos[idx];
+            if (photo.fname) deletedFnames.push(photo.fname);
+            // Remove status and comments
+            state.status.delete(photoId);
+            state.comments.delete(photoId);
+            // Remove from group
+            g.photos.splice(idx, 1);
+            break;
+          }
+        }
+      });
+
+      // Cloud delete (if session exists)
+      if (sessionId && deletedFnames.length > 0) {
+        try {
+          await fetch(`${SELEKT_API}/api/session/${sessionId}/photos`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fnames: deletedFnames })
+          });
+        } catch (e) {
+          console.warn('[SELEKT] Cloud delete failed:', e);
+        }
+      }
+
+      clearSelection();
+      GROUPS.forEach(g => renderGroup(g));
+      renderGroupProgress();
+      updateSidebarCounts();
+      save();
+      showToast(count + '枚の写真を削除しました', 'coral');
     }
 
     function bulkSetAll(newStatus) {
