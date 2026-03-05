@@ -2835,7 +2835,7 @@
     // Async cloud session loader (runs after init if ?session= present)
     async function loadCloudSession(sessionId) {
       try {
-        const res = await fetch(`${SELEKT_API}/api/session/${sessionId}`);
+        const res = await fetch(`${SELEKT_API}/api/session/${sessionId}?t=${Date.now()}`);
         if (res.ok) {
           const meta = await res.json();
           console.log('[SELEKT] Cloud session loaded:', sessionId);
@@ -3802,6 +3802,10 @@
     let _pendingResetGroupId = null;
 
     function editGroupDesired(groupId) {
+      if (new URLSearchParams(window.location.search).get('session') && !window._selektSessionId) {
+        showToast('データ同期中です。しばらくお待ちください', 'coral');
+        return;
+      }
       const group = GROUPS.find(g => g.id === groupId);
       if (!group) return;
       const current = group.limit || 0;
@@ -3821,6 +3825,10 @@
     }
 
     function editTotalDesired() {
+      if (new URLSearchParams(window.location.search).get('session') && !window._selektSessionId) {
+        showToast('データ同期中です。しばらくお待ちください', 'coral');
+        return;
+      }
       const currentTotal = GROUPS.reduce((s, g) => s + (parseInt(g.limit) || 0), 0);
       const val = prompt('希望セレクト枚数を入力:', currentTotal || '');
       if (val === null) return;
@@ -4069,7 +4077,7 @@
     }
 
     function _makeThumb(photo, group) {
-      if (photo.url) return `<div class="sel-thumb" style="background:url(${photo.url}) center/cover no-repeat"></div>`;
+      if (photo.url) return `<div class="sel-thumb" style="background:var(--surface2);font-size:0;position:relative;"><img src="${photo.url}" alt="${photo.fname}" loading="lazy" style="width:100%;height:100%;object-fit:contain;display:block;" onerror="if(this.src!=='${photo.fullUrl || ''}') {this.src='${photo.fullUrl || ''}';} else {this.style.display='none';}"></div>`;
       return `<div class="sel-thumb" style="background:${photo.bg || '#222'}">${photo.emoji || '📷'}</div>`;
     }
 
@@ -5104,6 +5112,10 @@
     }
 
     function editSessionTitle() {
+      if (new URLSearchParams(window.location.search).get('session') && !window._selektSessionId) {
+        showToast('データ同期中です。しばらくお待ちください', 'coral');
+        return;
+      }
       const titleEl = document.getElementById('sessionTitle');
       // If title is just a date placeholder, show empty prompt
       const isDate = titleEl?.dataset.isDate === '1';
