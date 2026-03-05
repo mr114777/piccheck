@@ -5055,12 +5055,12 @@
     renderNGList();
 
     // Load from cloud if ?session= param present AND no local data loaded
-    (function checkCloudSession() {
+    (async function checkCloudSession() {
       if (isPreviewMode) return;
       const urlParams = new URLSearchParams(window.location.search);
       const sessionId = urlParams.get('session');
       if (sessionId) {
-        loadCloudSession(sessionId);
+        await loadCloudSession(sessionId);
       } else {
         // Local mode — show fallback expiry and load saved title
         initLocalSessionUI();
