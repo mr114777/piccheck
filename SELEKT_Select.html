@@ -3378,8 +3378,22 @@
       const img = document.createElement('div');
       img.className = 'photo-img';
       if (photo.url) {
-        img.style.background = `url(${photo.url}) center/contain no-repeat var(--surface2)`;
+        img.style.background = 'var(--surface2)';
         img.style.fontSize = '0';
+        const imgEl = document.createElement('img');
+        imgEl.src = photo.url;
+        imgEl.alt = photo.fname || '';
+        imgEl.loading = 'lazy';
+        imgEl.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;';
+        imgEl.onerror = function() {
+          // Fallback: try fullUrl if thumb failed
+          if (photo.fullUrl && this.src !== photo.fullUrl) {
+            this.src = photo.fullUrl;
+          } else {
+            this.style.display = 'none';
+          }
+        };
+        img.appendChild(imgEl);
       } else {
         img.style.background = photo.bg;
         img.style.fontSize = '42px';
