@@ -1722,10 +1722,10 @@
             }).join('');
 
             bar.innerHTML = `
-                <span class="sel-label">📌 ${_selectedPhotos.size}枚を選択中</span>
-                <span class="sel-arrow">→ 移動先:</span>
+                <span class="sel-label">📌 ${_selectedPhotos.size}${ut('selPhotos')}</span>
+                <span class="sel-arrow">→ ${ut('moveTo')}:</span>
                 ${destButtons}
-                <button onclick="clearSelection()">選択解除</button>
+                <button onclick="clearSelection()">${ut('clearSel')}</button>
             `;
         }
 
@@ -1759,19 +1759,19 @@
                 placeholder="${g.label}"
                 onclick="event.stopPropagation()"
                 oninput="updateGroupName(${gi}, this.value)">
-              <span style="cursor:pointer;opacity:0.4;font-size:13px;margin-left:4px;" title="グループ名を編集" onclick="event.stopPropagation();document.getElementById('gname-${gi}').focus()">✏️</span>
+              <span style="cursor:pointer;opacity:0.4;font-size:13px;margin-left:4px;" title="${ut('editGroup')}" onclick="event.stopPropagation();document.getElementById('gname-${gi}').focus()">✏️</span>
             </div>
             <div class="group-meta">
-              <div class="group-photo-count">${g.photos.length}枚</div>
+              <div class="group-photo-count">${g.photos.length}${ut('photos')}</div>
               <div class="group-limit-wrap">
-                <span class="group-limit-label">希望セレクト枚数</span>
+                <span class="group-limit-label">${ut('limitLabel')}</span>
                 <input class="group-limit-input" type="number" min="0" max="${g.photos.length}"
                   value="${g.limit || ''}" id="glimit-${gi}"
                   onclick="event.stopPropagation()"
                   oninput="updateGroupLimit(${gi}, this.value)">
-                <span class="group-limit-unit">枚</span>
+                <span class="group-limit-unit">${ut('photos')}</span>
               </div>
-              ${groups.length > 1 ? `<button class="btn-delete-group" onclick="event.stopPropagation();deleteGroup(${gi})" title="グループ削除">🗑</button>` : ''}
+              ${groups.length > 1 ? `<button class="btn-delete-group" onclick="event.stopPropagation();deleteGroup(${gi})" title="${ut('deleteGroupTooltip')}">🗑</button>` : ''}
               <div class="group-toggle">▾</div>
             </div>
           </div>
@@ -1848,7 +1848,7 @@
                         e.dataTransfer.effectAllowed = 'move';
                         // If dragging a selected photo, show count
                         if (_selectedPhotos.size > 0 && _selectedPhotos.has(_selKey(gi, pi))) {
-                            e.dataTransfer.setData('text/plain', `${_selectedPhotos.size}枚移動`);
+                            e.dataTransfer.setData('text/plain', `${_selectedPhotos.size}${ut('moveNPhotos')}`);
                         }
                     });
                     thumb.addEventListener('dragend', () => {
@@ -2589,6 +2589,8 @@
                 limitLabel: '希望セレクト枚数', photos: '枚',
                 closeUp: '寄り', others: 'その他', person: '人物',
                 fullBody: '全身', bustUp: 'バストアップ',
+                moveTo: '移動先', clearSel: '選択解除', moveNPhotos: '枚移動',
+                editGroup: 'グループ名を編集', deleteGroupTooltip: 'グループ削除',
             },
             en: {
                 topbarTitle: 'Photo Upload & Group Settings',
@@ -2624,6 +2626,8 @@
                 limitLabel: 'Desired Selection', photos: '',
                 closeUp: 'Close-up', others: 'Others', person: 'Person',
                 fullBody: 'Full Body', bustUp: 'Bust Up',
+                moveTo: 'Move to', clearSel: 'Clear selection', moveNPhotos: ' to move',
+                editGroup: 'Edit group name', deleteGroupTooltip: 'Delete group',
             },
             zh: {
                 topbarTitle: '照片上传 & 分组设置',
@@ -2648,17 +2652,19 @@
                 undone: '已撤销 ✓', photoMoved: '照片已移动 ✓',
                 photosMoved: '张已移动 ✓', groupAdded: '分组已添加',
                 groupDeleted: '分组已删除', noPhotos: '没有照片',
-                errorOccurred: '发生错误',
-                creatingSession: '正在创建云会话…',
-                uploading: '正在上传到云端…',
-                uploadFailed: '云端上传失败，将使用本地模式继续',
-                shareDesc: '分享此URL可让其他人查看照片',
-                copyUrl: '📋 复制URL', goSelect: '前往筛选 →',
-                copied: '✓ 已复制', selected: '已选择（Ctrl+C复制）',
-                selPhotos: '已选择',
-                limitLabel: '期望筛选数量', photos: '张',
+                errorOccurred: '发生了错误',
+                creatingSession: '正在云端创建会话...',
+                uploading: '正在上传到云端...',
+                uploadFailed: '云端上传失败。将以本地模式继续',
+                shareDesc: '分享以下链接即可让其他人查看这些照片',
+                copyUrl: '📋 复制链接', goSelect: '前往筛选页面 →',
+                copied: '✓ 已复制', selected: '已选择（Ctrl+C可复制）',
+                selPhotos: '张已选',
+                limitLabel: '期望选择数量', photos: '张',
                 closeUp: '特写', others: '其他', person: '人物',
                 fullBody: '全身', bustUp: '半身',
+                moveTo: '移动到', clearSel: '取消选择', moveNPhotos: '张移动',
+                editGroup: '编辑分组名称', deleteGroupTooltip: '删除分组',
             }
         };
 

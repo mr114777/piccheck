@@ -4059,7 +4059,7 @@
         }
         // Update group section header meta (photo count)
         const gmeta = document.getElementById('gmeta-' + g.id);
-        if (gmeta) gmeta.textContent = g.photos.length + '\u679a';
+        if (gmeta) gmeta.textContent = g.photos.length + t('photos');
         // Update limit badge
         const limitBadge = document.getElementById('limit-' + g.id);
         if (limitBadge) {
@@ -4072,8 +4072,8 @@
       const totalLimit = GROUPS.reduce((acc, g) => acc + (g.limit || 0), 0);
       const statTotal = document.getElementById('statTotal');
       const statLimit = document.getElementById('statLimit');
-      if (statTotal) statTotal.textContent = totalPhotos + '\u679a';
-      if (statLimit) statLimit.textContent = totalLimit ? totalLimit + '枚' : '未設定';
+      if (statTotal) statTotal.textContent = totalPhotos + t('photos');
+      if (statLimit) statLimit.textContent = totalLimit ? totalLimit + t('photos') : t('desiredUnset');
     }
 
     function _makeThumb(photo, group) {
@@ -4085,7 +4085,7 @@
       const list = document.getElementById('selectedList');
       const ids = [...state.status.entries()].filter(([, v]) => v === 'ok').map(([k]) => k);
       if (ids.length === 0) {
-        list.innerHTML = '<div style="font-size:12px;color:var(--text-dim);text-align:center;padding:20px 0">OK 写真を選んでください</div>';
+        list.innerHTML = '<div style="font-size:12px;color:var(--text-dim);text-align:center;padding:20px 0">' + t('noOk') + '</div>';
         return;
       }
       list.innerHTML = '';
@@ -4113,7 +4113,7 @@
       if (!list) return;
       const ids = [...state.status.entries()].filter(([, v]) => v === 'nearok').map(([k]) => k);
       if (ids.length === 0) {
-        list.innerHTML = '<div style="font-size:12px;color:var(--text-dim);text-align:center;padding:12px 0">保留 はありません</div>';
+        list.innerHTML = '<div style="font-size:12px;color:var(--text-dim);text-align:center;padding:12px 0">' + t('noHold') + '</div>';
         return;
       }
       list.innerHTML = '';
@@ -4128,7 +4128,7 @@
       ${_makeThumb(photo, group)}
       <div class="sel-info">
         <div class="sel-name">${photo.fname}</div>
-        <div class="sel-group" style="color:var(--yellow)">保留 — 要修正</div>
+        <div class="sel-group" style="color:var(--yellow)">${t('holdStatus')}</div>
         ${comment ? `<div style="font-size:10px;color:var(--text-sub);margin-top:3px">💬 ${comment.substring(0, 30)}${comment.length > 30 ? '…' : ''}</div>` : ''}
       </div>
       <button class="sel-remove" onclick="setPhotoStatus('${id}', GROUPS.find(g=>g.id==='${group.id}'), null)">✕</button>`;
@@ -4140,7 +4140,7 @@
       const list = document.getElementById('ngList');
       const ids = [...state.status.entries()].filter(([, v]) => v === 'ng').map(([k]) => k);
       if (ids.length === 0) {
-        list.innerHTML = '<div style="font-size:12px;color:var(--text-dim);text-align:center;padding:12px 0">NG はありません</div>';
+        list.innerHTML = '<div style="font-size:12px;color:var(--text-dim);text-align:center;padding:12px 0">' + t('noNg') + '</div>';
         return;
       }
       list.innerHTML = '';
@@ -5234,6 +5234,8 @@
         selCompleteDone: 'セレクト完了しました！',
         highQuality: '高画質',
         previewNotice: '⚡ プレビュー',
+        holdStatus: '保留 — 要修正',
+        ngStatus: 'NG',
       },
       en: {
         title: 'SELEKT \u2014 Photo Selection',
@@ -5318,6 +5320,8 @@
         selCompleteDone: 'Selection completed!',
         highQuality: 'HD',
         previewNotice: '⚡ Preview',
+        holdStatus: 'Hold — Needs Fix',
+        ngStatus: 'NG',
       },
       zh: {
         title: 'SELEKT \u2014 \u7167\u7247\u7b5b\u9009',
@@ -5402,6 +5406,8 @@
         selCompleteDone: '选择已完成！',
         highQuality: '高清',
         previewNotice: '⚡ 预览',
+        holdStatus: '待定 — 需修改',
+        ngStatus: 'NG',
       }
     };
 
@@ -5515,6 +5521,15 @@
       // Lang selector
       const ls = document.getElementById('langSelect');
       if (ls) ls.value = lang;
+
+      // Re-render lists to apply translated status labels and empty states
+      if (typeof GROUPS !== 'undefined' && GROUPS.length > 0) {
+        renderSelectedList();
+        renderNearokList();
+        renderNGList();
+        renderGroupProgress();
+        updateSidebarCounts();
+      }
     }
 
     // Init language
