@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SELEKT — 写真セレクトを、もっとスマートに</title>
+    <meta name="description" content="URLひとつで写真のセレクトが完結。カメラマンとモデル・クライアントをつなぐ、新しい写真セレクトプラットフォーム。">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #06060c;
+            --surface: #0e0e1a;
+            --surface2: #15152a;
+            --surface3: #1d1d36;
+            --border: rgba(255, 255, 255, 0.06);
+            --border2: rgba(255, 255, 255, 0.1);
+            --text: #f0f0f5;
+            --text-sub: rgba(255, 255, 255, 0.55);
+            --text-dim: rgba(255, 255, 255, 0.3);
+            --coral: #E8634A;
+            --coral-glow: rgba(232, 99, 74, 0.15);
+            --accent: #4A9EE0;
+            --accent-glow: rgba(74, 158, 224, 0.12);
+            --green: #3CB371;
+            --gold: #F5A623;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* ===== NAV ===== */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(6, 6, 12, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            transition: background 0.3s;
+        }
+
+        .nav-logo {
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: 3px;
+        }
+
+        .nav-logo span:first-child {
+            color: var(--coral);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 28px;
+        }
+
+        .nav-links a {
+            color: var(--text-sub);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .nav-cta {
+            padding: 8px 20px;
+            background: var(--coral);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .nav-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px var(--coral-glow);
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 120px 24px 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 60% 50% at 50% 30%, var(--coral-glow) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 40% at 70% 60%, var(--accent-glow) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            border-radius: 50px;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-sub);
+            margin-bottom: 28px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .hero-badge .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+            animation: pulse 2s infinite;
+        }
+
+        .hero h1 {
+            font-size: clamp(36px, 6vw, 64px);
+            font-weight: 900;
+            line-height: 1.15;
+            letter-spacing: -1px;
+            margin-bottom: 20px;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .hero h1 .accent {
+            color: var(--coral);
+        }
+
+        .hero-sub {
+            font-size: clamp(15px, 2vw, 18px);
+            color: var(--text-sub);
+            max-width: 520px;
+            line-height: 1.7;
+            margin-bottom: 40px;
+            animation: fadeInUp 0.8s ease 0.1s both;
+        }
+
+        .hero-ctas {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            justify-content: center;
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+
+        .btn-primary {
+            padding: 14px 36px;
+            background: var(--coral);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px var(--coral-glow);
+        }
+
+        .btn-secondary {
+            padding: 14px 36px;
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface2);
+            border-color: var(--text-dim);
+        }
+
+        .hero-visual {
+            margin-top: 60px;
+            max-width: 900px;
+            width: 100%;
+            border-radius: 16px;
+            border: 1px solid var(--border2);
+            background: var(--surface);
+            padding: 3px;
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.5);
+            animation: fadeInUp 1s ease 0.3s both;
+            overflow: hidden;
+        }
+
+        .hero-visual-inner {
+            border-radius: 13px;
+            background: var(--surface2);
+            padding: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            position: relative;
+        }
+
+        .mock-flow {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .mock-step {
+            background: var(--surface3);
+            border: 1px solid var(--border2);
+            border-radius: 14px;
+            padding: 24px;
+            text-align: center;
+            width: 180px;
+            transition: transform 0.2s;
+        }
+
+        .mock-step:hover {
+            transform: translateY(-4px);
+        }
+
+        .mock-step .icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .mock-step .label {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .mock-step .desc {
+            font-size: 11px;
+            color: var(--text-sub);
+        }
+
+        .mock-arrow {
+            font-size: 24px;
+            color: var(--text-dim);
+        }
+
+        /* ===== SECTION COMMON ===== */
+        section {
+            padding: 100px 24px;
+        }
+
+        .section-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .section-tag {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 50px;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--coral);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: clamp(28px, 4vw, 40px);
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .section-sub {
+            font-size: 15px;
+            color: var(--text-sub);
+            max-width: 560px;
+            line-height: 1.7;
+            margin-bottom: 48px;
+        }
+
+        /* ===== PAIN POINTS ===== */
+        .pain-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .pain-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .pain-card:hover {
+            border-color: var(--border2);
+            transform: translateY(-2px);
+        }
+
+        .pain-icon {
+            font-size: 28px;
+            margin-bottom: 14px;
+        }
+
+        .pain-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .pain-old {
+            font-size: 12px;
+            color: var(--text-dim);
+            text-decoration: line-through;
+            margin-bottom: 4px;
+        }
+
+        .pain-new {
+            font-size: 13px;
+            color: var(--green);
+            font-weight: 600;
+        }
+
+        /* ===== HOW IT WORKS ===== */
+        .how-grid {
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+            position: relative;
+        }
+
+        .how-step {
+            flex: 1;
+            text-align: center;
+            padding: 32px 20px;
+            position: relative;
+        }
+
+        .how-num {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--coral);
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .how-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 55px;
+            left: calc(50% + 30px);
+            right: -50%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--coral), var(--border));
+            z-index: 1;
+        }
+
+        .how-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .how-desc {
+            font-size: 13px;
+            color: var(--text-sub);
+            line-height: 1.6;
+        }
+
+        /* ===== FEATURES ===== */
+        .feat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .feat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            transition: border-color 0.2s;
+        }
+
+        .feat-card:hover {
+            border-color: var(--border2);
+        }
+
+        .feat-emoji {
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+
+        .feat-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .feat-desc {
+            font-size: 13px;
+            color: var(--text-sub);
+            line-height: 1.6;
+        }
+
+        /* ===== PRICING ===== */
+        .price-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .price-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px 24px;
+            text-align: center;
+            position: relative;
+            transition: transform 0.2s;
+        }
+
+        .price-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .price-card.highlight {
+            border-color: var(--accent);
+            box-shadow: 0 0 40px var(--accent-glow);
+        }
+
+        .price-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            background: var(--accent);
+            color: white;
+        }
+
+        .price-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .price-sub {
+            font-size: 12px;
+            color: var(--text-sub);
+            margin-bottom: 16px;
+        }
+
+        .price-amount {
+            font-size: 40px;
+            font-weight: 800;
+        }
+
+        .price-amount .yen {
+            font-size: 16px;
+            color: var(--text-sub);
+            vertical-align: super;
+        }
+
+        .price-amount .period {
+            font-size: 13px;
+            color: var(--text-dim);
+            font-weight: 400;
+        }
+
+        .price-free {
+            font-size: 40px;
+            font-weight: 800;
+            color: var(--green);
+        }
+
+        .price-features {
+            text-align: left;
+            margin: 20px 0;
+            list-style: none;
+        }
+
+        .price-features li {
+            padding: 8px 0;
+            font-size: 13px;
+            color: var(--text-sub);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .price-features li:last-child {
+            border: none;
+        }
+
+        .price-features .val {
+            margin-left: auto;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .price-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: opacity 0.15s;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .price-btn:hover {
+            opacity: 0.85;
+        }
+
+        /* ===== COMPARISON ===== */
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--surface);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .compare-table th,
+        .compare-table td {
+            padding: 14px 20px;
+            text-align: center;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .compare-table th {
+            font-weight: 700;
+            color: var(--text-sub);
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .compare-table th:first-child,
+        .compare-table td:first-child {
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .compare-table .selekt-col {
+            background: rgba(232, 99, 74, 0.05);
+            color: var(--coral);
+            font-weight: 700;
+        }
+
+        .compare-table .check {
+            color: var(--green);
+        }
+
+        .compare-table .cross {
+            color: var(--text-dim);
+        }
+
+        /* ===== CTA ===== */
+        .cta-section {
+            text-align: center;
+            padding: 100px 24px;
+            position: relative;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 60% 50% at 50% 50%, var(--coral-glow) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .cta-title {
+            font-size: clamp(28px, 4vw, 40px);
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .cta-sub {
+            font-size: 15px;
+            color: var(--text-sub);
+            margin-bottom: 32px;
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            padding: 40px 24px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        /* Scroll-triggered fade */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            nav {
+                padding: 12px 16px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            section {
+                padding: 60px 16px;
+            }
+
+            .pain-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .feat-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .price-grid {
+                grid-template-columns: 1fr;
+                max-width: 380px;
+                margin: 0 auto;
+            }
+
+            .how-grid {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .how-step:not(:last-child)::after {
+                display: none;
+            }
+
+            .mock-arrow {
+                transform: rotate(90deg);
+            }
+
+            .compare-table {
+                font-size: 11px;
+            }
+
+            .compare-table th,
+            .compare-table td {
+                padding: 10px 8px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ===== NAV ===== -->
+    <nav>
+        <div class="nav-logo"><span>SE</span><span>LEKT</span></div>
+        <div class="nav-links">
+            <a href="#pain">課題</a>
+            <a href="#how">使い方</a>
+            <a href="#features">機能</a>
+            <a href="#pricing">料金</a>
+        </div>
+        <a class="nav-cta" href="SELEKT_Auth.html">無料で始める</a>
+    </nav>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+        <div class="hero-badge"><span class="dot"></span> カメラマンの新しいワークフロー</div>
+        <h1>納品前のやりとり、<br><span class="accent">もう要りません</span></h1>
+        <p class="hero-sub">
+            URLをひとつ送るだけ。モデルやクライアントが<br>
+            スマホで写真を閲覧・セレクト。結果は自動集計。
+        </p>
+        <div class="hero-ctas">
+            <a class="btn-primary" href="SELEKT_Auth.html">無料で始める →</a>
+            <a class="btn-secondary" href="#how">使い方を見る</a>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-visual-inner">
+                <div class="mock-flow">
+                    <div class="mock-step">
+                        <div class="icon">📸</div>
+                        <div class="label">写真を選ぶ</div>
+                        <div class="desc">ドラッグ＆ドロップ</div>
+                    </div>
+                    <div class="mock-arrow">→</div>
+                    <div class="mock-step">
+                        <div class="icon">🤖</div>
+                        <div class="label">AIが自動分類</div>
+                        <div class="desc">顔認識＋色解析</div>
+                    </div>
+                    <div class="mock-arrow">→</div>
+                    <div class="mock-step">
+                        <div class="icon">🔗</div>
+                        <div class="label">URLを共有</div>
+                        <div class="desc">リンク1つで完結</div>
+                    </div>
+                    <div class="mock-arrow">→</div>
+                    <div class="mock-step">
+                        <div class="icon">✅</div>
+                        <div class="label">セレクト完了</div>
+                        <div class="desc">結果を自動集計</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== PAIN POINTS ===== -->
+    <section id="pain">
+        <div class="section-inner reveal">
+            <div class="section-tag">Before → After</div>
+            <h2 class="section-title">こんな経験、ありませんか？</h2>
+            <p class="section-sub">写真のセレクトに関わるすべてのストレスを解消します。</p>
+            <div class="pain-grid">
+                <div class="pain-card">
+                    <div class="pain-icon">📦</div>
+                    <div class="pain-title">大容量ファイル転送</div>
+                    <div class="pain-old">ギガファイル便でZIP送る → 相手がDL → 解凍</div>
+                    <div class="pain-new">→ URLを送るだけ。DL不要</div>
+                </div>
+                <div class="pain-card">
+                    <div class="pain-icon">💬</div>
+                    <div class="pain-title">LINEで写真指定</div>
+                    <div class="pain-old">「3枚目と7枚目がいいです」→ どれ？</div>
+                    <div class="pain-new">→ タップでOK/NG。結果が即座に届く</div>
+                </div>
+                <div class="pain-card">
+                    <div class="pain-icon">⏳</div>
+                    <div class="pain-title">催促のDM</div>
+                    <div class="pain-old">「セレクトまだですか？」を何度も送る</div>
+                    <div class="pain-new">→ 進捗がリアルタイムで見える</div>
+                </div>
+                <div class="pain-card">
+                    <div class="pain-icon">📊</div>
+                    <div class="pain-title">結果の集計</div>
+                    <div class="pain-old">ファイル名をExcelに打ち込んで管理</div>
+                    <div class="pain-new">→ 自動集計、一括ダウンロード</div>
+                </div>
+                <div class="pain-card">
+                    <div class="pain-icon">📱</div>
+                    <div class="pain-title">スマホ非対応</div>
+                    <div class="pain-old">PCでしか確認できない大きなファイル</div>
+                    <div class="pain-new">→ スマホで即閲覧。アプリ不要</div>
+                </div>
+                <div class="pain-card">
+                    <div class="pain-icon">🔒</div>
+                    <div class="pain-title">セキュリティ</div>
+                    <div class="pain-old">共有フォルダの設定ミスで写真が漏れる</div>
+                    <div class="pain-new">→ 期限付きURL＋パスワード保護</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== HOW IT WORKS ===== -->
+    <section id="how" style="background:var(--surface)">
+        <div class="section-inner reveal">
+            <div class="section-tag">How it works</div>
+            <h2 class="section-title">3ステップで完結</h2>
+            <p class="section-sub">カメラマンもモデルも、直感的に使えるシンプルな設計。</p>
+            <div class="how-grid">
+                <div class="how-step">
+                    <div class="how-num">1</div>
+                    <div class="how-title">写真をアップロード</div>
+                    <div class="how-desc">ドラッグ＆ドロップで写真を追加。<br>AIが顔認識と色解析で自動グループ分け。</div>
+                </div>
+                <div class="how-step">
+                    <div class="how-num">2</div>
+                    <div class="how-title">URLを送る</div>
+                    <div class="how-desc">生成されたURLをモデルやクライアントに共有。<br>アカウント登録もアプリも不要。</div>
+                </div>
+                <div class="how-step">
+                    <div class="how-num">3</div>
+                    <div class="how-title">セレクト結果を受け取る</div>
+                    <div class="how-desc">OK / 保留 / NG の結果が自動集計。<br>選ばれた写真だけ一括ダウンロード。</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FEATURES ===== -->
+    <section id="features">
+        <div class="section-inner reveal">
+            <div class="section-tag">Features</div>
+            <h2 class="section-title">あなたの撮影フローを加速する</h2>
+            <p class="section-sub">カメラマンの「あったらいいな」を全部入れました。</p>
+            <div class="feat-grid">
+                <div class="feat-card">
+                    <div class="feat-emoji">🤖</div>
+                    <div>
+                        <div class="feat-title">AIグループ分け</div>
+                        <div class="feat-desc">顔認識と色解析で写真を自動分類。同じ人物・シーンでまとまるから、セレクトがラクに。</div>
+                    </div>
+                </div>
+                <div class="feat-card">
+                    <div class="feat-emoji">🛡️</div>
+                    <div>
+                        <div class="feat-title">AIセンシティブ判定</div>
+                        <div class="feat-desc">NSFW判定で水着やきわどい写真を自動フラグ。モデルの写真が安心して管理できる。</div>
+                    </div>
+                </div>
+                <div class="feat-card">
+                    <div class="feat-emoji">🌍</div>
+                    <div>
+                        <div class="feat-title">多言語対応</div>
+                        <div class="feat-desc">日本語・英語・中国語に対応。海外のクライアントやモデルともスムーズなやりとり。</div>
+                    </div>
+                </div>
+                <div class="feat-card">
+                    <div class="feat-emoji">📱</div>
+                    <div>
+                        <div class="feat-title">スマホファースト</div>
+                        <div class="feat-desc">アプリなし、アカウントなし。URLを開くだけで閲覧・セレクトが完結。</div>
+                    </div>
+                </div>
+                <div class="feat-card">
+                    <div class="feat-emoji">⚡</div>
+                    <div>
+                        <div class="feat-title">高速配信</div>
+                        <div class="feat-desc">Cloudflare Edge Network上で動作。世界中どこからでも低遅延で写真にアクセス。</div>
+                    </div>
+                </div>
+                <div class="feat-card">
+                    <div class="feat-emoji">🔐</div>
+                    <div>
+                        <div class="feat-title">期限付きURL</div>
+                        <div class="feat-desc">セッションは自動で期限切れ。パスワード保護で大切な写真を安全に共有。</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== COMPARISON ===== -->
+    <section style="background:var(--surface)">
+        <div class="section-inner reveal">
+            <div class="section-tag">Comparison</div>
+            <h2 class="section-title">もう、ギガファイル便は卒業</h2>
+            <p class="section-sub">既存ツールとの違いを一目で。</p>
+            <table class="compare-table">
+                <tr>
+                    <th></th>
+                    <th class="selekt-col">SELEKT</th>
+                    <th>ギガファイル便</th>
+                    <th>Googleフォト</th>
+                    <th>Pixieset</th>
+                </tr>
+                <tr>
+                    <td>写真セレクト機能</td>
+                    <td class="selekt-col check">✓</td>
+                    <td class="cross">✕</td>
+                    <td class="cross">✕</td>
+                    <td class="check">✓</td>
+                </tr>
+                <tr>
+                    <td>AIグループ分け</td>
+                    <td class="selekt-col check">✓</td>
+                    <td class="cross">✕</td>
+                    <td class="cross">✕</td>
+                    <td class="cross">✕</td>
+                </tr>
+                <tr>
+                    <td>センシティブ判定</td>
+                    <td class="selekt-col check">✓</td>
+                    <td class="cross">✕</td>
+                    <td class="cross">✕</td>
+                    <td class="cross">✕</td>
+                </tr>
+                <tr>
+                    <td>日本語UI</td>
+                    <td class="selekt-col check">✓</td>
+                    <td class="check">✓</td>
+                    <td class="cross">△</td>
+                    <td class="cross">✕</td>
+                </tr>
+                <tr>
+                    <td>スマホ対応</td>
+                    <td class="selekt-col check">✓</td>
+                    <td class="cross">△</td>
+                    <td class="check">✓</td>
+                    <td class="check">✓</td>
+                </tr>
+                <tr>
+                    <td>アカウント不要（閲覧側）</td>
+                    <td class="selekt-col check">✓</td>
+                    <td class="check">✓</td>
+                    <td class="cross">✕</td>
+                    <td class="check">✓</td>
+                </tr>
+                <tr>
+                    <td>月額</td>
+                    <td class="selekt-col" style="font-weight:800">¥0〜</td>
+                    <td>無料</td>
+                    <td>無料</td>
+                    <td style="color:var(--text-dim)">$15〜</td>
+                </tr>
+            </table>
+        </div>
+    </section>
+
+    <!-- ===== PRICING ===== -->
+    <section id="pricing">
+        <div class="section-inner reveal">
+            <div class="section-tag">Pricing</div>
+            <h2 class="section-title">シンプルな料金体系</h2>
+            <p class="section-sub">まずは無料で。必要に応じてアップグレード。</p>
+            <div class="price-grid">
+                <div class="price-card">
+                    <div class="price-name">FREE</div>
+                    <div class="price-sub">まずは試してみる</div>
+                    <div class="price-free">¥0</div>
+                    <ul class="price-features">
+                        <li>📦 月間容量 <span class="val">5 GB</span></li>
+                        <li>📸 月間セッション <span class="val">3回</span></li>
+                        <li>🖼️ 写真/セッション <span class="val">300枚</span></li>
+                        <li>⏰ 有効期限 <span class="val">7日</span></li>
+                    </ul>
+                    <a class="price-btn" href="SELEKT_Auth.html"
+                        style="background:var(--surface3);color:var(--text)">無料で始める</a>
+                </div>
+                <div class="price-card highlight">
+                    <div class="price-badge">おすすめ</div>
+                    <div class="price-name">BASIC</div>
+                    <div class="price-sub">フリーランスカメラマンに</div>
+                    <div class="price-amount"><span class="yen">¥</span>980<span class="period"> / 月</span></div>
+                    <ul class="price-features">
+                        <li>📦 月間容量 <span class="val">10 GB</span></li>
+                        <li>📸 月間セッション <span class="val">15回</span></li>
+                        <li>🖼️ 写真/セッション <span class="val">800枚</span></li>
+                        <li>⏰ 有効期限 <span class="val">14日</span></li>
+                    </ul>
+                    <a class="price-btn" href="SELEKT_Auth.html"
+                        style="background:var(--accent);color:white">BASICで始める</a>
+                </div>
+                <div class="price-card">
+                    <div class="price-name">PRO</div>
+                    <div class="price-sub">プロフェッショナル向け</div>
+                    <div class="price-amount"><span class="yen">¥</span>2,980<span class="period"> / 月</span></div>
+                    <ul class="price-features">
+                        <li>📦 月間容量 <span class="val">200 GB</span></li>
+                        <li>📸 月間セッション <span class="val">無制限</span></li>
+                        <li>🖼️ 写真/セッション <span class="val">1,500枚</span></li>
+                        <li>⏰ 有効期限 <span class="val">30日</span></li>
+                    </ul>
+                    <a class="price-btn" href="SELEKT_Auth.html"
+                        style="background:var(--gold);color:#1a1a2e">PROで始める</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CTA ===== -->
+    <section class="cta-section">
+        <div class="reveal">
+            <h2 class="cta-title">写真セレクトを、<br>もっとスマートに</h2>
+            <p class="cta-sub">無料プランで今すぐ始められます。クレジットカード不要。</p>
+            <a class="btn-primary" href="SELEKT_Auth.html" style="font-size:17px;padding:16px 48px">無料で始める →</a>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        <div class="nav-logo" style="margin-bottom:12px;font-size:16px"><span>SE</span><span>LEKT</span></div>
+        <div>© 2025 SELEKT. All rights reserved.</div>
+    </footer>
+
+    <!-- ===== SCROLL REVEAL ===== -->
+    <script>
+        const reveals = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+        }, { threshold: 0.15 });
+        reveals.forEach(el => observer.observe(el));
+    </script>
+
+</body>
+
+</html>
