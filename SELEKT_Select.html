@@ -5010,13 +5010,25 @@
     }
 
     function editSessionTitle() {
-      const current = localStorage.getItem('selekt_project_title') || '';
-      const newTitle = prompt('プロジェクト名を入力:', current);
-      if (newTitle === null) return;
-      localStorage.setItem('selekt_project_title', newTitle);
       const titleEl = document.getElementById('sessionTitle');
+      const current = titleEl ? (titleEl.textContent || '').replace(/\s+/g, ' ').trim() : '';
+      const displayCurrent = current === 'プロジェクト名未設定' ? '' : current;
+      const newTitle = prompt('プロジェクト名を入力:', displayCurrent);
+      if (newTitle === null) return;
+
+      localStorage.setItem('selekt_project_title', newTitle);
       if (titleEl) {
         titleEl.innerHTML = (newTitle || 'プロジェクト名未設定') + ' <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.35;vertical-align:middle"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>';
+      }
+
+      // Update cloud session title
+      const sessionId = window._selektSessionId;
+      if (sessionId) {
+        fetch(`${SELEKT_API}/api/session/${sessionId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: newTitle })
+        }).catch(e => console.warn('[SELEKT] Title update failed:', e));
       }
     }
 

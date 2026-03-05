@@ -378,6 +378,27 @@ export default {
         return jsonResponse(meta);
       }
 
+      // === PATCH /api/session/:id — Update session metadata ===
+      if (sessionMatch && request.method === 'PATCH') {
+        const sessionId = sessionMatch[1];
+        const metaKey = `sessions/${sessionId}/meta.json`;
+        const obj = await env.PHOTOS.get(metaKey);
+        if (!obj) return errorResponse('Session not found', 404);
+
+        const meta = JSON.parse(await obj.text());
+        const updates = await request.json();
+
+        // Allow updating title, photographer
+        if ('title' in updates) meta.title = updates.title;
+        if ('photographer' in updates) meta.photographer = updates.photographer;
+
+        await env.PHOTOS.put(metaKey, JSON.stringify(meta), {
+          httpMetadata: { contentType: 'application/json' },
+        });
+
+        return jsonResponse({ ok: true });
+      }
+
       // === POST /api/session/:id/upload — Upload a photo ===
       const uploadMatch = path.match(/^\/api\/session\/([a-zA-Z0-9]+)\/upload$/);
       if (uploadMatch && request.method === 'POST') {
