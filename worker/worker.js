@@ -388,9 +388,16 @@ export default {
         const meta = JSON.parse(await obj.text());
         const updates = await request.json();
 
-        // Allow updating title, photographer
+        // Allow updating title, photographer, limits
         if ('title' in updates) meta.title = updates.title;
         if ('photographer' in updates) meta.photographer = updates.photographer;
+        if ('limits' in updates && meta.groups) {
+          // Update group limits
+          for (const [gid, limit] of Object.entries(updates.limits)) {
+            const g = meta.groups.find(g => g.id === gid);
+            if (g) g.limit = parseInt(limit) || 0;
+          }
+        }
 
         await env.PHOTOS.put(metaKey, JSON.stringify(meta), {
           httpMetadata: { contentType: 'application/json' },

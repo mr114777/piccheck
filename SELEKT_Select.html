@@ -3068,6 +3068,9 @@
       if (state && state.status) state.status.clear();
       if (state && state.comments) state.comments.clear();
 
+      // Restore saved state (limits, status, comments) from localStorage
+      if (typeof loadSavedState === 'function') loadSavedState();
+
       buildGroupUI();
 
       // Render all UI
@@ -3812,7 +3815,9 @@
       const totalLimit = GROUPS.reduce((s, g) => s + (parseInt(g.limit) || 0), 0);
       const statLimit = document.getElementById('statLimit');
       if (statLimit) statLimit.textContent = totalLimit ? totalLimit + '枚' : '未設定';
-      save();
+      saveState();
+      // Sync limits to cloud
+      syncLimitsToCloud();
     }
 
     function editTotalDesired() {
@@ -3841,7 +3846,60 @@
       // Update sidebar total
       const statLimit = document.getElementById('statLimit');
       if (statLimit) statLimit.textContent = num ? num + '枚' : '未設定';
-      save();
+      saveState();
+      syncLimitsToCloud();
+    }
+
+    // ===== STATE PERSISTENCE =====
+    function saveState() {
+      try {
+        const data = {
+          status: Object.fromEntries(state.status),
+          comments: Object.fromEntries(state.comments),
+          limits: GROUPS.map(g => ({ id: g.id, limit: g.limit || 0 }))
+        };
+        const key = window._selektSessionId ? 'selekt_state_' + window._selektSessionId : 'selekt_state_local';
+        localStorage.setItem(key, JSON.stringify(data));
+      } catch (e) {
+        console.warn('[SELEKT] State save failed:', e);
+      }
+    }
+    // Alias for backward compat
+    var save = saveState;
+
+    function loadSavedState() {
+      try {
+        const key = window._selektSessionId ? 'selekt_state_' + window._selektSessionId : 'selekt_state_local';
+        const raw = localStorage.getItem(key);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (data.status) {
+          Object.entries(data.status).forEach(([k, v]) => state.status.set(k, v));
+        }
+        if (data.comments) {
+          Object.entries(data.comments).forEach(([k, v]) => state.comments.set(k, v));
+        }
+        if (data.limits && GROUPS.length > 0) {
+          data.limits.forEach(l => {
+            const g = GROUPS.find(g => g.id === l.id);
+            if (g) g.limit = l.limit;
+          });
+        }
+      } catch (e) {
+        console.warn('[SELEKT] State load failed:', e);
+      }
+    }
+
+    function syncLimitsToCloud() {
+      const sessionId = window._selektSessionId;
+      if (!sessionId) return;
+      const limits = {};
+      GROUPS.forEach(g => { limits[g.id] = g.limit || 0; });
+      fetch(`${SELEKT_API}/api/session/${sessionId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ limits })
+      }).catch(e => console.warn('[SELEKT] Limits sync failed:', e));
     }
 
     function confirmComplete() {
