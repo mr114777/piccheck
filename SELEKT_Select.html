@@ -3129,7 +3129,7 @@
             const color = g.color || '#888888';
             const bg = hexToRgba(color, 0.15);
             const border = hexToRgba(color, 0.3);
-            const headerName = g.name && g.name !== g.label ? `${g.label}: ${g.name}` : `グループ ${g.label}`;
+            const headerName = g.name && g.name !== g.label ? `${g.label}: ${g.name}` : `${t('groupPrefix')} ${g.label}`;
 
             section.innerHTML = `
             <div class="group-header">
@@ -5236,6 +5236,7 @@
         previewNotice: '⚡ プレビュー',
         holdStatus: '保留 — 要修正',
         ngStatus: 'NG',
+        groupPrefix: 'グループ',
       },
       en: {
         title: 'SELEKT \u2014 Photo Selection',
@@ -5322,6 +5323,7 @@
         previewNotice: '⚡ Preview',
         holdStatus: 'Hold — Needs Fix',
         ngStatus: 'NG',
+        groupPrefix: 'Group',
       },
       zh: {
         title: 'SELEKT \u2014 \u7167\u7247\u7b5b\u9009',
@@ -5408,6 +5410,7 @@
         previewNotice: '⚡ 预览',
         holdStatus: '待定 — 需修改',
         ngStatus: 'NG',
+        groupPrefix: '分组',
       }
     };
 
@@ -5442,9 +5445,42 @@
       });
       const filterBtns = document.querySelectorAll('.filter-btn');
       filterBtns.forEach(b => {
-        const txt = b.textContent.trim();
-        if (txt.includes('全て') || txt.includes('Show') || txt.includes('全部')) b.lastChild.textContent = ' ' + t('filterAll');
+        b.childNodes.forEach(node => {
+          if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+            const txt = node.textContent.trim();
+            if (txt.includes('すべて') || txt.includes('All') || txt.includes('全部')) node.textContent = ' ' + t('filterAll') + ' ';
+            if (txt.includes('OK')) node.textContent = ' ' + t('filterOk') + ' ';
+            if (txt.includes('保留') || txt.includes('Hold') || txt.includes('待定')) node.textContent = ' ' + t('filterHold') + ' ';
+            // NG is usually just NG in all langs, but let's be safe
+            if (txt.includes('NG')) node.textContent = ' ' + t('filterNg') + ' ';
+            if (txt.includes('AI') && (txt.includes('判定') || txt.includes('Check') || txt.includes('检测'))) node.textContent = ' ' + t('sensitive') + ' ';
+            if (txt.includes('未判定') || txt.includes('Unjudged') || txt.includes('未判定')) node.textContent = ' ' + t('filterNone') + ' ';
+          }
+        });
       });
+
+      // Sort dropdown
+      const sortSelect = document.getElementById('sortSelect');
+      if (sortSelect && sortSelect.options && sortSelect.options.length >= 4) {
+        sortSelect.options[0].text = t('sortDefault');
+        sortSelect.options[1].text = t('sortNameAsc');
+        sortSelect.options[2].text = t('sortNameDesc');
+        sortSelect.options[3].text = t('sortStatus');
+      }
+
+      // Flat view toggle
+      const flatViewToggle = document.getElementById('flatViewToggle');
+      if (flatViewToggle && flatViewToggle.parentElement) {
+        flatViewToggle.parentElement.childNodes.forEach(node => {
+          if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+            node.textContent = ' ' + t('flatView');
+          }
+        });
+      }
+
+      // Add Group button in sidebar
+      const addGroupBtn = document.querySelector('.sidebar-section button[onclick="addNewGroup()"]');
+      if (addGroupBtn) addGroupBtn.textContent = '＋ ' + t('addGroup');
 
       // Sidebar labels
       document.querySelectorAll('.sidebar-label').forEach(el => {
