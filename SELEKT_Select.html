@@ -2857,13 +2857,15 @@
 
           // Update session title and photographer in topbar
           const titleEl = document.getElementById('sessionTitle');
+          const pencilSvg = ' <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.35;transition:opacity 0.15s;vertical-align:middle" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=0.35"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>';
           if (titleEl) {
             if (meta.title) {
-              titleEl.textContent = meta.title;
+              titleEl.innerHTML = meta.title + pencilSvg;
             } else if (meta.createdAt) {
-              // No title set — show creation date
               const d = new Date(meta.createdAt);
-              titleEl.innerHTML = `<span style="font-weight:500;font-size:12px;color:var(--text-sub)">${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}</span>`;
+              const dateStr = `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+              titleEl.innerHTML = `<span style="font-weight:500;font-size:12px;color:var(--text-sub)">${dateStr}</span>` + pencilSvg;
+              titleEl.dataset.isDate = '1';
             }
           }
           if (meta.photographer) {
@@ -5011,14 +5013,25 @@
 
     function editSessionTitle() {
       const titleEl = document.getElementById('sessionTitle');
-      const current = titleEl ? (titleEl.textContent || '').replace(/\s+/g, ' ').trim() : '';
-      const displayCurrent = current === 'プロジェクト名未設定' ? '' : current;
-      const newTitle = prompt('プロジェクト名を入力:', displayCurrent);
+      // If title is just a date placeholder, show empty prompt
+      const isDate = titleEl?.dataset.isDate === '1';
+      let current = '';
+      if (!isDate && titleEl) {
+        // Get text without SVG content
+        const clone = titleEl.cloneNode(true);
+        clone.querySelectorAll('svg').forEach(s => s.remove());
+        current = (clone.textContent || '').trim();
+        if (current === 'プロジェクト名未設定') current = '';
+      }
+
+      const newTitle = prompt('プロジェクト名を入力:', current);
       if (newTitle === null) return;
 
+      const pencilSvg = ' <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.35;vertical-align:middle"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>';
       localStorage.setItem('selekt_project_title', newTitle);
       if (titleEl) {
-        titleEl.innerHTML = (newTitle || 'プロジェクト名未設定') + ' <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.35;vertical-align:middle"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>';
+        titleEl.innerHTML = (newTitle || 'プロジェクト名未設定') + pencilSvg;
+        delete titleEl.dataset.isDate;
       }
 
       // Update cloud session title
