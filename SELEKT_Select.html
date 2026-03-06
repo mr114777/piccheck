@@ -5237,6 +5237,8 @@
         holdStatus: '保留 — 要修正',
         ngStatus: 'NG',
         groupPrefix: 'グループ',
+        mobileBsTitle: '選択済み・NG 一覧',
+        mobileDlTitle: '写真ダウンロード',
       },
       en: {
         title: 'SELEKT \u2014 Photo Selection',
@@ -5324,6 +5326,8 @@
         holdStatus: 'Hold — Needs Fix',
         ngStatus: 'NG',
         groupPrefix: 'Group',
+        mobileBsTitle: 'Selected & NG List',
+        mobileDlTitle: 'Download Photos',
       },
       zh: {
         title: 'SELEKT \u2014 \u7167\u7247\u7b5b\u9009',
@@ -5411,6 +5415,8 @@
         holdStatus: '待定 — 需修改',
         ngStatus: 'NG',
         groupPrefix: '分组',
+        mobileBsTitle: '已选与NG列表',
+        mobileDlTitle: '照片下载',
       }
     };
 
@@ -5439,25 +5445,55 @@
         if (b.classList.contains('bulk-btn-reset')) b.textContent = t('reset');
       });
 
-      // Sidebar
-      document.querySelectorAll('.sidebar-label').forEach((el, i) => {
-        if (i === 0) el.textContent = t('filterLabel');
-      });
-      const filterBtns = document.querySelectorAll('.filter-btn');
-      filterBtns.forEach(b => {
-        b.childNodes.forEach(node => {
-          if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
-            const txt = node.textContent.trim();
-            if (txt.includes('すべて') || txt.includes('All') || txt.includes('全部')) node.textContent = ' ' + t('filterAll') + ' ';
-            if (txt.includes('OK')) node.textContent = ' ' + t('filterOk') + ' ';
-            if (txt.includes('保留') || txt.includes('Hold') || txt.includes('待定')) node.textContent = ' ' + t('filterHold') + ' ';
-            // NG is usually just NG in all langs, but let's be safe
-            if (txt.includes('NG')) node.textContent = ' ' + t('filterNg') + ' ';
-            if (txt.includes('AI') && (txt.includes('判定') || txt.includes('Check') || txt.includes('检测'))) node.textContent = ' ' + t('sensitive') + ' ';
-            if (txt.includes('未判定') || txt.includes('Unjudged') || txt.includes('未判定')) node.textContent = ' ' + t('filterNone') + ' ';
+      // Deep text node translation with spacing and emoji preservation
+      const termsToReplace = [
+        { regex: /グループ別\s*進捗|Group Progress|分组进度/g, key: 'groupProgress' },
+        { regex: /OK\s*一覧|OK List|OK 列表/g, key: 'okList' },
+        { regex: /保留\s*一覧|Hold List|待定 列表/g, key: 'holdList' },
+        { regex: /NG\s*一覧|NG List|NG 列表/g, key: 'ngList' },
+        { regex: /選択済み・\s*NG\s*一覧|Selected & NG List|已选与NG列表/g, key: 'mobileBsTitle' },
+        { regex: /写真ダウンロード|Download Photos|照片下载/g, key: 'mobileDlTitle' },
+        { regex: /^(\s*)(グループ\s*一覧|Groups|分组列表)(\s*)$/, key: 'groupList' },
+        { regex: /^(\s*)(グループ|Group|分组)(\s*)$/, key: 'groupPrefix' },
+        { regex: /^(\s*)(フィルター|Filter|过滤)(\s*)$/, key: 'filterLabel' },
+        { regex: /^(\s*)(選択済み|Selected|已选)(\s*)$/, key: 'selSelected' },
+        { regex: /^(\s*)(NG\s*フラグ|NG Flag|NG 标记)(\s*)$/, key: 'ngFlag' },
+        { regex: /^(\s*)(すべて|All|全部)(\s*)$/, key: 'filterAll' },
+        { regex: /^(\s*)(OK)(\s*)$/, key: 'filterOk' },
+        { regex: /^(\s*)(保留|Hold|待定)(\s*)$/, key: 'filterHold' },
+        { regex: /^(\s*)(NG)(\s*)$/, key: 'filterNg' },
+        { regex: /^(\s*)(AIセンシティブ判定（要確認）|AIセンシティブ|Sensitive Check|敏感内容)(\s*)$/, key: 'sensitive' },
+        { regex: /^(\s*)(未判定|未選択|Unjudged|Unselected|未选择)(\s*)$/, key: 'filterNone' }
+      ];
+
+      const walkAndReplace = (node) => {
+        if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+          let text = node.textContent;
+          let changed = false;
+          termsToReplace.forEach(term => {
+            if (term.regex.test(text)) {
+              text = text.replace(term.regex, (match, p1, p2, p3) => {
+                if (p2 !== undefined) return p1 + t(term.key) + p3;
+                return t(term.key);
+              });
+              changed = true;
+            }
+          });
+
+          // Mobile filter chips with prefix emojis
+          if (/✓\s*OK/.test(text)) { text = text.replace(/✓\s*OK/, '✓ ' + t('filterOk')); changed = true; }
+          if (/△\s*保留|△\s*Hold|△\s*待定/.test(text)) { text = text.replace(/△\s*保留|△\s*Hold|△\s*待定/, '△ ' + t('filterHold')); changed = true; }
+          if (/✕\s*NG/.test(text)) { text = text.replace(/✕\s*NG/, '✕ ' + t('filterNg')); changed = true; }
+
+          if (changed) node.textContent = text;
+        } else if (node.nodeType === Node.ELEMENT_NODE && !['selCountBadge', 'nearokCountBadge', 'bnSelBadge', 'statTotal', 'statLimit', 'cnt-all', 'cnt-ok', 'cnt-nearok', 'cnt-ng', 'cnt-ai', 'cnt-none'].includes(node.id)) {
+          if (node.tagName !== 'SCRIPT' && node.tagName !== 'STYLE') {
+            node.childNodes.forEach(walkAndReplace);
           }
-        });
-      });
+        }
+      };
+
+      document.querySelectorAll('.sidebar-section, .rp-label, .bs-title, .filter-chip, .bn-btn').forEach(el => walkAndReplace(el));
 
       // Sort dropdown
       const sortSelect = document.getElementById('sortSelect');
@@ -5481,13 +5517,6 @@
       // Add Group button in sidebar
       const addGroupBtn = document.querySelector('.sidebar-section button[onclick="addNewGroup()"]');
       if (addGroupBtn) addGroupBtn.textContent = '＋ ' + t('addGroup');
-
-      // Sidebar labels
-      document.querySelectorAll('.sidebar-label').forEach(el => {
-        const txt = el.textContent.trim();
-        if (txt.includes('グループ') || txt.includes('Groups') || txt.includes('分组')) el.textContent = t('groupList');
-        if (txt.includes('フィルター') || txt.includes('Filter') || txt.includes('过滤')) el.textContent = t('filterLabel');
-      });
 
       // Stat rows
       document.querySelectorAll('.stat-key').forEach(el => {
@@ -5541,12 +5570,6 @@
       // Progress label
       const pl = document.querySelector('.progress-label');
       if (pl) pl.textContent = t('selectProgress');
-
-      // Right panel labels
-      document.querySelectorAll('.rp-label').forEach(el => {
-        const txt = el.textContent.trim();
-        if (txt.includes('グループ別') || txt.includes('Group') || txt.includes('分组')) el.textContent = t('groupProgress');
-      });
 
       // Group bulk buttons
       document.querySelectorAll('.gbtn-ok').forEach(b => b.textContent = t('groupOk'));
