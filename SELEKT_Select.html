@@ -2806,8 +2806,8 @@
       <button class="modal-nav modal-nav-prev" id="modalPrev" onclick="modalNav(-1)">‹</button>
       <div class="modal-photo-img" id="modalImg"></div>
       <button class="modal-nav modal-nav-next" id="modalNext" onclick="modalNav(1)">›</button>
-      <!-- Bottom: quality + shortcuts + comment -->
-      <div style="display:flex;align-items:center;gap:8px;padding:4px 12px;flex-shrink:0">
+      <!-- Bottom: quality info -->
+      <div class="modal-bottom-info" style="display:flex;align-items:center;gap:8px;padding:4px 12px;flex-shrink:0">
         <div id="modalAiBadges" style="display:flex;gap:4px;flex-shrink:0"></div>
         <span id="modalQualityNotice" style="font-size:10px;color:rgba(255,255,255,0.6);white-space:nowrap">⚡
           プレビュー</span>
@@ -2815,9 +2815,11 @@
           style="background:var(--surface3);border:1px solid var(--border2);color:rgba(255,255,255,0.8);font-size:10px;padding:2px 8px;border-radius:5px;cursor:pointer;white-space:nowrap;flex-shrink:0">
           高画質
         </button>
-        <span style="display:none"></span>
-        <input id="modalComment" placeholder="コメント..." oninput="saveComment()"
-          style="flex:1;background:var(--surface3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:inherit;font-size:11px;padding:5px 8px;outline:none;min-width:0">
+      </div>
+      <!-- Bottom: comment input -->
+      <div class="modal-comment-row" style="padding:4px 12px 6px;flex-shrink:0">
+        <input id="modalComment" placeholder="💬 コメントを入力..." oninput="saveComment()"
+          style="width:100%;background:var(--surface3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:inherit;font-size:13px;padding:10px 12px;outline:none">
       </div>
       <div class="modal-shortcut-bar" id="modalShortcutBar">
         <span class="sc-item"><kbd>←</kbd><kbd>→</kbd> 前後の写真</span>
