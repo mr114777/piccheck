@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SELEKT — プロフィール</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0D0F14;
+            --surface: #13161E;
+            --surface2: #1A1E28;
+            --surface3: #222736;
+            --border: #2A2F3E;
+            --border2: #333849;
+            --text: #E8EAF0;
+            --text-sub: #7B849A;
+            --text-dim: #454C60;
+            --accent: #4A9EE0;
+            --accent2: #3BBFA5;
+            --coral: #FF6B6B;
+            --green: #4CAF7D;
+            --yellow: #F5C842;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* Topbar */
+        .topbar {
+            height: 56px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            gap: 16px;
+        }
+
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .topbar-divider {
+            width: 1px;
+            height: 28px;
+            background: var(--border);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 4px;
+        }
+
+        .nav-link {
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-sub);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            background: var(--surface2);
+            color: var(--text);
+        }
+
+        .nav-link.active {
+            background: var(--surface3);
+            color: var(--text);
+        }
+
+        .topbar-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Main */
+        .main {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+        }
+
+        /* Profile Header */
+        .profile-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .avatar-large {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #3578C4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: 800;
+            color: #fff;
+            margin: 0 auto 16px;
+            box-shadow: 0 4px 24px rgba(74, 158, 224, 0.3);
+            font-family: 'Syne', sans-serif;
+        }
+
+        .profile-name {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .profile-id {
+            font-size: 14px;
+            color: var(--text-sub);
+            margin-bottom: 12px;
+        }
+
+        .badge-row {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .badge {
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .badge-role {
+            background: rgba(74, 158, 224, 0.12);
+            color: var(--accent);
+            border: 1px solid rgba(74, 158, 224, 0.25);
+        }
+
+        .badge-plan {
+            border: 1px solid rgba(59, 191, 165, 0.3);
+        }
+
+        .badge-plan.free {
+            background: rgba(123, 132, 154, 0.12);
+            color: var(--text-sub);
+            border-color: rgba(123, 132, 154, 0.3);
+        }
+
+        .badge-plan.basic {
+            background: rgba(74, 158, 224, 0.12);
+            color: var(--accent);
+            border-color: rgba(74, 158, 224, 0.3);
+        }
+
+        .badge-plan.pro {
+            background: rgba(59, 191, 165, 0.12);
+            color: var(--accent2);
+            border-color: rgba(59, 191, 165, 0.3);
+        }
+
+        /* Section */
+        .section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title svg {
+            opacity: 0.6;
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-sub);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-dim);
+        }
+
+        .form-input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Role grid */
+        .role-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .role-card {
+            padding: 14px 12px;
+            background: var(--surface2);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .role-card:hover {
+            border-color: var(--text-dim);
+        }
+
+        .role-card.selected {
+            border-color: var(--accent);
+            background: rgba(74, 158, 224, 0.08);
+        }
+
+        .role-card .role-icon {
+            margin-bottom: 6px;
+            opacity: 0.7;
+        }
+
+        .role-card.selected .role-icon {
+            opacity: 1;
+        }
+
+        .role-card .role-name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .role-card .role-desc {
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-top: 2px;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--accent), #3578C4);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .btn-outline {
+            width: 100%;
+            padding: 12px;
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-sub);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--text-dim);
+            color: var(--text);
+        }
+
+        .btn-danger {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 107, 107, 0.08);
+            border: 1px solid rgba(255, 107, 107, 0.2);
+            border-radius: 10px;
+            color: var(--coral);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 107, 107, 0.15);
+            border-color: rgba(255, 107, 107, 0.4);
+        }
+
+        /* Stats row */
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-sub);
+        }
+
+        .stat-value {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .usage-bar-inline {
+            width: 100px;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+
+        .usage-bar-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
+
+        /* Messages */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 24px;
+            font-size: 13px;
+            color: var(--text);
+            z-index: 999;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: transform 0.3s ease;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.success {
+            border-color: rgba(76, 175, 125, 0.4);
+            color: var(--green);
+        }
+
+        /* Upgrade banner */
+        .upgrade-banner {
+            background: linear-gradient(135deg, rgba(59, 191, 165, 0.1), rgba(74, 158, 224, 0.1));
+            border: 1px solid rgba(59, 191, 165, 0.2);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 16px;
+            text-decoration: none;
+            color: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .upgrade-banner:hover {
+            border-color: rgba(59, 191, 165, 0.5);
+        }
+
+        .upgrade-banner .upgrade-text {
+            flex: 1;
+        }
+
+        .upgrade-banner .upgrade-text .title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--accent2);
+        }
+
+        .upgrade-banner .upgrade-text .desc {
+            font-size: 11px;
+            color: var(--text-sub);
+            margin-top: 2px;
+        }
+
+        .upgrade-arrow {
+            color: var(--accent2);
+            font-size: 18px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .topbar {
+                padding: 0 12px;
+                gap: 8px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .main {
+                padding: 24px 16px 80px;
+            }
+
+            .section {
+                padding: 20px 16px;
+            }
+
+            .avatar-large {
+                width: 80px;
+                height: 80px;
+                font-size: 34px;
+            }
+
+            .profile-name {
+                font-size: 22px;
+            }
+
+            .role-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Topbar -->
+    <div class="topbar">
+        <a class="logo" href="SELEKT_Dashboard.html">SE<span>LEKT</span></a>
+        <div class="topbar-divider"></div>
+        <div class="nav-links">
+            <a class="nav-link" href="SELEKT_Dashboard.html" data-i18n="navDashboard">ダッシュボード</a>
+            <a class="nav-link" href="SELEKT_Upload.html" data-i18n="navUpload">アップロード</a>
+            <a class="nav-link" href="SELEKT_Pricing.html" data-i18n="navPlan">プラン</a>
+            <a class="nav-link active" href="SELEKT_Profile.html" data-i18n="navProfile">プロフィール</a>
+        </div>
+        <div class="topbar-right">
+            <div style="display:flex;gap:4px">
+                <button class="lang-btn" onclick="setLang('ja')" id="langJa"
+                    style="background:none;border:1px solid var(--border2);color:var(--text-sub);padding:2px 6px;border-radius:4px;font-size:10px;cursor:pointer">JP</button>
+                <button class="lang-btn" onclick="setLang('en')" id="langEn"
+                    style="background:none;border:1px solid var(--border2);color:var(--text-sub);padding:2px 6px;border-radius:4px;font-size:10px;cursor:pointer">EN</button>
+                <button class="lang-btn" onclick="setLang('zh')" id="langZh"
+                    style="background:none;border:1px solid var(--border2);color:var(--text-sub);padding:2px 6px;border-radius:4px;font-size:10px;cursor:pointer">中</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="avatar-large" id="avatarLarge">?</div>
+            <div class="profile-name" id="profileName">---</div>
+            <div class="profile-id" id="profileId">@---</div>
+            <div class="badge-row">
+                <span class="badge badge-role" id="roleBadge">---</span>
+                <span class="badge badge-plan" id="planBadge">FREE</span>
+            </div>
+        </div>
+
+        <!-- Edit Profile -->
+        <div class="section">
+            <div class="section-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+                <span data-i18n="editProfile">プロフィール編集</span>
+            </div>
+            <div class="form-group">
+                <label class="form-label" data-i18n="displayName">表示名</label>
+                <input class="form-input" type="text" id="editName" placeholder="表示名を入力">
+            </div>
+            <div class="form-group">
+                <label class="form-label" data-i18n="userId">ユーザーID</label>
+                <input class="form-input" type="text" id="editId" disabled>
+            </div>
+            <div class="form-group">
+                <label class="form-label" data-i18n="yourRole">あなたの役割</label>
+                <div class="role-grid" id="roleGrid">
+                    <div class="role-card" data-role="photographer" onclick="selectRole(this)">
+                        <div class="role-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                                <circle cx="12" cy="13" r="4" />
+                            </svg>
+                        </div>
+                        <div class="role-name" data-i18n="rolePhotographer">カメラマン</div>
+                        <div class="role-desc" data-i18n="rolePhotographerDesc">写真を送る側</div>
+                    </div>
+                    <div class="role-card" data-role="model" onclick="selectRole(this)">
+                        <div class="role-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                <circle cx="12" cy="7" r="4" />
+                            </svg>
+                        </div>
+                        <div class="role-name" data-i18n="roleModel">モデル</div>
+                        <div class="role-desc" data-i18n="roleModelDesc">写真を受け取る側</div>
+                    </div>
+                    <div class="role-card" data-role="company" onclick="selectRole(this)">
+                        <div class="role-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="4" y="2" width="16" height="20" rx="2" />
+                                <line x1="9" y1="6" x2="9" y2="6.01" />
+                                <line x1="15" y1="6" x2="15" y2="6.01" />
+                                <line x1="9" y1="10" x2="9" y2="10.01" />
+                                <line x1="15" y1="10" x2="15" y2="10.01" />
+                                <line x1="9" y1="14" x2="15" y2="14" />
+                            </svg>
+                        </div>
+                        <div class="role-name" data-i18n="roleCompany">企業</div>
+                        <div class="role-desc" data-i18n="roleCompanyDesc">ビジネス利用</div>
+                    </div>
+                    <div class="role-card" data-role="private" onclick="selectRole(this)">
+                        <div class="role-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" />
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                <circle cx="12" cy="16" r="1" />
+                            </svg>
+                        </div>
+                        <div class="role-name" data-i18n="rolePrivate">プライベート</div>
+                        <div class="role-desc" data-i18n="rolePrivateDesc">個人利用</div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="saveProfile()" id="saveBtn" data-i18n="saveChanges">変更を保存</button>
+        </div>
+
+        <!-- Account Info -->
+        <div class="section">
+            <div class="section-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3" />
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+                <span data-i18n="accountInfo">アカウント情報</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label" data-i18n="currentPlan">現在のプラン</span>
+                <span class="stat-value" id="statPlan">FREE</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label" data-i18n="storageUsage">ストレージ使用量</span>
+                <span class="stat-value" id="statStorage">
+                    0.8 / 2 GB
+                    <span class="usage-bar-inline">
+                        <span class="usage-bar-fill" id="storageBar" style="width:40%"></span>
+                    </span>
+                </span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label" data-i18n="totalProjects">プロジェクト数</span>
+                <span class="stat-value" id="statProjects">-</span>
+            </div>
+
+            <a href="SELEKT_Pricing.html" class="upgrade-banner" id="upgradeBanner">
+                <div>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polygon
+                            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
+                </div>
+                <div class="upgrade-text">
+                    <div class="title" data-i18n="upgradePlan">プランをアップグレード</div>
+                    <div class="desc" data-i18n="upgradeDesc">より多くのストレージと機能をアンロック</div>
+                </div>
+                <span class="upgrade-arrow">→</span>
+            </a>
+        </div>
+
+        <!-- Danger zone -->
+        <div class="section" style="border-color: rgba(255,107,107,0.15)">
+            <div class="section-title" style="color:var(--coral)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                    <line x1="12" y1="9" x2="12" y2="13" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+                <span data-i18n="dangerZone">危険ゾーン</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+                <button class="btn-outline" onclick="changePassword()" data-i18n="changePassword">パスワードを変更</button>
+                <button class="btn-danger" onclick="logout()" data-i18n="logoutBtn">ログアウト</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const API = 'https://selekt-api.mr-mail114.workers.dev';
+        let currentUser = null;
+        let selectedRole = null;
+
+        // ===== I18N =====
+        const PROFILE_I18N = {
+            ja: {
+                navDashboard: 'ダッシュボード', navUpload: 'アップロード', navPlan: 'プラン', navProfile: 'プロフィール',
+                editProfile: 'プロフィール編集', displayName: '表示名', userId: 'ユーザーID',
+                yourRole: 'あなたの役割',
+                rolePhotographer: 'カメラマン', rolePhotographerDesc: '写真を送る側',
+                roleModel: 'モデル', roleModelDesc: '写真を受け取る側',
+                roleCompany: '企業', roleCompanyDesc: 'ビジネス利用',
+                rolePrivate: 'プライベート', rolePrivateDesc: '個人利用',
+                saveChanges: '変更を保存',
+                accountInfo: 'アカウント情報', currentPlan: '現在のプラン',
+                storageUsage: 'ストレージ使用量', totalProjects: 'プロジェクト数',
+                upgradePlan: 'プランをアップグレード', upgradeDesc: 'より多くのストレージと機能をアンロック',
+                dangerZone: '危険ゾーン', changePassword: 'パスワードを変更', logoutBtn: 'ログアウト',
+                saved: '✓ 保存しました', passwordNotReady: 'パスワード変更は準備中です',
+                pageTitle: 'SELEKT — プロフィール',
+            },
+            en: {
+                navDashboard: 'Dashboard', navUpload: 'Upload', navPlan: 'Plan', navProfile: 'Profile',
+                editProfile: 'Edit Profile', displayName: 'Display Name', userId: 'User ID',
+                yourRole: 'Your Role',
+                rolePhotographer: 'Photographer', rolePhotographerDesc: 'Send photos',
+                roleModel: 'Model', roleModelDesc: 'Receive photos',
+                roleCompany: 'Company', roleCompanyDesc: 'Business use',
+                rolePrivate: 'Private', rolePrivateDesc: 'Personal use',
+                saveChanges: 'Save Changes',
+                accountInfo: 'Account Info', currentPlan: 'Current Plan',
+                storageUsage: 'Storage Usage', totalProjects: 'Projects',
+                upgradePlan: 'Upgrade Plan', upgradeDesc: 'Unlock more storage and features',
+                dangerZone: 'Danger Zone', changePassword: 'Change Password', logoutBtn: 'Logout',
+                saved: '✓ Saved', passwordNotReady: 'Password change is coming soon',
+                pageTitle: 'SELEKT — Profile',
+            },
+            zh: {
+                navDashboard: '仪表板', navUpload: '上传', navPlan: '方案', navProfile: '个人资料',
+                editProfile: '编辑资料', displayName: '显示名称', userId: '用户ID',
+                yourRole: '您的角色',
+                rolePhotographer: '摄影师', rolePhotographerDesc: '发送照片',
+                roleModel: '模特', roleModelDesc: '接收照片',
+                roleCompany: '企业', roleCompanyDesc: '商业用途',
+                rolePrivate: '个人', rolePrivateDesc: '个人使用',
+                saveChanges: '保存更改',
+                accountInfo: '账户信息', currentPlan: '当前方案',
+                storageUsage: '存储用量', totalProjects: '项目数',
+                upgradePlan: '升级方案', upgradeDesc: '解锁更多存储和功能',
+                dangerZone: '危险区域', changePassword: '更改密码', logoutBtn: '退出登录',
+                saved: '✓ 已保存', passwordNotReady: '密码更改功能即将推出',
+                pageTitle: 'SELEKT — 个人资料',
+            }
+        };
+
+        const ROLE_LABELS = {
+            ja: { photographer: 'カメラマン', model: 'モデル', company: '企業', private: 'プライベート' },
+            en: { photographer: 'Photographer', model: 'Model', company: 'Company', private: 'Private' },
+            zh: { photographer: '摄影师', model: '模特', company: '企业', private: '个人' },
+        };
+
+        let _lang = localStorage.getItem('selekt-lang') || 'ja';
+        function pt(key) { return (PROFILE_I18N[_lang] && PROFILE_I18N[_lang][key]) || PROFILE_I18N.ja[key] || key; }
+
+        function setLang(lang) {
+            _lang = lang;
+            localStorage.setItem('selekt-lang', lang);
+            document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = pt(el.dataset.i18n));
+            document.title = pt('pageTitle');
+            document.querySelectorAll('.lang-btn').forEach(b => b.style.borderColor = 'var(--border2)');
+            const active = document.getElementById('lang' + lang.charAt(0).toUpperCase() + lang.slice(1));
+            if (active) active.style.borderColor = 'var(--accent)';
+            if (currentUser) updateUI();
+        }
+
+        function selectRole(el) {
+            document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedRole = el.dataset.role;
+        }
+
+        function updateUI() {
+            if (!currentUser) return;
+            document.getElementById('avatarLarge').textContent = currentUser.displayName.charAt(0).toUpperCase();
+            document.getElementById('profileName').textContent = currentUser.displayName;
+            document.getElementById('profileId').textContent = `@${currentUser.id}`;
+
+            const roleLabel = (ROLE_LABELS[_lang] || ROLE_LABELS.ja)[currentUser.role] || currentUser.role;
+            document.getElementById('roleBadge').textContent = roleLabel;
+
+            const planLabel = { pro: 'PRO', basic: 'BASIC' }[currentUser.plan] || 'FREE';
+            const planBadge = document.getElementById('planBadge');
+            planBadge.textContent = planLabel;
+            planBadge.className = `badge badge-plan ${(currentUser.plan || 'free')}`;
+
+            document.getElementById('statPlan').textContent = planLabel;
+
+            // Form
+            document.getElementById('editName').value = currentUser.displayName;
+            document.getElementById('editId').value = currentUser.id;
+
+            // Select current role
+            document.querySelectorAll('.role-card').forEach(c => {
+                c.classList.toggle('selected', c.dataset.role === currentUser.role);
+            });
+            selectedRole = currentUser.role;
+
+            // Hide upgrade banner for pro users
+            if (currentUser.plan === 'pro') {
+                document.getElementById('upgradeBanner').style.display = 'none';
+            }
+        }
+
+        function showToast(msg, type = '') {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className = 'toast show' + (type ? ` ${type}` : '');
+            setTimeout(() => toast.className = 'toast', 2500);
+        }
+
+        async function saveProfile() {
+            const newName = document.getElementById('editName').value.trim();
+            if (!newName) return;
+
+            const btn = document.getElementById('saveBtn');
+            btn.disabled = true;
+
+            // Update user object
+            currentUser.displayName = newName;
+            if (selectedRole) currentUser.role = selectedRole;
+
+            // Try API first
+            try {
+                const token = localStorage.getItem('selekt_token');
+                if (token) {
+                    const res = await fetch(`${API}/api/auth/update-profile`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ displayName: newName, role: selectedRole }),
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.user) currentUser = data.user;
+                    }
+                }
+            } catch (e) {
+                // API not available, save locally only
+            }
+
+            // Save locally
+            localStorage.setItem('selekt_user', JSON.stringify(currentUser));
+            updateUI();
+            showToast(pt('saved'), 'success');
+
+            setTimeout(() => btn.disabled = false, 500);
+        }
+
+        function changePassword() {
+            showToast(pt('passwordNotReady'));
+        }
+
+        function logout() {
+            localStorage.removeItem('selekt_token');
+            localStorage.removeItem('selekt_user');
+            window.location.href = 'SELEKT_Auth.html';
+        }
+
+        // Init
+        async function init() {
+            try {
+                const token = localStorage.getItem('selekt_token');
+                if (token) {
+                    const controller = new AbortController();
+                    setTimeout(() => controller.abort(), 3000);
+                    const res = await fetch(`${API}/api/auth/me`, {
+                        headers: { 'Authorization': `Bearer ${token}` },
+                        signal: controller.signal
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        currentUser = data.user;
+                        updateUI();
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.log('API unavailable, using local data');
+            }
+
+            // Fall back to localStorage
+            const stored = localStorage.getItem('selekt_user');
+            if (stored) {
+                currentUser = JSON.parse(stored);
+                updateUI();
+                return;
+            }
+
+            // Demo mode
+            currentUser = {
+                id: 'demo_user',
+                displayName: 'Demo User',
+                role: 'photographer',
+                plan: 'free'
+            };
+            updateUI();
+
+            // Demo stats
+            document.getElementById('statProjects').textContent = '5';
+        }
+
+        setLang(_lang);
+        init();
+    </script>
+</body>
+
+</html>
