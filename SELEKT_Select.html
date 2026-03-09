@@ -4295,19 +4295,23 @@
       document.getElementById('modal').classList.add('open');
     }
 
-    let _zoomLevel = 1;
-    const ZOOM_LEVELS = [1, 2, 3, 5];
+    let _zoomScale = 1;
+    const MIN_ZOOM = 1;
+    const MAX_ZOOM = 5;
 
     function _resetZoom() {
-      _zoomLevel = 1;
+      _zoomScale = 1;
       const container = document.getElementById('modalImg');
       container.classList.remove('zoomed', 'zoomed-dragging');
       const imgEl = container.querySelector('img');
       if (imgEl) {
-        imgEl.style.transform = '';
         imgEl.style.width = '100%';
         imgEl.style.height = '100%';
+        imgEl.style.maxWidth = '';
+        imgEl.style.maxHeight = '';
       }
+      container.scrollTop = 0;
+      container.scrollLeft = 0;
       _updateZoomIndicator();
     }
 
@@ -4319,57 +4323,49 @@
         badge.id = 'zoomBadge';
         document.getElementById('modalImg').appendChild(badge);
       }
-      badge.textContent = `${_zoomLevel}x`;
-      badge.style.display = _zoomLevel > 1 ? 'block' : 'none';
+      const displayScale = Math.round(_zoomScale * 10) / 10;
+      badge.textContent = `${displayScale}x`;
+      badge.style.display = _zoomScale > 1.05 ? 'block' : 'none';
     }
 
-    function _applyZoom(container, imgEl, clientX, clientY) {
-      if (_zoomLevel === 1) {
+    function _applyScale(container, imgEl, centerX, centerY) {
+      if (_zoomScale <= 1.02) {
+        _zoomScale = 1;
         container.classList.remove('zoomed');
-        imgEl.style.transform = '';
-        imgEl.style.width = '';
-        imgEl.style.height = '';
+        imgEl.style.width = '100%';
+        imgEl.style.height = '100%';
         imgEl.style.maxWidth = '';
         imgEl.style.maxHeight = '';
         container.scrollTop = 0;
         container.scrollLeft = 0;
       } else {
-        const wasZoomed = container.classList.contains('zoomed');
-        // Save current image size before changing
-        const oldW = imgEl.offsetWidth;
-        const oldH = imgEl.offsetHeight;
-        // Get current transform
-        const oldTransform = imgEl.style.transform;
-        let oldTx = 0, oldTy = 0;
-        if (oldTransform) {
-          const m = oldTransform.match(/translate\(([-\d.]+)px,\s*([-\d.]+)px\)/);
-          if (m) { oldTx = parseFloat(m[1]); oldTy = parseFloat(m[2]); }
-        }
-
         container.classList.add('zoomed');
-        // Use natural dimensions to preserve aspect ratio
         const natW = imgEl.naturalWidth || 800;
         const natH = imgEl.naturalHeight || 600;
         const rect = container.getBoundingClientRect();
-        // Scale to fit container at 1x, maintaining aspect ratio
         const fitScale = Math.min(rect.width / natW, rect.height / natH);
-        const w = natW * fitScale * _zoomLevel;
-        const h = natH * fitScale * _zoomLevel;
+        const w = natW * fitScale * _zoomScale;
+        const h = natH * fitScale * _zoomScale;
         imgEl.style.width = w + 'px';
         imgEl.style.height = h + 'px';
         imgEl.style.maxWidth = 'none';
         imgEl.style.maxHeight = 'none';
-        imgEl.style.transform = '';
 
-        // Scroll to center on click point
         requestAnimationFrame(() => {
-          const mx = clientX !== undefined ? (clientX - rect.left) / rect.width : 0.5;
-          const my = clientY !== undefined ? (clientY - rect.top) / rect.height : 0.5;
-          container.scrollLeft = (w - rect.width) * mx;
-          container.scrollTop = (h - rect.height) * my;
+          if (centerX !== undefined && centerY !== undefined) {
+            const mx = (centerX - rect.left) / rect.width;
+            const my = (centerY - rect.top) / rect.height;
+            container.scrollLeft = (w - rect.width) * mx;
+            container.scrollTop = (h - rect.height) * my;
+          }
         });
       }
       _updateZoomIndicator();
+    }
+
+    // Keep for backward compat with desktop click zoom
+    function _applyZoom(container, imgEl, clientX, clientY) {
+      _applyScale(container, imgEl, clientX, clientY);
     }
 
     function _panToPoint(container, imgEl, clientX, clientY) {
@@ -4472,7 +4468,7 @@
       container.innerHTML = '';
       container.style.background = 'var(--surface)';
       container.classList.remove('zoomed', 'zoomed-dragging');
-      _zoomLevel = 1;
+      _zoomScale = 1;
 
       if (photo.url) {
         const imgEl = document.createElement('img');
@@ -4488,29 +4484,32 @@
         badge.style.display = 'none';
         container.appendChild(badge);
 
-        // Click to cycle zoom (DESKTOP ONLY - disabled on touch devices)
+        // Click to cycle zoom (DESKTOP ONLY)
         const _isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        const CLICK_ZOOM_STEPS = [1, 2, 3, 5];
         if (!_isTouchDevice) {
           container.addEventListener('click', function _clickZoom(e) {
             if (e.target.closest('.zoom-indicator')) return;
             if (_didDrag) { _didDrag = false; return; }
-            const idx = ZOOM_LEVELS.indexOf(_zoomLevel);
-            _zoomLevel = ZOOM_LEVELS[(idx + 1) % ZOOM_LEVELS.length];
-            _applyZoom(container, imgEl, e.clientX, e.clientY);
+            // Find nearest step and go to next
+            let nextIdx = 0;
+            for (let i = 0; i < CLICK_ZOOM_STEPS.length; i++) {
+              if (_zoomScale >= CLICK_ZOOM_STEPS[i] - 0.1) nextIdx = i + 1;
+            }
+            _zoomScale = CLICK_ZOOM_STEPS[nextIdx % CLICK_ZOOM_STEPS.length];
+            _applyScale(container, imgEl, e.clientX, e.clientY);
           }, { once: false });
         }
 
-        // Scroll wheel zoom (DESKTOP)
+        // Scroll wheel zoom (DESKTOP) - continuous
         container.addEventListener('wheel', function _wheelZoom(e) {
           e.preventDefault();
           if (e.deltaY < 0) {
-            const idx = ZOOM_LEVELS.indexOf(_zoomLevel);
-            if (idx < ZOOM_LEVELS.length - 1) _zoomLevel = ZOOM_LEVELS[idx + 1];
+            _zoomScale = Math.min(MAX_ZOOM, _zoomScale * 1.2);
           } else {
-            const idx = ZOOM_LEVELS.indexOf(_zoomLevel);
-            if (idx > 0) _zoomLevel = ZOOM_LEVELS[idx - 1];
+            _zoomScale = Math.max(MIN_ZOOM, _zoomScale / 1.2);
           }
-          _applyZoom(container, imgEl, e.clientX, e.clientY);
+          _applyScale(container, imgEl, e.clientX, e.clientY);
         }, { passive: false });
 
         // Drag panning when zoomed — scroll-based (DESKTOP)
@@ -4520,7 +4519,7 @@
         let _scrollStartX = 0, _scrollStartY = 0;
 
         container.addEventListener('mousedown', function (e) {
-          if (_zoomLevel <= 1) return;
+          if (_zoomScale <= 1) return;
           _isDragging = true;
           _didDrag = false;
           _dragStartX = e.clientX;
@@ -4532,7 +4531,7 @@
         });
 
         container.addEventListener('mousemove', function (e) {
-          if (!_isDragging || _zoomLevel <= 1) return;
+          if (!_isDragging || _zoomScale <= 1) return;
           _didDrag = true;
           container.scrollLeft = _scrollStartX - (e.clientX - _dragStartX);
           container.scrollTop = _scrollStartY - (e.clientY - _dragStartY);
@@ -4548,11 +4547,12 @@
           container.classList.remove('zoomed-dragging');
         });
 
-        // === MOBILE TOUCH: double-tap zoom + pinch zoom + scroll pan ===
+        // === MOBILE TOUCH: continuous pinch zoom + double-tap + pan ===
         let _touchStartX = 0, _touchStartY = 0;
         let _touchPanning = false;
         let _touchMoved = false;
         let _pinchStartDist = 0;
+        let _pinchStartScale = 1;
         let _lastTapTime = 0;
         let _lastTapX = 0, _lastTapY = 0;
         const PAN_DAMPING = 0.65;
@@ -4568,11 +4568,12 @@
           // Pinch start (2 fingers)
           if (e.touches.length === 2) {
             _touchPanning = false;
-            _touchMoved = true; // Prevent double-tap on release
+            _touchMoved = true;
             _pinchStartDist = Math.hypot(
               e.touches[0].clientX - e.touches[1].clientX,
               e.touches[0].clientY - e.touches[1].clientY
             );
+            _pinchStartScale = _zoomScale; // Remember scale at pinch start
             e.preventDefault();
             return;
           }
@@ -4583,8 +4584,7 @@
             _touchStartY = e.touches[0].clientY;
             _touchMoved = false;
 
-            // Start panning if zoomed
-            if (_zoomLevel > 1) {
+            if (_zoomScale > 1.05) {
               _touchPanning = true;
               container.classList.add('zoomed-dragging');
               e.preventDefault();
@@ -4593,55 +4593,36 @@
         }, { passive: false });
 
         container.addEventListener('touchmove', function (e) {
-          // Pinch zoom (2 fingers)
+          // Continuous pinch zoom (2 fingers)
           if (e.touches.length === 2 && _pinchStartDist > 0) {
             e.preventDefault();
             const dist = Math.hypot(
               e.touches[0].clientX - e.touches[1].clientX,
               e.touches[0].clientY - e.touches[1].clientY
             );
-            const ratio = dist / _pinchStartDist;
+            // Continuous: scale = startScale * (currentDist / startDist)
+            const newScale = _pinchStartScale * (dist / _pinchStartDist);
+            _zoomScale = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newScale));
 
-            if (ratio > 1.25) {
-              // Zoom in one step
-              const idx = ZOOM_LEVELS.indexOf(_zoomLevel);
-              if (idx < ZOOM_LEVELS.length - 1) {
-                _zoomLevel = ZOOM_LEVELS[idx + 1];
-                const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-                const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-                _applyZoom(container, imgEl, cx, cy);
-              }
-              _pinchStartDist = dist;
-            } else if (ratio < 0.75) {
-              // Zoom out one step
-              const idx = ZOOM_LEVELS.indexOf(_zoomLevel);
-              if (idx > 0) {
-                _zoomLevel = ZOOM_LEVELS[idx - 1];
-                const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-                const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-                _applyZoom(container, imgEl, cx, cy);
-              } else {
-                _resetZoom();
-              }
-              _pinchStartDist = dist;
-            }
+            const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+            const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+            _applyScale(container, imgEl, cx, cy);
             return;
           }
 
           // Single finger pan when zoomed
-          if (e.touches.length === 1 && _touchPanning && _zoomLevel > 1) {
+          if (e.touches.length === 1 && _touchPanning && _zoomScale > 1.05) {
             e.preventDefault();
             const dx = e.touches[0].clientX - _touchStartX;
             const dy = e.touches[0].clientY - _touchStartY;
 
-            // Only start moving after a small threshold
             if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
               _touchMoved = true;
             }
 
             if (_touchMoved) {
-              container.scrollLeft -= (e.touches[0].clientX - _touchStartX) * PAN_DAMPING;
-              container.scrollTop -= (e.touches[0].clientY - _touchStartY) * PAN_DAMPING;
+              container.scrollLeft -= dx * PAN_DAMPING;
+              container.scrollTop -= dy * PAN_DAMPING;
             }
             _touchStartX = e.touches[0].clientX;
             _touchStartY = e.touches[0].clientY;
@@ -4649,6 +4630,11 @@
         }, { passive: false });
 
         container.addEventListener('touchend', function (e) {
+          // Snap to 1x if very close
+          if (_zoomScale < 1.08 && _zoomScale > 0.92) {
+            _resetZoom();
+          }
+
           // Double-tap detection (only if finger didn't move)
           if (!_touchMoved && e.touches.length === 0) {
             const now = Date.now();
@@ -4656,13 +4642,12 @@
               _touchStartX - _lastTapX, _touchStartY - _lastTapY
             );
             if (now - _lastTapTime < 350 && tapDist < 40) {
-              // Double tap detected!
               e.preventDefault();
-              if (_zoomLevel > 1) {
+              if (_zoomScale > 1.05) {
                 _resetZoom();
               } else {
-                _zoomLevel = 2;
-                _applyZoom(container, imgEl, _touchStartX, _touchStartY);
+                _zoomScale = 2;
+                _applyScale(container, imgEl, _touchStartX, _touchStartY);
               }
               _lastTapTime = 0;
               _lastTapX = 0;
