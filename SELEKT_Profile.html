@@ -39,7 +39,7 @@
             min-height: 100vh;
         }
 
-        /* Topbar */
+        /* ===== TOPBAR ===== */
         .topbar {
             height: 56px;
             background: var(--surface);
@@ -48,24 +48,30 @@
             align-items: center;
             padding: 0 24px;
             gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
 
         .logo {
-            font-family: 'Syne', sans-serif;
-            font-size: 22px;
+            font-size: 18px;
             font-weight: 800;
-            letter-spacing: -0.5px;
-            text-decoration: none;
             color: var(--text);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-decoration: none;
+            white-space: nowrap;
         }
 
         .logo span {
-            color: var(--accent);
+            opacity: 0.5;
         }
 
         .topbar-divider {
             width: 1px;
-            height: 28px;
+            height: 24px;
             background: var(--border);
         }
 
@@ -98,54 +104,82 @@
             margin-left: auto;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
         }
 
-        /* Main */
-        .main {
-            max-width: 640px;
-            margin: 0 auto;
-            padding: 40px 24px 80px;
-        }
-
-        /* Profile Header */
-        .profile-header {
+        /* ===== HERO HEADER ===== */
+        .profile-hero {
+            position: relative;
+            padding: 48px 24px 32px;
             text-align: center;
-            margin-bottom: 40px;
+            overflow: hidden;
+        }
+
+        .profile-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 600px 300px at 50% 0%, rgba(74, 158, 224, 0.08), transparent),
+                radial-gradient(ellipse 400px 200px at 30% 100%, rgba(59, 191, 165, 0.05), transparent);
+            pointer-events: none;
+        }
+
+        .avatar-wrap {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            margin: 0 auto 20px;
         }
 
         .avatar-large {
-            width: 96px;
-            height: 96px;
+            width: 110px;
+            height: 110px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent), #3578C4);
+            background: linear-gradient(135deg, var(--accent), #3578C4, var(--accent2));
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 40px;
+            font-size: 44px;
             font-weight: 800;
             color: #fff;
-            margin: 0 auto 16px;
-            box-shadow: 0 4px 24px rgba(74, 158, 224, 0.3);
             font-family: 'Syne', sans-serif;
+            box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px rgba(74, 158, 224, 0.3), 0 8px 32px rgba(74, 158, 224, 0.2);
+        }
+
+        .avatar-ring {
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, var(--accent), var(--accent2), var(--accent));
+            -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #fff calc(100% - 2px));
+            mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #fff calc(100% - 2px));
+            animation: spin 8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .profile-name {
-            font-size: 26px;
+            font-size: 28px;
             font-weight: 700;
             margin-bottom: 4px;
+            font-family: 'Syne', 'Zen Kaku Gothic New', sans-serif;
         }
 
         .profile-id {
-            font-size: 14px;
+            font-size: 13px;
             color: var(--text-sub);
-            margin-bottom: 12px;
+            margin-bottom: 14px;
         }
 
         .badge-row {
             display: flex;
             justify-content: center;
             gap: 8px;
+            flex-wrap: wrap;
         }
 
         .badge {
@@ -163,53 +197,199 @@
         }
 
         .badge-plan {
-            border: 1px solid rgba(59, 191, 165, 0.3);
+            border: 1px solid rgba(123, 132, 154, 0.3);
         }
 
         .badge-plan.free {
-            background: rgba(123, 132, 154, 0.12);
+            background: rgba(123, 132, 154, 0.1);
             color: var(--text-sub);
-            border-color: rgba(123, 132, 154, 0.3);
         }
 
         .badge-plan.basic {
-            background: rgba(74, 158, 224, 0.12);
+            background: rgba(74, 158, 224, 0.1);
             color: var(--accent);
             border-color: rgba(74, 158, 224, 0.3);
         }
 
         .badge-plan.pro {
-            background: rgba(59, 191, 165, 0.12);
+            background: rgba(59, 191, 165, 0.1);
             color: var(--accent2);
             border-color: rgba(59, 191, 165, 0.3);
         }
 
-        /* Section */
+        /* ===== BIO ===== */
+        .bio-section {
+            max-width: 520px;
+            margin: 0 auto 8px;
+            padding: 0 24px;
+            text-align: center;
+        }
+
+        .bio-text {
+            font-size: 14px;
+            color: var(--text-sub);
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .bio-text.placeholder {
+            font-style: italic;
+            color: var(--text-dim);
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 24px 24px 80px;
+        }
+
+        /* ===== PORTFOLIO ===== */
         .section {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 20px;
+            margin-bottom: 28px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
         }
 
         .section-title {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
             color: var(--text-sub);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 20px;
+            letter-spacing: 1px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
         .section-title svg {
-            opacity: 0.6;
+            opacity: 0.5;
         }
 
-        /* Form */
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        .portfolio-slot {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            background: var(--surface);
+            border: 2px dashed var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .portfolio-slot:hover {
+            border-color: var(--accent);
+            background: rgba(74, 158, 224, 0.05);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .portfolio-slot.filled {
+            border: none;
+        }
+
+        .portfolio-slot.filled img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+            transition: transform 0.3s;
+        }
+
+        .portfolio-slot.filled:hover img {
+            transform: scale(1.05);
+        }
+
+        .portfolio-slot .remove-btn {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
+            color: var(--coral);
+            font-size: 12px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+            transition: background 0.15s;
+        }
+
+        .portfolio-slot.filled:hover .remove-btn {
+            display: flex;
+        }
+
+        .portfolio-slot .remove-btn:hover {
+            background: rgba(255, 107, 107, 0.3);
+        }
+
+        .slot-placeholder {
+            color: var(--text-dim);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .slot-placeholder svg {
+            opacity: 0.4;
+        }
+
+        .slot-placeholder span {
+            font-size: 9px;
+            opacity: 0.5;
+            letter-spacing: 0.3px;
+        }
+
+        /* ===== CARD ===== */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            transition: border-color 0.2s;
+        }
+
+        .card:hover {
+            border-color: var(--border2);
+        }
+
+        .card-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title svg {
+            opacity: 0.5;
+        }
+
+        /* ===== FORM ===== */
         .form-group {
             margin-bottom: 20px;
         }
@@ -220,32 +400,36 @@
 
         .form-label {
             display: block;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
-            color: var(--text-sub);
+            color: var(--text-dim);
             margin-bottom: 6px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.8px;
         }
 
-        .form-input {
+        .form-input,
+        .form-textarea {
             width: 100%;
-            padding: 14px 16px;
+            padding: 12px 14px;
             background: var(--surface2);
             border: 1px solid var(--border);
             border-radius: 10px;
             color: var(--text);
             font-size: 14px;
             font-family: inherit;
-            transition: border-color 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
-        .form-input:focus {
+        .form-input:focus,
+        .form-textarea:focus {
             outline: none;
             border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(74, 158, 224, 0.1);
         }
 
-        .form-input::placeholder {
+        .form-input::placeholder,
+        .form-textarea::placeholder {
             color: var(--text-dim);
         }
 
@@ -254,18 +438,41 @@
             cursor: not-allowed;
         }
 
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+            max-height: 160px;
+            line-height: 1.6;
+        }
+
+        .char-count {
+            text-align: right;
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-top: 4px;
+            transition: color 0.2s;
+        }
+
+        .char-count.warning {
+            color: var(--yellow);
+        }
+
+        .char-count.over {
+            color: var(--coral);
+        }
+
         /* Role grid */
         .role-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 8px;
         }
 
         .role-card {
-            padding: 14px 12px;
+            padding: 12px 10px;
             background: var(--surface2);
             border: 2px solid var(--border);
-            border-radius: 12px;
+            border-radius: 10px;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s;
@@ -277,12 +484,13 @@
 
         .role-card.selected {
             border-color: var(--accent);
-            background: rgba(74, 158, 224, 0.08);
+            background: rgba(74, 158, 224, 0.06);
+            box-shadow: 0 0 0 1px rgba(74, 158, 224, 0.15);
         }
 
         .role-card .role-icon {
-            margin-bottom: 6px;
-            opacity: 0.7;
+            margin-bottom: 4px;
+            opacity: 0.6;
         }
 
         .role-card.selected .role-icon {
@@ -290,28 +498,29 @@
         }
 
         .role-card .role-name {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
         }
 
         .role-card .role-desc {
-            font-size: 11px;
+            font-size: 10px;
             color: var(--text-dim);
-            margin-top: 2px;
+            margin-top: 1px;
         }
 
-        /* Buttons */
+        /* ===== BUTTONS ===== */
         .btn-primary {
             width: 100%;
-            padding: 14px;
+            padding: 13px;
             background: linear-gradient(135deg, var(--accent), #3578C4);
             color: #fff;
             border: none;
-            border-radius: 12px;
-            font-size: 14px;
+            border-radius: 10px;
+            font-size: 13px;
             font-weight: 700;
             cursor: pointer;
             transition: opacity 0.2s, transform 0.1s;
+            letter-spacing: 0.3px;
         }
 
         .btn-primary:hover {
@@ -329,12 +538,12 @@
 
         .btn-outline {
             width: 100%;
-            padding: 12px;
+            padding: 11px;
             background: none;
             border: 1px solid var(--border);
             border-radius: 10px;
             color: var(--text-sub);
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
@@ -347,32 +556,32 @@
 
         .btn-danger {
             width: 100%;
-            padding: 12px;
-            background: rgba(255, 107, 107, 0.08);
-            border: 1px solid rgba(255, 107, 107, 0.2);
+            padding: 11px;
+            background: rgba(255, 107, 107, 0.06);
+            border: 1px solid rgba(255, 107, 107, 0.15);
             border-radius: 10px;
             color: var(--coral);
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .btn-danger:hover {
-            background: rgba(255, 107, 107, 0.15);
-            border-color: rgba(255, 107, 107, 0.4);
+            background: rgba(255, 107, 107, 0.12);
+            border-color: rgba(255, 107, 107, 0.3);
         }
 
-        /* Stats row */
+        /* ===== STAT ROW ===== */
         .stat-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 12px 0;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid rgba(42, 47, 62, 0.5);
         }
 
-        .stat-row:last-child {
+        .stat-row:last-of-type {
             border-bottom: none;
         }
 
@@ -384,27 +593,65 @@
         .stat-value {
             font-size: 13px;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .usage-bar-inline {
-            width: 100px;
-            height: 4px;
+        .usage-bar-sm {
+            width: 80px;
+            height: 3px;
             background: var(--border);
             border-radius: 2px;
             overflow: hidden;
-            display: inline-block;
-            vertical-align: middle;
-            margin-left: 8px;
         }
 
-        .usage-bar-fill {
+        .usage-bar-sm .fill {
             height: 100%;
             background: var(--accent);
             border-radius: 2px;
             transition: width 0.3s;
         }
 
-        /* Messages */
+        /* Upgrade link */
+        .upgrade-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 16px;
+            margin-top: 16px;
+            background: linear-gradient(135deg, rgba(59, 191, 165, 0.06), rgba(74, 158, 224, 0.06));
+            border: 1px solid rgba(59, 191, 165, 0.15);
+            border-radius: 12px;
+            text-decoration: none;
+            color: inherit;
+            transition: border-color 0.2s, transform 0.1s;
+        }
+
+        .upgrade-link:hover {
+            border-color: rgba(59, 191, 165, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .upgrade-link .upgrade-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent2);
+        }
+
+        .upgrade-link .upgrade-desc {
+            font-size: 10px;
+            color: var(--text-dim);
+            margin-top: 1px;
+        }
+
+        .upgrade-link .arrow {
+            margin-left: auto;
+            color: var(--accent2);
+            font-size: 16px;
+        }
+
+        /* ===== TOAST ===== */
         .toast {
             position: fixed;
             bottom: 24px;
@@ -418,7 +665,6 @@
             color: var(--text);
             z-index: 999;
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             transition: transform 0.3s ease;
             pointer-events: none;
         }
@@ -432,47 +678,21 @@
             color: var(--green);
         }
 
-        /* Upgrade banner */
-        .upgrade-banner {
-            background: linear-gradient(135deg, rgba(59, 191, 165, 0.1), rgba(74, 158, 224, 0.1));
-            border: 1px solid rgba(59, 191, 165, 0.2);
-            border-radius: 12px;
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-top: 16px;
-            text-decoration: none;
-            color: inherit;
-            transition: border-color 0.2s;
+        /* ===== DANGER SECTION ===== */
+        .danger-section {
+            border-color: rgba(255, 107, 107, 0.1);
         }
 
-        .upgrade-banner:hover {
-            border-color: rgba(59, 191, 165, 0.5);
+        .danger-section .card-title {
+            color: rgba(255, 107, 107, 0.7);
         }
 
-        .upgrade-banner .upgrade-text {
-            flex: 1;
+        /* Hidden file input */
+        .hidden-input {
+            display: none;
         }
 
-        .upgrade-banner .upgrade-text .title {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--accent2);
-        }
-
-        .upgrade-banner .upgrade-text .desc {
-            font-size: 11px;
-            color: var(--text-sub);
-            margin-top: 2px;
-        }
-
-        .upgrade-arrow {
-            color: var(--accent2);
-            font-size: 18px;
-        }
-
-        /* Responsive */
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 600px) {
             .topbar {
                 padding: 0 12px;
@@ -484,26 +704,50 @@
             }
 
             .main {
-                padding: 24px 16px 80px;
+                padding: 20px 16px 80px;
             }
 
-            .section {
-                padding: 20px 16px;
+            .profile-hero {
+                padding: 32px 16px 24px;
+            }
+
+            .avatar-wrap {
+                width: 88px;
+                height: 88px;
             }
 
             .avatar-large {
-                width: 80px;
-                height: 80px;
-                font-size: 34px;
+                width: 88px;
+                height: 88px;
+                font-size: 36px;
             }
 
             .profile-name {
-                font-size: 22px;
+                font-size: 24px;
+            }
+
+            .portfolio-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
+            }
+
+            .card {
+                padding: 20px 16px;
+                border-radius: 14px;
             }
 
             .role-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 8px;
+                gap: 6px;
+            }
+
+            .bio-section {
+                padding: 0 16px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .portfolio-grid {
+                grid-template-columns: repeat(3, 1fr);
             }
         }
     </style>
@@ -533,173 +777,210 @@
         </div>
     </div>
 
-    <!-- Main -->
+    <!-- Profile Hero -->
+    <div class="profile-hero">
+        <div class="avatar-wrap">
+            <div class="avatar-ring"></div>
+            <div class="avatar-large" id="avatarLarge">?</div>
+        </div>
+        <div class="profile-name" id="profileName">---</div>
+        <div class="profile-id" id="profileId">@---</div>
+        <div class="badge-row">
+            <span class="badge badge-role" id="roleBadge">---</span>
+            <span class="badge badge-plan" id="planBadge">FREE</span>
+        </div>
+    </div>
+
+    <!-- Bio Section -->
+    <div class="bio-section">
+        <div class="bio-text" id="bioDisplay"></div>
+    </div>
+
+    <!-- Main Content -->
     <div class="main">
 
-        <!-- Profile Header -->
-        <div class="profile-header">
-            <div class="avatar-large" id="avatarLarge">?</div>
-            <div class="profile-name" id="profileName">---</div>
-            <div class="profile-id" id="profileId">@---</div>
-            <div class="badge-row">
-                <span class="badge badge-role" id="roleBadge">---</span>
-                <span class="badge badge-plan" id="planBadge">FREE</span>
+        <!-- Portfolio -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <polyline points="21 15 16 10 5 21" />
+                    </svg>
+                    <span data-i18n="portfolio">ポートフォリオ</span>
+                </div>
+            </div>
+            <div class="portfolio-grid" id="portfolioGrid">
+                <!-- Slots rendered by JS -->
             </div>
         </div>
 
         <!-- Edit Profile -->
         <div class="section">
-            <div class="section-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                </svg>
-                <span data-i18n="editProfile">プロフィール編集</span>
-            </div>
-            <div class="form-group">
-                <label class="form-label" data-i18n="displayName">表示名</label>
-                <input class="form-input" type="text" id="editName" placeholder="表示名を入力">
-            </div>
-            <div class="form-group">
-                <label class="form-label" data-i18n="userId">ユーザーID</label>
-                <input class="form-input" type="text" id="editId" disabled>
-            </div>
-            <div class="form-group">
-                <label class="form-label" data-i18n="yourRole">あなたの役割</label>
-                <div class="role-grid" id="roleGrid">
-                    <div class="role-card" data-role="photographer" onclick="selectRole(this)">
-                        <div class="role-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path
-                                    d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-                                <circle cx="12" cy="13" r="4" />
-                            </svg>
+            <div class="card">
+                <div class="card-title">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                    <span data-i18n="editProfile">プロフィール編集</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" data-i18n="displayName">表示名</label>
+                    <input class="form-input" type="text" id="editName" placeholder="表示名を入力">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" data-i18n="bio">自己紹介</label>
+                    <textarea class="form-textarea" id="editBio" maxlength="250" placeholder="自己紹介を入力（250文字以内）"
+                        oninput="updateCharCount()"></textarea>
+                    <div class="char-count" id="charCount">0 / 250</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" data-i18n="userId">ユーザーID</label>
+                    <input class="form-input" type="text" id="editId" disabled>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" data-i18n="yourRole">あなたの役割</label>
+                    <div class="role-grid" id="roleGrid">
+                        <div class="role-card" data-role="photographer" onclick="selectRole(this)">
+                            <div class="role-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path
+                                        d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                                    <circle cx="12" cy="13" r="4" />
+                                </svg></div>
+                            <div class="role-name" data-i18n="rolePhotographer">カメラマン</div>
+                            <div class="role-desc" data-i18n="rolePhotographerDesc">写真を送る側</div>
                         </div>
-                        <div class="role-name" data-i18n="rolePhotographer">カメラマン</div>
-                        <div class="role-desc" data-i18n="rolePhotographerDesc">写真を送る側</div>
-                    </div>
-                    <div class="role-card" data-role="model" onclick="selectRole(this)">
-                        <div class="role-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                                <circle cx="12" cy="7" r="4" />
-                            </svg>
+                        <div class="role-card" data-role="model" onclick="selectRole(this)">
+                            <div class="role-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                    <circle cx="12" cy="7" r="4" />
+                                </svg></div>
+                            <div class="role-name" data-i18n="roleModel">モデル</div>
+                            <div class="role-desc" data-i18n="roleModelDesc">写真を受け取る側</div>
                         </div>
-                        <div class="role-name" data-i18n="roleModel">モデル</div>
-                        <div class="role-desc" data-i18n="roleModelDesc">写真を受け取る側</div>
-                    </div>
-                    <div class="role-card" data-role="company" onclick="selectRole(this)">
-                        <div class="role-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="4" y="2" width="16" height="20" rx="2" />
-                                <line x1="9" y1="6" x2="9" y2="6.01" />
-                                <line x1="15" y1="6" x2="15" y2="6.01" />
-                                <line x1="9" y1="10" x2="9" y2="10.01" />
-                                <line x1="15" y1="10" x2="15" y2="10.01" />
-                                <line x1="9" y1="14" x2="15" y2="14" />
-                            </svg>
+                        <div class="role-card" data-role="company" onclick="selectRole(this)">
+                            <div class="role-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <rect x="4" y="2" width="16" height="20" rx="2" />
+                                    <line x1="9" y1="6" x2="9" y2="6.01" />
+                                    <line x1="15" y1="6" x2="15" y2="6.01" />
+                                    <line x1="9" y1="10" x2="9" y2="10.01" />
+                                    <line x1="15" y1="10" x2="15" y2="10.01" />
+                                    <line x1="9" y1="14" x2="15" y2="14" />
+                                </svg></div>
+                            <div class="role-name" data-i18n="roleCompany">企業</div>
+                            <div class="role-desc" data-i18n="roleCompanyDesc">ビジネス利用</div>
                         </div>
-                        <div class="role-name" data-i18n="roleCompany">企業</div>
-                        <div class="role-desc" data-i18n="roleCompanyDesc">ビジネス利用</div>
-                    </div>
-                    <div class="role-card" data-role="private" onclick="selectRole(this)">
-                        <div class="role-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="3" y="11" width="18" height="11" rx="2" />
-                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                                <circle cx="12" cy="16" r="1" />
-                            </svg>
+                        <div class="role-card" data-role="private" onclick="selectRole(this)">
+                            <div class="role-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" />
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                    <circle cx="12" cy="16" r="1" />
+                                </svg></div>
+                            <div class="role-name" data-i18n="rolePrivate">プライベート</div>
+                            <div class="role-desc" data-i18n="rolePrivateDesc">個人利用</div>
                         </div>
-                        <div class="role-name" data-i18n="rolePrivate">プライベート</div>
-                        <div class="role-desc" data-i18n="rolePrivateDesc">個人利用</div>
                     </div>
                 </div>
+                <button class="btn-primary" onclick="saveProfile()" id="saveBtn" data-i18n="saveChanges">変更を保存</button>
             </div>
-            <button class="btn-primary" onclick="saveProfile()" id="saveBtn" data-i18n="saveChanges">変更を保存</button>
         </div>
 
         <!-- Account Info -->
         <div class="section">
-            <div class="section-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="3" />
-                    <path
-                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                </svg>
-                <span data-i18n="accountInfo">アカウント情報</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label" data-i18n="currentPlan">現在のプラン</span>
-                <span class="stat-value" id="statPlan">FREE</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label" data-i18n="storageUsage">ストレージ使用量</span>
-                <span class="stat-value" id="statStorage">
-                    0.8 / 2 GB
-                    <span class="usage-bar-inline">
-                        <span class="usage-bar-fill" id="storageBar" style="width:40%"></span>
+            <div class="card">
+                <div class="card-title">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3" />
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                    </svg>
+                    <span data-i18n="accountInfo">アカウント情報</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label" data-i18n="currentPlan">現在のプラン</span>
+                    <span class="stat-value" id="statPlan">FREE</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label" data-i18n="storageUsage">ストレージ</span>
+                    <span class="stat-value">
+                        <span id="statStorage">0.8 / 2 GB</span>
+                        <span class="usage-bar-sm"><span class="fill" id="storageBar" style="width:40%"></span></span>
                     </span>
-                </span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label" data-i18n="totalProjects">プロジェクト数</span>
-                <span class="stat-value" id="statProjects">-</span>
-            </div>
-
-            <a href="SELEKT_Pricing.html" class="upgrade-banner" id="upgradeBanner">
-                <div>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2"
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label" data-i18n="totalProjects">プロジェクト数</span>
+                    <span class="stat-value" id="statProjects">—</span>
+                </div>
+                <a href="SELEKT_Pricing.html" class="upgrade-link" id="upgradeBanner">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <polygon
                             points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                     </svg>
-                </div>
-                <div class="upgrade-text">
-                    <div class="title" data-i18n="upgradePlan">プランをアップグレード</div>
-                    <div class="desc" data-i18n="upgradeDesc">より多くのストレージと機能をアンロック</div>
-                </div>
-                <span class="upgrade-arrow">→</span>
-            </a>
+                    <div>
+                        <div class="upgrade-title" data-i18n="upgradePlan">プランをアップグレード</div>
+                        <div class="upgrade-desc" data-i18n="upgradeDesc">より多くのストレージと機能をアンロック</div>
+                    </div>
+                    <span class="arrow">→</span>
+                </a>
+            </div>
         </div>
 
-        <!-- Danger zone -->
-        <div class="section" style="border-color: rgba(255,107,107,0.15)">
-            <div class="section-title" style="color:var(--coral)">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path
-                        d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                    <line x1="12" y1="9" x2="12" y2="13" />
-                    <line x1="12" y1="17" x2="12.01" y2="17" />
-                </svg>
-                <span data-i18n="dangerZone">危険ゾーン</span>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:10px">
-                <button class="btn-outline" onclick="changePassword()" data-i18n="changePassword">パスワードを変更</button>
-                <button class="btn-danger" onclick="logout()" data-i18n="logoutBtn">ログアウト</button>
+        <!-- Danger Zone -->
+        <div class="section">
+            <div class="card danger-section">
+                <div class="card-title">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                        <line x1="12" y1="9" x2="12" y2="13" />
+                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                    <span data-i18n="dangerZone">危険ゾーン</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                    <button class="btn-outline" onclick="changePassword()" data-i18n="changePassword">パスワードを変更</button>
+                    <button class="btn-danger" onclick="logout()" data-i18n="logoutBtn">ログアウト</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Toast notification -->
+    <input type="file" id="portfolioInput" class="hidden-input" accept="image/*"
+        onchange="handlePortfolioUpload(event)">
+
+    <!-- Toast -->
     <div class="toast" id="toast"></div>
 
     <script>
         const API = 'https://selekt-api.mr-mail114.workers.dev';
         let currentUser = null;
         let selectedRole = null;
+        let portfolioPhotos = []; // Array of data URLs (max 5)
+        const MAX_PORTFOLIO = 5;
+        let _uploadSlotIdx = -1;
 
         // ===== I18N =====
         const PROFILE_I18N = {
             ja: {
                 navDashboard: 'ダッシュボード', navUpload: 'アップロード', navPlan: 'プラン', navProfile: 'プロフィール',
-                editProfile: 'プロフィール編集', displayName: '表示名', userId: 'ユーザーID',
+                portfolio: 'ポートフォリオ', addPhoto: '追加',
+                editProfile: 'プロフィール編集', displayName: '表示名', bio: '自己紹介',
+                bioPlaceholder: '自己紹介を入力（250文字以内）', userId: 'ユーザーID',
                 yourRole: 'あなたの役割',
                 rolePhotographer: 'カメラマン', rolePhotographerDesc: '写真を送る側',
                 roleModel: 'モデル', roleModelDesc: '写真を受け取る側',
@@ -707,15 +988,18 @@
                 rolePrivate: 'プライベート', rolePrivateDesc: '個人利用',
                 saveChanges: '変更を保存',
                 accountInfo: 'アカウント情報', currentPlan: '現在のプラン',
-                storageUsage: 'ストレージ使用量', totalProjects: 'プロジェクト数',
+                storageUsage: 'ストレージ', totalProjects: 'プロジェクト数',
                 upgradePlan: 'プランをアップグレード', upgradeDesc: 'より多くのストレージと機能をアンロック',
                 dangerZone: '危険ゾーン', changePassword: 'パスワードを変更', logoutBtn: 'ログアウト',
                 saved: '✓ 保存しました', passwordNotReady: 'パスワード変更は準備中です',
+                noBio: '自己紹介が未設定です',
                 pageTitle: 'SELEKT — プロフィール',
             },
             en: {
                 navDashboard: 'Dashboard', navUpload: 'Upload', navPlan: 'Plan', navProfile: 'Profile',
-                editProfile: 'Edit Profile', displayName: 'Display Name', userId: 'User ID',
+                portfolio: 'Portfolio', addPhoto: 'Add',
+                editProfile: 'Edit Profile', displayName: 'Display Name', bio: 'Bio',
+                bioPlaceholder: 'Write a short bio (max 250 chars)', userId: 'User ID',
                 yourRole: 'Your Role',
                 rolePhotographer: 'Photographer', rolePhotographerDesc: 'Send photos',
                 roleModel: 'Model', roleModelDesc: 'Receive photos',
@@ -723,15 +1007,18 @@
                 rolePrivate: 'Private', rolePrivateDesc: 'Personal use',
                 saveChanges: 'Save Changes',
                 accountInfo: 'Account Info', currentPlan: 'Current Plan',
-                storageUsage: 'Storage Usage', totalProjects: 'Projects',
+                storageUsage: 'Storage', totalProjects: 'Projects',
                 upgradePlan: 'Upgrade Plan', upgradeDesc: 'Unlock more storage and features',
                 dangerZone: 'Danger Zone', changePassword: 'Change Password', logoutBtn: 'Logout',
-                saved: '✓ Saved', passwordNotReady: 'Password change is coming soon',
+                saved: '✓ Saved', passwordNotReady: 'Password change coming soon',
+                noBio: 'No bio set',
                 pageTitle: 'SELEKT — Profile',
             },
             zh: {
                 navDashboard: '仪表板', navUpload: '上传', navPlan: '方案', navProfile: '个人资料',
-                editProfile: '编辑资料', displayName: '显示名称', userId: '用户ID',
+                portfolio: '作品集', addPhoto: '添加',
+                editProfile: '编辑资料', displayName: '显示名称', bio: '自我介绍',
+                bioPlaceholder: '写一段简短的自我介绍（最多250字）', userId: '用户ID',
                 yourRole: '您的角色',
                 rolePhotographer: '摄影师', rolePhotographerDesc: '发送照片',
                 roleModel: '模特', roleModelDesc: '接收照片',
@@ -739,10 +1026,11 @@
                 rolePrivate: '个人', rolePrivateDesc: '个人使用',
                 saveChanges: '保存更改',
                 accountInfo: '账户信息', currentPlan: '当前方案',
-                storageUsage: '存储用量', totalProjects: '项目数',
+                storageUsage: '存储', totalProjects: '项目数',
                 upgradePlan: '升级方案', upgradeDesc: '解锁更多存储和功能',
                 dangerZone: '危险区域', changePassword: '更改密码', logoutBtn: '退出登录',
                 saved: '✓ 已保存', passwordNotReady: '密码更改功能即将推出',
+                noBio: '未设置自我介绍',
                 pageTitle: 'SELEKT — 个人资料',
             }
         };
@@ -760,10 +1048,14 @@
             _lang = lang;
             localStorage.setItem('selekt-lang', lang);
             document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = pt(el.dataset.i18n));
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => el.placeholder = pt(el.dataset.i18nPlaceholder));
             document.title = pt('pageTitle');
             document.querySelectorAll('.lang-btn').forEach(b => b.style.borderColor = 'var(--border2)');
             const active = document.getElementById('lang' + lang.charAt(0).toUpperCase() + lang.slice(1));
             if (active) active.style.borderColor = 'var(--accent)';
+            // Update bio placeholder
+            const bioEl = document.getElementById('editBio');
+            if (bioEl) bioEl.placeholder = pt('bioPlaceholder');
             if (currentUser) updateUI();
         }
 
@@ -785,26 +1077,127 @@
             const planLabel = { pro: 'PRO', basic: 'BASIC' }[currentUser.plan] || 'FREE';
             const planBadge = document.getElementById('planBadge');
             planBadge.textContent = planLabel;
-            planBadge.className = `badge badge-plan ${(currentUser.plan || 'free')}`;
+            planBadge.className = `badge badge-plan ${currentUser.plan || 'free'}`;
 
             document.getElementById('statPlan').textContent = planLabel;
-
-            // Form
             document.getElementById('editName').value = currentUser.displayName;
             document.getElementById('editId').value = currentUser.id;
 
-            // Select current role
-            document.querySelectorAll('.role-card').forEach(c => {
-                c.classList.toggle('selected', c.dataset.role === currentUser.role);
-            });
+            // Bio
+            const bio = currentUser.bio || '';
+            document.getElementById('editBio').value = bio;
+            updateCharCount();
+            const bioDisplay = document.getElementById('bioDisplay');
+            if (bio) {
+                bioDisplay.textContent = bio;
+                bioDisplay.classList.remove('placeholder');
+            } else {
+                bioDisplay.textContent = pt('noBio');
+                bioDisplay.classList.add('placeholder');
+            }
+
+            // Role
+            document.querySelectorAll('.role-card').forEach(c => c.classList.toggle('selected', c.dataset.role === currentUser.role));
             selectedRole = currentUser.role;
 
-            // Hide upgrade banner for pro users
-            if (currentUser.plan === 'pro') {
-                document.getElementById('upgradeBanner').style.display = 'none';
+            // Hide upgrade for pro
+            if (currentUser.plan === 'pro') document.getElementById('upgradeBanner').style.display = 'none';
+
+            renderPortfolio();
+        }
+
+        function updateCharCount() {
+            const textarea = document.getElementById('editBio');
+            const counter = document.getElementById('charCount');
+            const len = textarea.value.length;
+            counter.textContent = `${len} / 250`;
+            counter.className = 'char-count' + (len > 230 ? (len > 250 ? ' over' : ' warning') : '');
+        }
+
+        // ===== PORTFOLIO =====
+        function renderPortfolio() {
+            const grid = document.getElementById('portfolioGrid');
+            grid.innerHTML = '';
+
+            for (let i = 0; i < MAX_PORTFOLIO; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'portfolio-slot' + (portfolioPhotos[i] ? ' filled' : '');
+
+                if (portfolioPhotos[i]) {
+                    slot.innerHTML = `
+                        <img src="${portfolioPhotos[i]}" alt="Portfolio ${i + 1}">
+                        <button class="remove-btn" onclick="removePortfolioPhoto(${i}, event)" title="削除">✕</button>
+                    `;
+                } else {
+                    slot.innerHTML = `
+                        <div class="slot-placeholder">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                        </div>
+                    `;
+                    slot.onclick = () => { _uploadSlotIdx = i; document.getElementById('portfolioInput').click(); };
+                }
+
+                grid.appendChild(slot);
             }
         }
 
+        function handlePortfolioUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (ev) {
+                // Resize to max 600px for localStorage efficiency
+                const img = new Image();
+                img.onload = function () {
+                    const canvas = document.createElement('canvas');
+                    const maxSize = 600;
+                    let w = img.width, h = img.height;
+                    if (w > maxSize || h > maxSize) {
+                        if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+                        else { w = Math.round(w * maxSize / h); h = maxSize; }
+                    }
+                    canvas.width = w;
+                    canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+                    if (_uploadSlotIdx >= 0 && _uploadSlotIdx < MAX_PORTFOLIO) {
+                        portfolioPhotos[_uploadSlotIdx] = dataUrl;
+                    } else {
+                        portfolioPhotos.push(dataUrl);
+                    }
+
+                    savePortfolio();
+                    renderPortfolio();
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+            e.target.value = '';
+        }
+
+        function removePortfolioPhoto(idx, e) {
+            e.stopPropagation();
+            portfolioPhotos.splice(idx, 1);
+            savePortfolio();
+            renderPortfolio();
+        }
+
+        function savePortfolio() {
+            localStorage.setItem('selekt_portfolio', JSON.stringify(portfolioPhotos));
+        }
+
+        function loadPortfolio() {
+            try {
+                const stored = localStorage.getItem('selekt_portfolio');
+                if (stored) portfolioPhotos = JSON.parse(stored);
+            } catch (e) { }
+        }
+
+        // ===== SAVE PROFILE =====
         function showToast(msg, type = '') {
             const toast = document.getElementById('toast');
             toast.textContent = msg;
@@ -814,47 +1207,38 @@
 
         async function saveProfile() {
             const newName = document.getElementById('editName').value.trim();
+            const newBio = document.getElementById('editBio').value.trim().substring(0, 250);
             if (!newName) return;
 
             const btn = document.getElementById('saveBtn');
             btn.disabled = true;
 
-            // Update user object
             currentUser.displayName = newName;
+            currentUser.bio = newBio;
             if (selectedRole) currentUser.role = selectedRole;
 
-            // Try API first
             try {
                 const token = localStorage.getItem('selekt_token');
                 if (token) {
                     const res = await fetch(`${API}/api/auth/update-profile`, {
                         method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({ displayName: newName, role: selectedRole }),
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ displayName: newName, role: selectedRole, bio: newBio }),
                     });
                     if (res.ok) {
                         const data = await res.json();
                         if (data.user) currentUser = data.user;
                     }
                 }
-            } catch (e) {
-                // API not available, save locally only
-            }
+            } catch (e) { }
 
-            // Save locally
             localStorage.setItem('selekt_user', JSON.stringify(currentUser));
             updateUI();
             showToast(pt('saved'), 'success');
-
             setTimeout(() => btn.disabled = false, 500);
         }
 
-        function changePassword() {
-            showToast(pt('passwordNotReady'));
-        }
+        function changePassword() { showToast(pt('passwordNotReady')); }
 
         function logout() {
             localStorage.removeItem('selekt_token');
@@ -862,8 +1246,10 @@
             window.location.href = 'SELEKT_Auth.html';
         }
 
-        // Init
+        // ===== INIT =====
         async function init() {
+            loadPortfolio();
+
             try {
                 const token = localStorage.getItem('selekt_token');
                 if (token) {
@@ -884,7 +1270,6 @@
                 console.log('API unavailable, using local data');
             }
 
-            // Fall back to localStorage
             const stored = localStorage.getItem('selekt_user');
             if (stored) {
                 currentUser = JSON.parse(stored);
@@ -897,11 +1282,10 @@
                 id: 'demo_user',
                 displayName: 'Demo User',
                 role: 'photographer',
-                plan: 'free'
+                plan: 'free',
+                bio: ''
             };
             updateUI();
-
-            // Demo stats
             document.getElementById('statProjects').textContent = '5';
         }
 
