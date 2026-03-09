@@ -2702,7 +2702,17 @@
         function setLang(lang) {
             _uplLang = lang;
             localStorage.setItem('selekt-lang', lang);
-            document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = ut(el.dataset.i18n));
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const svg = el.querySelector('svg');
+                if (svg) {
+                    // Preserve SVG icon, only update the text node after it
+                    const textNode = Array.from(el.childNodes).find(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim());
+                    if (textNode) textNode.textContent = ut(el.dataset.i18n);
+                    else el.appendChild(document.createTextNode(ut(el.dataset.i18n)));
+                } else {
+                    el.textContent = ut(el.dataset.i18n);
+                }
+            });
             document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
                 el.placeholder = ut(el.dataset.i18nPlaceholder);
             });
