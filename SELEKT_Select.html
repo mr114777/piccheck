@@ -4488,31 +4488,32 @@
         badge.style.display = 'none';
         container.appendChild(badge);
 
-        // Click to cycle zoom
-        container.addEventListener('click', function _clickZoom(e) {
-          if (e.target.closest('.zoom-indicator')) return;
-          if (_didDrag) { _didDrag = false; return; }
-          const idx = ZOOM_LEVELS.indexOf(_zoomLevel);
-          _zoomLevel = ZOOM_LEVELS[(idx + 1) % ZOOM_LEVELS.length];
-          _applyZoom(container, imgEl, e.clientX, e.clientY);
-        }, { once: false });
+        // Click to cycle zoom (DESKTOP ONLY - disabled on touch devices)
+        const _isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        if (!_isTouchDevice) {
+          container.addEventListener('click', function _clickZoom(e) {
+            if (e.target.closest('.zoom-indicator')) return;
+            if (_didDrag) { _didDrag = false; return; }
+            const idx = ZOOM_LEVELS.indexOf(_zoomLevel);
+            _zoomLevel = ZOOM_LEVELS[(idx + 1) % ZOOM_LEVELS.length];
+            _applyZoom(container, imgEl, e.clientX, e.clientY);
+          }, { once: false });
+        }
 
-        // Scroll wheel zoom
+        // Scroll wheel zoom (DESKTOP)
         container.addEventListener('wheel', function _wheelZoom(e) {
           e.preventDefault();
           if (e.deltaY < 0) {
-            // Zoom in
             const idx = ZOOM_LEVELS.indexOf(_zoomLevel);
             if (idx < ZOOM_LEVELS.length - 1) _zoomLevel = ZOOM_LEVELS[idx + 1];
           } else {
-            // Zoom out
             const idx = ZOOM_LEVELS.indexOf(_zoomLevel);
             if (idx > 0) _zoomLevel = ZOOM_LEVELS[idx - 1];
           }
           _applyZoom(container, imgEl, e.clientX, e.clientY);
         }, { passive: false });
 
-        // Drag panning when zoomed — scroll-based
+        // Drag panning when zoomed — scroll-based (DESKTOP)
         let _isDragging = false;
         let _didDrag = false;
         let _dragStartX = 0, _dragStartY = 0;
@@ -4547,58 +4548,62 @@
           container.classList.remove('zoomed-dragging');
         });
 
-        // === TOUCH: scroll-based drag + pinch zoom + double-tap reset ===
-        let _lastTouchX = 0, _lastTouchY = 0, _touchPanning = false;
+        // === MOBILE TOUCH: double-tap zoom + pinch zoom + scroll pan ===
+        let _touchStartX = 0, _touchStartY = 0;
+        let _touchPanning = false;
+        let _touchMoved = false;
         let _pinchStartDist = 0;
         let _lastTapTime = 0;
-        const PAN_DAMPING = 0.7; // reduce pan sensitivity (0.7 = 70% of finger movement)
+        let _lastTapX = 0, _lastTapY = 0;
+        const PAN_DAMPING = 0.65;
+
+        function _cleanupTouchState() {
+          _touchPanning = false;
+          _touchMoved = false;
+          _pinchStartDist = 0;
+          container.classList.remove('zoomed-dragging');
+        }
 
         container.addEventListener('touchstart', function (e) {
+          // Pinch start (2 fingers)
           if (e.touches.length === 2) {
+            _touchPanning = false;
+            _touchMoved = true; // Prevent double-tap on release
             _pinchStartDist = Math.hypot(
               e.touches[0].clientX - e.touches[1].clientX,
               e.touches[0].clientY - e.touches[1].clientY
             );
-            _touchPanning = false;
             e.preventDefault();
             return;
           }
 
-          // Double-tap detection: reset zoom to 1x or zoom to 2x
-          const now = Date.now();
-          if (now - _lastTapTime < 300 && e.touches.length === 1) {
-            e.preventDefault();
+          // Single finger
+          if (e.touches.length === 1) {
+            _touchStartX = e.touches[0].clientX;
+            _touchStartY = e.touches[0].clientY;
+            _touchMoved = false;
+
+            // Start panning if zoomed
             if (_zoomLevel > 1) {
-              // Reset to 1x
-              _zoomLevel = 1;
-              _applyZoom(container, imgEl);
-            } else {
-              // Zoom to 2x at tap point
-              _zoomLevel = 2;
-              _applyZoom(container, imgEl, e.touches[0].clientX, e.touches[0].clientY);
+              _touchPanning = true;
+              container.classList.add('zoomed-dragging');
+              e.preventDefault();
             }
-            _lastTapTime = 0;
-            return;
           }
-          _lastTapTime = now;
-
-          if (_zoomLevel <= 1) return;
-          _touchPanning = true;
-          _lastTouchX = e.touches[0].clientX;
-          _lastTouchY = e.touches[0].clientY;
-          container.classList.add('zoomed-dragging');
-          e.preventDefault();
         }, { passive: false });
 
         container.addEventListener('touchmove', function (e) {
+          // Pinch zoom (2 fingers)
           if (e.touches.length === 2 && _pinchStartDist > 0) {
             e.preventDefault();
             const dist = Math.hypot(
               e.touches[0].clientX - e.touches[1].clientX,
               e.touches[0].clientY - e.touches[1].clientY
             );
-            const scale = dist / _pinchStartDist;
-            if (scale > 1.3) {
+            const ratio = dist / _pinchStartDist;
+
+            if (ratio > 1.25) {
+              // Zoom in one step
               const idx = ZOOM_LEVELS.indexOf(_zoomLevel);
               if (idx < ZOOM_LEVELS.length - 1) {
                 _zoomLevel = ZOOM_LEVELS[idx + 1];
@@ -4607,7 +4612,8 @@
                 _applyZoom(container, imgEl, cx, cy);
               }
               _pinchStartDist = dist;
-            } else if (scale < 0.7) {
+            } else if (ratio < 0.75) {
+              // Zoom out one step
               const idx = ZOOM_LEVELS.indexOf(_zoomLevel);
               if (idx > 0) {
                 _zoomLevel = ZOOM_LEVELS[idx - 1];
@@ -4615,33 +4621,64 @@
                 const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
                 _applyZoom(container, imgEl, cx, cy);
               } else {
-                // Already at 1x, reset fully
                 _resetZoom();
               }
               _pinchStartDist = dist;
             }
-            // Cancel any pending tap on pinch
-            _lastTapTime = 0;
             return;
           }
-          if (!_touchPanning || _zoomLevel <= 1) return;
-          e.preventDefault();
-          const curX = e.touches[0].clientX;
-          const curY = e.touches[0].clientY;
-          container.scrollLeft -= (curX - _lastTouchX) * PAN_DAMPING;
-          container.scrollTop -= (curY - _lastTouchY) * PAN_DAMPING;
-          _lastTouchX = curX;
-          _lastTouchY = curY;
-          // Cancel tap detection if finger moved significantly
-          if (Math.abs(curX - _lastTouchX) > 10 || Math.abs(curY - _lastTouchY) > 10) {
-            _lastTapTime = 0;
+
+          // Single finger pan when zoomed
+          if (e.touches.length === 1 && _touchPanning && _zoomLevel > 1) {
+            e.preventDefault();
+            const dx = e.touches[0].clientX - _touchStartX;
+            const dy = e.touches[0].clientY - _touchStartY;
+
+            // Only start moving after a small threshold
+            if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+              _touchMoved = true;
+            }
+
+            if (_touchMoved) {
+              container.scrollLeft -= (e.touches[0].clientX - _touchStartX) * PAN_DAMPING;
+              container.scrollTop -= (e.touches[0].clientY - _touchStartY) * PAN_DAMPING;
+            }
+            _touchStartX = e.touches[0].clientX;
+            _touchStartY = e.touches[0].clientY;
           }
         }, { passive: false });
 
         container.addEventListener('touchend', function (e) {
-          _touchPanning = false;
-          _pinchStartDist = 0;
-          container.classList.remove('zoomed-dragging');
+          // Double-tap detection (only if finger didn't move)
+          if (!_touchMoved && e.touches.length === 0) {
+            const now = Date.now();
+            const tapDist = Math.hypot(
+              _touchStartX - _lastTapX, _touchStartY - _lastTapY
+            );
+            if (now - _lastTapTime < 350 && tapDist < 40) {
+              // Double tap detected!
+              e.preventDefault();
+              if (_zoomLevel > 1) {
+                _resetZoom();
+              } else {
+                _zoomLevel = 2;
+                _applyZoom(container, imgEl, _touchStartX, _touchStartY);
+              }
+              _lastTapTime = 0;
+              _lastTapX = 0;
+              _lastTapY = 0;
+            } else {
+              _lastTapTime = now;
+              _lastTapX = _touchStartX;
+              _lastTapY = _touchStartY;
+            }
+          }
+          _cleanupTouchState();
+        });
+
+        // Prevent stuck states
+        container.addEventListener('touchcancel', function () {
+          _cleanupTouchState();
         });
 
       } else {
