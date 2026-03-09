@@ -1969,28 +1969,20 @@
 
       .modal-actions {
         position: static !important;
-        display: grid !important;
-        grid-template-columns: 1fr 1fr;
+        display: flex !important;
+        flex-wrap: wrap;
         gap: 0;
         flex-shrink: 0;
         padding: 0;
         margin-top: 0;
       }
 
-      /* Close button spans full width at bottom */
-      #modalCloseBtn {
-        grid-column: 1 / -1;
-        border-radius: 0 !important;
-        padding: 14px !important;
-        font-size: 13px !important;
-        background: var(--surface2) !important;
-        color: var(--text-sub) !important;
-      }
-
       .modal-btn {
         border-radius: 0 !important;
-        padding: 18px 4px !important;
-        font-size: 15px !important;
+        padding: 14px 4px !important;
+        font-size: 14px !important;
+        flex: 1;
+        min-width: 0;
       }
 
       /* Swipe hint */
@@ -2049,12 +2041,12 @@
       flex-direction: column;
       align-items: center;
       gap: 3px;
-      padding: 8px 16px;
+      padding: 6px 6px;
       border-radius: 12px;
       background: none;
       border: none;
       color: var(--text-sub);
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 600;
       cursor: pointer;
       font-family: inherit;
@@ -2093,14 +2085,18 @@
     .bn-complete {
       background: var(--coral);
       color: white;
-      border-radius: 14px;
-      padding: 10px 20px;
-      font-size: 13px;
+      border-radius: 12px;
+      padding: 8px 12px;
+      font-size: 11px;
       font-weight: 700;
       border: none;
       cursor: pointer;
       font-family: inherit;
-      flex: 1.5;
+      flex: 1.2;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       transition: opacity 0.15s;
     }
 

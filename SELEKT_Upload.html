@@ -958,15 +958,21 @@
             }
 
             .topbar {
-                padding: 0 12px;
-                gap: 8px;
+                padding: 0 10px;
+                gap: 6px;
             }
 
             .topbar-title {
-                font-size: 12px;
+                font-size: 11px;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
+                min-width: 0;
+                flex: 1;
+            }
+
+            .topbar-divider {
+                display: none;
             }
 
             .logo {
@@ -977,17 +983,25 @@
             .steps {
                 padding: 0 8px;
                 gap: 0;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                flex-wrap: nowrap;
             }
 
             .step-label {
-                font-size: 10px;
+                font-size: 9px;
                 white-space: nowrap;
             }
 
             .step-num {
-                width: 24px;
-                height: 24px;
-                font-size: 12px;
+                width: 22px;
+                height: 22px;
+                font-size: 11px;
+            }
+
+            .step-line {
+                min-width: 20px;
+                flex: 1;
             }
 
             .upload-zone {
@@ -1035,6 +1049,20 @@
 
             button {
                 white-space: nowrap;
+            }
+
+            /* Action bar mobile layout */
+            .action-bar {
+                flex-wrap: wrap;
+                gap: 8px !important;
+            }
+
+            .action-bar .btn-primary,
+            .action-bar .btn-secondary {
+                font-size: 12px !important;
+                padding: 12px 16px !important;
+                flex: 1;
+                min-width: 0;
             }
 
             /* Group cards spacing */
@@ -1108,7 +1136,7 @@
                 <div class="upload-title" data-i18n="dropTitle">写真をドラッグ＆ドロップ</div>
                 <div class="upload-sub">
                     <span data-i18n="dropSub">または下のボタンから選択</span><br>
-                    JPG / PNG 対応 ・ 複数ファイル一括OK
+                    <span data-i18n="formatHint">JPG / PNG 対応 ・ 複数ファイル一括OK</span>
                 </div>
                 <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
                     <button class="upload-btn"
@@ -2587,6 +2615,7 @@
                 topbarTitle: '写真アップロード & グループ設定',
                 step1: '写真を選ぶ', step2: 'グループ設定', step3: '確認 & 共有',
                 dropTitle: '写真をドラッグ＆ドロップ', dropSub: 'または下のボタンから選択',
+                formatHint: 'JPG / PNG 対応 ・ 複数ファイル一括OK',
                 selectFiles: 'ファイルを選択', selectFolder: 'フォルダを選択',
                 photosSelected: '枚の写真を選択中', clearAll: 'すべて削除',
                 nextStep: '次へ進む →', aiGrouping: 'AIで簡易グループ分け',
@@ -2624,6 +2653,7 @@
                 topbarTitle: 'Photo Upload & Group Settings',
                 step1: 'Select Photos', step2: 'Group Settings', step3: 'Confirm & Share',
                 dropTitle: 'Drag & Drop Photos', dropSub: 'Or select using the buttons below',
+                formatHint: 'JPG / PNG supported · Multiple files OK',
                 selectFiles: 'Select Files', selectFolder: 'Select Folder',
                 photosSelected: 'photos selected', clearAll: 'Clear All',
                 nextStep: 'Next →', aiGrouping: 'AI Auto-Grouping',
@@ -2661,6 +2691,7 @@
                 topbarTitle: '照片上传 & 分组设置',
                 step1: '选择照片', step2: '分组设置', step3: '确认 & 分享',
                 dropTitle: '拖放照片', dropSub: '或点击下方按钮选择',
+                formatHint: 'JPG / PNG 支持 · 支持多文件',
                 selectFiles: '选择文件', selectFolder: '选择文件夹',
                 photosSelected: '张照片已选择', clearAll: '全部清除',
                 nextStep: '下一步 →', aiGrouping: 'AI自动分组',
