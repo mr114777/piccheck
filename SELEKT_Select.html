@@ -1985,18 +1985,24 @@
 
       .modal-actions {
         position: fixed !important;
-        bottom: 0;
-        left: 0;
-        right: 0;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
         display: flex !important;
-        flex-wrap: nowrap;
-        gap: 4px;
-        flex-shrink: 0;
-        padding: 8px;
-        margin-top: 0;
-        background: var(--surface);
-        border-top: 1px solid var(--border);
-        z-index: 1000;
+        flex-wrap: nowrap !important;
+        gap: 6px !important;
+        flex-shrink: 0 !important;
+        padding: 10px 12px !important;
+        margin-top: 0 !important;
+        background: rgba(19, 22, 30, 0.95) !important;
+        border-top: 1px solid var(--border) !important;
+        z-index: 10000 !important;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+
+      .modal-actions .modal-close {
+        display: none !important;
       }
 
       .modal-btn {
@@ -2008,7 +2014,7 @@
       }
 
       .modal-photo {
-        padding-bottom: 70px !important;
+        padding-bottom: 76px !important;
       }
 
       /* Swipe hint */
@@ -2775,14 +2781,22 @@
           <span class="modal-group-tag" id="modalGroupTag"></span>
         </div>
         <div class="modal-actions" style="padding:0;flex-shrink:0">
-          <button class="modal-btn" id="modalOkBtn" style="background:var(--green);color:white"
-            onclick="modalAction('ok')">✓ OK</button>
-          <button class="modal-btn" id="modalNearokBtn" style="background:var(--yellow);color:#111"
-            onclick="modalAction('nearok')">△ 保留</button>
-          <button class="modal-btn" id="modalNgBtn" style="background:var(--coral);color:white"
-            onclick="modalAction('ng')">✕ NG</button>
+          <button class="modal-btn" id="modalOkBtn"
+            style="background:linear-gradient(135deg, #43e97b, #38b2ac);color:white" onclick="modalAction('ok')">✓
+            OK</button>
+          <button class="modal-btn" id="modalNearokBtn"
+            style="background:linear-gradient(135deg, #f6d365, #fda085);color:#111" onclick="modalAction('nearok')">△
+            保留</button>
+          <button class="modal-btn" id="modalNgBtn"
+            style="background:linear-gradient(135deg, #ff6b6b, #ee5a24);color:white" onclick="modalAction('ng')">✕
+            NG</button>
           <button class="modal-btn" id="modalDlBtn" style="background:var(--surface3);color:var(--text)"
-            onclick="downloadCurrentPhoto()">💾</button>
+            onclick="downloadCurrentPhoto()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg></button>
           <button class="modal-close" onclick="closeModal()">✕</button>
         </div>
       </div>
