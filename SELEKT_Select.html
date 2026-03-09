@@ -1383,6 +1383,45 @@
       background: var(--surface);
     }
 
+    .modal-shortcut-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 5px 12px;
+      background: rgba(0, 0, 0, 0.25);
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+
+    .modal-shortcut-bar .sc-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.45);
+      white-space: nowrap;
+    }
+
+    .modal-shortcut-bar kbd {
+      display: inline-block;
+      padding: 1px 5px;
+      font-size: 10px;
+      font-family: 'Space Mono', monospace;
+      color: rgba(255, 255, 255, 0.7);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 600px) {
+      .modal-shortcut-bar {
+        display: none;
+      }
+    }
+
     .modal-photo::-webkit-scrollbar {
       width: 4px;
     }
@@ -2726,6 +2765,13 @@
         <span style="display:none"></span>
         <input id="modalComment" placeholder="コメント..." oninput="saveComment()"
           style="flex:1;background:var(--surface3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:inherit;font-size:11px;padding:5px 8px;outline:none;min-width:0">
+      </div>
+      <div class="modal-shortcut-bar" id="modalShortcutBar">
+        <span class="sc-item"><kbd>←</kbd><kbd>→</kbd> 前後の写真</span>
+        <span class="sc-item"><kbd>O</kbd> OK</span>
+        <span class="sc-item"><kbd>H</kbd> 保留</span>
+        <span class="sc-item"><kbd>N</kbd> NG</span>
+        <span class="sc-item"><kbd>Esc</kbd> 閉じる</span>
       </div>
     </div>
   </div>
@@ -5242,6 +5288,8 @@
         groupPrefix: 'グループ',
         mobileBsTitle: '選択済み・NG 一覧',
         mobileDlTitle: '写真ダウンロード',
+        scNav: '前後の写真',
+        scClose: '閉じる',
       },
       en: {
         title: 'SELEKT \u2014 Photo Selection',
@@ -5331,6 +5379,8 @@
         groupPrefix: 'Group',
         mobileBsTitle: 'Selected & NG List',
         mobileDlTitle: 'Download Photos',
+        scNav: 'Navigate',
+        scClose: 'Close',
       },
       zh: {
         title: 'SELEKT \u2014 \u7167\u7247\u7b5b\u9009',
@@ -5420,6 +5470,8 @@
         groupPrefix: '分组',
         mobileBsTitle: '已选与NG列表',
         mobileDlTitle: '照片下载',
+        scNav: '前后切换',
+        scClose: '关闭',
       }
     };
 
@@ -5552,6 +5604,17 @@
       if (qn) qn.textContent = t('qualityNotice');
       const fb = document.getElementById('modalFullsizeBtn');
       if (fb) fb.textContent = t('fullQuality');
+
+      // Shortcut bar in modal
+      const scBar = document.getElementById('modalShortcutBar');
+      if (scBar) {
+        scBar.innerHTML = `
+          <span class="sc-item"><kbd>←</kbd><kbd>→</kbd> ${t('scNav')}</span>
+          <span class="sc-item"><kbd>O</kbd> OK</span>
+          <span class="sc-item"><kbd>H</kbd> ${t('modalHold').replace(/[△✕✓]\s*/, '')}</span>
+          <span class="sc-item"><kbd>N</kbd> NG</span>
+          <span class="sc-item"><kbd>Esc</kbd> ${t('scClose')}</span>`;
+      }
 
       // Confirm modal
       const ct = document.querySelector('.confirm-title');
