@@ -4296,22 +4296,21 @@
     }
 
     let _zoomScale = 1;
+    let _panX = 0, _panY = 0; // translate offsets in px
     const MIN_ZOOM = 1;
     const MAX_ZOOM = 5;
 
     function _resetZoom() {
       _zoomScale = 1;
+      _panX = 0;
+      _panY = 0;
       const container = document.getElementById('modalImg');
       container.classList.remove('zoomed', 'zoomed-dragging');
       const imgEl = container.querySelector('img');
       if (imgEl) {
-        imgEl.style.width = '100%';
-        imgEl.style.height = '100%';
-        imgEl.style.maxWidth = '';
-        imgEl.style.maxHeight = '';
+        imgEl.style.transform = '';
+        imgEl.style.transformOrigin = '';
       }
-      container.scrollTop = 0;
-      container.scrollLeft = 0;
       _updateZoomIndicator();
     }
 
@@ -4328,39 +4327,65 @@
       badge.style.display = _zoomScale > 1.05 ? 'block' : 'none';
     }
 
+    // Lightweight: just updates CSS transform (called every touchmove frame)
+    function _renderZoom(imgEl) {
+      if (_zoomScale <= 1.02) {
+        imgEl.style.transform = '';
+        imgEl.style.transformOrigin = '';
+      } else {
+        imgEl.style.transformOrigin = '0 0';
+        imgEl.style.transform = `scale(${_zoomScale}) translate(${_panX}px, ${_panY}px)`;
+      }
+    }
+
     function _applyScale(container, imgEl, centerX, centerY) {
       if (_zoomScale <= 1.02) {
         _zoomScale = 1;
+        _panX = 0;
+        _panY = 0;
         container.classList.remove('zoomed');
-        imgEl.style.width = '100%';
-        imgEl.style.height = '100%';
-        imgEl.style.maxWidth = '';
-        imgEl.style.maxHeight = '';
-        container.scrollTop = 0;
-        container.scrollLeft = 0;
+        imgEl.style.transform = '';
+        imgEl.style.transformOrigin = '';
       } else {
         container.classList.add('zoomed');
-        const natW = imgEl.naturalWidth || 800;
-        const natH = imgEl.naturalHeight || 600;
-        const rect = container.getBoundingClientRect();
-        const fitScale = Math.min(rect.width / natW, rect.height / natH);
-        const w = natW * fitScale * _zoomScale;
-        const h = natH * fitScale * _zoomScale;
-        imgEl.style.width = w + 'px';
-        imgEl.style.height = h + 'px';
-        imgEl.style.maxWidth = 'none';
-        imgEl.style.maxHeight = 'none';
-
-        requestAnimationFrame(() => {
-          if (centerX !== undefined && centerY !== undefined) {
-            const mx = (centerX - rect.left) / rect.width;
-            const my = (centerY - rect.top) / rect.height;
-            container.scrollLeft = (w - rect.width) * mx;
-            container.scrollTop = (h - rect.height) * my;
-          }
-        });
+        // Center the zoom on the given point
+        if (centerX !== undefined && centerY !== undefined) {
+          const rect = imgEl.getBoundingClientRect();
+          // Where in the image was clicked (0-1)
+          const mx = (centerX - rect.left) / rect.width;
+          const my = (centerY - rect.top) / rect.height;
+          // Pan so that point stays centered in viewport
+          const containerRect = container.getBoundingClientRect();
+          const imgW = imgEl.offsetWidth;
+          const imgH = imgEl.offsetHeight;
+          _panX = -(mx * imgW * _zoomScale - containerRect.width / 2) / _zoomScale;
+          _panY = -(my * imgH * _zoomScale - containerRect.height / 2) / _zoomScale;
+          _clampPan(container, imgEl);
+        }
+        _renderZoom(imgEl);
       }
       _updateZoomIndicator();
+    }
+
+    function _clampPan(container, imgEl) {
+      const containerRect = container.getBoundingClientRect();
+      const imgW = imgEl.offsetWidth;
+      const imgH = imgEl.offsetHeight;
+      const scaledW = imgW * _zoomScale;
+      const scaledH = imgH * _zoomScale;
+      // Max pan: image edge shouldn't go past container edge
+      const minPanX = -(scaledW - containerRect.width) / _zoomScale;
+      const minPanY = -(scaledH - containerRect.height) / _zoomScale;
+      if (scaledW <= containerRect.width) {
+        _panX = -(scaledW - containerRect.width) / (2 * _zoomScale);
+      } else {
+        _panX = Math.min(0, Math.max(minPanX, _panX));
+      }
+      if (scaledH <= containerRect.height) {
+        _panY = -(scaledH - containerRect.height) / (2 * _zoomScale);
+      } else {
+        _panY = Math.min(0, Math.max(minPanY, _panY));
+      }
     }
 
     // Keep for backward compat with desktop click zoom
@@ -4524,8 +4549,6 @@
           _didDrag = false;
           _dragStartX = e.clientX;
           _dragStartY = e.clientY;
-          _scrollStartX = container.scrollLeft;
-          _scrollStartY = container.scrollTop;
           container.classList.add('zoomed-dragging');
           e.preventDefault();
         });
@@ -4533,8 +4556,14 @@
         container.addEventListener('mousemove', function (e) {
           if (!_isDragging || _zoomScale <= 1) return;
           _didDrag = true;
-          container.scrollLeft = _scrollStartX - (e.clientX - _dragStartX);
-          container.scrollTop = _scrollStartY - (e.clientY - _dragStartY);
+          const dx = e.clientX - _dragStartX;
+          const dy = e.clientY - _dragStartY;
+          _panX += dx / _zoomScale;
+          _panY += dy / _zoomScale;
+          _clampPan(container, imgEl);
+          _renderZoom(imgEl);
+          _dragStartX = e.clientX;
+          _dragStartY = e.clientY;
         });
 
         container.addEventListener('mouseup', function () {
@@ -4604,13 +4633,16 @@
             const newScale = _pinchStartScale * (dist / _pinchStartDist);
             _zoomScale = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newScale));
 
-            const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-            const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-            _applyScale(container, imgEl, cx, cy);
+            if (_zoomScale > 1.02) {
+              container.classList.add('zoomed');
+            }
+            _clampPan(container, imgEl);
+            _renderZoom(imgEl);
+            _updateZoomIndicator();
             return;
           }
 
-          // Single finger pan when zoomed
+          // Single finger pan when zoomed (transform-based)
           if (e.touches.length === 1 && _touchPanning && _zoomScale > 1.05) {
             e.preventDefault();
             const dx = e.touches[0].clientX - _touchStartX;
@@ -4621,8 +4653,10 @@
             }
 
             if (_touchMoved) {
-              container.scrollLeft -= dx * PAN_DAMPING;
-              container.scrollTop -= dy * PAN_DAMPING;
+              _panX += dx / _zoomScale;
+              _panY += dy / _zoomScale;
+              _clampPan(container, imgEl);
+              _renderZoom(imgEl);
             }
             _touchStartX = e.touches[0].clientX;
             _touchStartY = e.touches[0].clientY;
