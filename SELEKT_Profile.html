@@ -1045,7 +1045,7 @@
         .pv-hero {
             position: relative;
             width: 100%;
-            height: 320px;
+            height: 360px;
             margin-top: 48px;
             overflow: hidden;
             background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 60%, #1a0520));
@@ -1074,15 +1074,21 @@
         .pv-card {
             position: relative;
             z-index: 2;
-            background: var(--bg);
+            background: var(--surface);
             border-radius: 40px 40px 0 0;
             margin-top: -60px;
             padding: 0 28px 40px;
-            min-height: calc(100vh - 320px + 60px);
-            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.1);
+            min-height: calc(100vh - 360px + 60px);
+            box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.4);
             max-width: 860px;
             margin-left: auto;
             margin-right: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        body[data-mode="light"] .pv-card {
+            box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.08);
+            border-top: 1px solid rgba(255, 255, 255, 0.5);
         }
 
         /* ── Avatar (Overlaps Card Border) ── */
@@ -1096,14 +1102,14 @@
         }
 
         .pv-avatar-outer {
-            width: 112px;
-            height: 112px;
+            width: 140px;
+            height: 140px;
             border-radius: 50%;
-            background: var(--bg);
+            background: var(--surface);
             /* Matches card bg to create cutout effect */
-            padding: 6px;
+            padding: 8px;
             margin-bottom: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
         }
 
         .pv-avatar {
