@@ -2383,6 +2383,16 @@
           </svg>プロフィール</a>
       </div>
     </div>
+    <a href="SELEKT_Profile.html" title="プロフィール" id="topbarAvatar"
+      style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:var(--surface3);border:2px solid var(--border2);color:var(--text-sub);transition:all 0.2s;text-decoration:none;overflow:hidden;flex-shrink:0"
+      onmouseover="this.style.borderColor='var(--text-sub)'" onmouseout="this.style.borderColor='var(--border2)'">
+      <svg class="avatar-fallback" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+        <circle cx="12" cy="7" r="4" />
+      </svg>
+    </a>
+    <script>(function () { var p = localStorage.getItem('selekt_avatar_photo'); if (p) { var a = document.getElementById('topbarAvatar'); a.innerHTML = '<img src="' + p + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'; } })()</script>
     <div class="topbar-divider"></div>
     <div class="session-name" style="display:flex;align-items:center;gap:12px">
       <strong id="sessionTitle" onclick="editSessionTitle()"
@@ -2471,16 +2481,7 @@
         <option value="en">EN English</option>
         <option value="zh">ZH 中文</option>
       </select>
-      <a href="SELEKT_Profile.html" title="プロフィール" id="topbarAvatar"
-        style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:var(--surface3);border:2px solid var(--border2);color:var(--text-sub);transition:all 0.2s;text-decoration:none;overflow:hidden"
-        onmouseover="this.style.borderColor='var(--text-sub)'" onmouseout="this.style.borderColor='var(--border2)'">
-        <svg class="avatar-fallback" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-          <circle cx="12" cy="7" r="4" />
-        </svg>
-      </a>
-      <script>(function () { var p = localStorage.getItem('selekt_avatar_photo'); if (p) { var a = document.getElementById('topbarAvatar'); a.innerHTML = '<img src="' + p + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'; } })()</script>
+
     </div>
   </div>
   <style>
