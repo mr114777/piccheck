@@ -831,73 +831,78 @@
             border-radius: 2px;
         }
 
-        /* ── Cropper Modal Specifics ── */
-        #cropModal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(10px);
-            z-index: 3000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        #cropModal.open {
-            display: flex;
-            animation: fadeIn 0.3s ease;
-        }
-
-        /* ── Cropper Modal ── */
-        .crop-container {
-            width: 100%;
-            height: 300px;
-            position: relative;
-            background: #111;
-            border-radius: 12px;
-            overflow: hidden;
-            margin: 20px 0;
-            touch-action: none;
-            /* Prevent scrolling while dragging */
-        }
-
-        #cropCanvas {
-            position: absolute;
-            transform-origin: center;
+        /* ── Avatar Adjust Mode (Inline) ── */
+        .avatar-large.adjusting {
             cursor: grab;
+            box-shadow: 0 0 0 4px var(--accent), 0 0 20px rgba(var(--accent-rgb, 74, 158, 224), 0.4);
+            animation: adjustPulse 1.5s infinite;
         }
 
-        #cropCanvas:active {
+        .avatar-large.adjusting:active {
             cursor: grabbing;
         }
 
-        .crop-mask {
+        @keyframes adjustPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 4px var(--accent), 0 0 20px rgba(74, 158, 224, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 0 0 6px var(--accent), 0 0 30px rgba(74, 158, 224, 0.5);
+            }
+        }
+
+        .avatar-adjust-hint {
             position: absolute;
-            inset: 0;
-            pointer-events: none;
-            /* Creates a dark overlay with a transparent hole in the middle */
-            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6);
-            border-radius: 50%;
-            width: 250px;
-            height: 250px;
+            bottom: -36px;
             left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            border: 2px solid rgba(255, 255, 255, 0.8);
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 5px 14px;
+            border-radius: 20px;
+            white-space: nowrap;
+            z-index: 10;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+            display: none;
         }
 
-        .crop-controls {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 0 16px;
+        .avatar-large.adjusting .avatar-adjust-hint {
+            display: block;
+            animation: fadeIn 0.3s ease;
         }
 
-        .crop-controls span {
-            font-size: 20px;
-            font-weight: 500;
-            color: var(--text-sub);
+        .avatar-confirm-btn {
+            position: absolute;
+            bottom: -44px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 8px 24px;
+            border-radius: 24px;
+            cursor: pointer;
+            z-index: 10;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            display: none;
+            font-family: inherit;
+            transition: transform 0.2s;
+        }
+
+        .avatar-confirm-btn:hover {
+            transform: translateX(-50%) scale(1.06);
+        }
+
+        .avatar-large.adjusting .avatar-confirm-btn {
+            display: block;
+            animation: fadeIn 0.3s ease;
         }
 
         .btn-outline {
@@ -1582,7 +1587,7 @@
 
     <!-- AVATAR + INFO -->
     <div class="avatar-area">
-        <div class="avatar-large" id="avatarLarge" onclick="document.getElementById('avatarInput').click()">
+        <div class="avatar-large" id="avatarLarge" onclick="onAvatarClick()">
             <div class="avatar-ring"></div>
             <span style="position:relative;z-index:1" id="avatarInitial">?</span>
             <div class="avatar-edit-hint">
@@ -1591,6 +1596,8 @@
                     <circle cx="12" cy="13" r="4" />
                 </svg>
             </div>
+            <button class="avatar-confirm-btn" id="avatarConfirmBtn"
+                onclick="event.stopPropagation(); confirmAvatarPosition()">✓ 完了</button>
         </div>
         <div class="profile-name" id="profileName">---</div>
         <div class="profile-id" id="profileId">@---</div>
@@ -2044,122 +2051,97 @@
             reader.readAsDataURL(file); e.target.value = '';
         }
 
-        // ===== AVATAR PHOTO CROPPER =====
-        let cropImg = null;
-        let cropX = 0, cropY = 0;
-        let cropScale = 1;
-        let isDragging = false;
-        let startX, startY;
-        const cropCanvas = document.getElementById('cropCanvas');
-        const cropCtx = cropCanvas.getContext('2d');
-        const cropModal = document.getElementById('cropModal');
-        const cropZoom = document.getElementById('cropZoom');
+        // ===== AVATAR PHOTO — INLINE DRAG-TO-REPOSITION =====
+        let avatarAdjusting = false;
+        let avatarDragging = false;
+        let avDragStartX, avDragStartY;
+        let avOffsetX = 50, avOffsetY = 50; // object-position percentages (50,50 = centered)
+        const avatarEl = document.getElementById('avatarLarge');
 
-        function drawCrop() {
-            if (!cropImg) return;
-            const targetSize = 300; // Internal resolution of cropped image
-            // Canvas display size in UI:
-            const displaySize = 250;
-            cropCanvas.width = displaySize;
-            cropCanvas.height = displaySize;
-
-            // clear background
-            cropCtx.clearRect(0, 0, displaySize, displaySize);
-
-            // Calc dimensions based on scale
-            const w = cropImg.width * cropScale * (displaySize / targetSize);
-            const h = cropImg.height * cropScale * (displaySize / targetSize);
-
-            // Draw image centered at current X/Y offset
-            cropCtx.drawImage(cropImg, (displaySize / 2) - (w / 2) + cropX, (displaySize / 2) - (h / 2) + cropY, w, h);
+        function onAvatarClick() {
+            if (avatarAdjusting) return; // ignore clicks during adjustment
+            document.getElementById('avatarInput').click();
         }
-
-        cropZoom.addEventListener('input', (e) => {
-            cropScale = parseFloat(e.target.value);
-            drawCrop();
-        });
-
-        // Mouse/Touch Drag Events
-        function onDragStart(e) {
-            isDragging = true;
-            startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-            startY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-        }
-
-        function onDragMove(e) {
-            if (!isDragging) return;
-            e.preventDefault(); // prevent scrolling
-            const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-            const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-            cropX += (clientX - startX);
-            cropY += (clientY - startY);
-            startX = clientX;
-            startY = clientY;
-            drawCrop();
-        }
-
-        function onDragEnd() { isDragging = false; }
-
-        cropCanvas.addEventListener('mousedown', onDragStart);
-        window.addEventListener('mousemove', onDragMove);
-        window.addEventListener('mouseup', onDragEnd);
-        cropCanvas.addEventListener('touchstart', onDragStart, { passive: false });
-        window.addEventListener('touchmove', onDragMove, { passive: false });
-        window.addEventListener('touchend', onDragEnd);
 
         function handleAvatarUpload(e) {
             const file = e.target.files[0]; if (!file) return;
             const reader = new FileReader();
             reader.onload = ev => {
-                cropImg = new Image();
-                cropImg.onload = () => {
-                    // Reset cropper state
-                    cropX = 0; cropY = 0;
-                    // Auto-calculate initial scale so the smallest dimension fills the 300px circle
-                    const minDim = Math.min(cropImg.width, cropImg.height);
-                    cropScale = 300 / minDim;
-
-                    // Update slider (min is filling, max is 3x Zoom)
-                    cropZoom.min = cropScale;
-                    cropZoom.max = cropScale * 3;
-                    cropZoom.value = cropScale;
-
-                    cropModal.classList.add('open');
-                    drawCrop();
-                    document.body.style.overflow = 'hidden';
+                const img = new Image();
+                img.onload = () => {
+                    // Resize for storage but keep good quality
+                    const canvas = document.createElement('canvas');
+                    const maxSize = 800;
+                    let w = img.width, h = img.height;
+                    if (w > maxSize || h > maxSize) {
+                        if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+                        else { w = Math.round(w * maxSize / h); h = maxSize; }
+                    }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    const data = canvas.toDataURL('image/jpeg', 0.92);
+                    localStorage.setItem('selekt_avatar_photo', data);
+                    // Reset position to center
+                    avOffsetX = 50; avOffsetY = 50;
+                    localStorage.setItem('selekt_avatar_pos', JSON.stringify({ x: 50, y: 50 }));
+                    displayAvatarPhoto(data);
+                    // Enter adjust mode
+                    enterAvatarAdjust();
                 };
-                cropImg.src = ev.target.result;
+                img.src = ev.target.result;
             };
             reader.readAsDataURL(file); e.target.value = '';
         }
 
-        function closeCropModal() {
-            cropModal.classList.remove('open');
-            document.body.style.overflow = '';
-            cropImg = null;
+        function enterAvatarAdjust() {
+            avatarAdjusting = true;
+            avatarEl.classList.add('adjusting');
+            avatarEl.style.touchAction = 'none';
         }
 
-        function applyCrop() {
-            if (!cropImg) return;
-            // Native render size
-            const size = 300;
-            const finalCanvas = document.createElement('canvas');
-            finalCanvas.width = size;
-            finalCanvas.height = size;
-            const ctx = finalCanvas.getContext('2d');
+        function confirmAvatarPosition() {
+            avatarAdjusting = false;
+            avatarEl.classList.remove('adjusting');
+            avatarEl.style.touchAction = '';
+            localStorage.setItem('selekt_avatar_pos', JSON.stringify({ x: avOffsetX, y: avOffsetY }));
+        }
 
-            // Draw matching the display ratios
-            const w = cropImg.width * cropScale;
-            const h = cropImg.height * cropScale;
-            // The display size ratio vs target size 
-            const ratio = size / 250; // because display canvas is 250x250
+        // Drag events on the avatar itself
+        avatarEl.addEventListener('mousedown', avDragStart);
+        avatarEl.addEventListener('touchstart', avDragStart, { passive: false });
+        window.addEventListener('mousemove', avDragMove);
+        window.addEventListener('touchmove', avDragMove, { passive: false });
+        window.addEventListener('mouseup', avDragEnd);
+        window.addEventListener('touchend', avDragEnd);
 
-            ctx.drawImage(cropImg, (size / 2) - (w / 2) + (cropX * ratio), (size / 2) - (h / 2) + (cropY * ratio), w, h);
+        function avDragStart(e) {
+            if (!avatarAdjusting) return;
+            e.preventDefault();
+            avatarDragging = true;
+            const pt = e.touches ? e.touches[0] : e;
+            avDragStartX = pt.clientX;
+            avDragStartY = pt.clientY;
+        }
 
-            const data = finalCanvas.toDataURL('image/jpeg', 0.9);
-            localStorage.setItem('selekt_avatar_photo', data);
-            displayAvatarPhoto(data);
-            closeCropModal();
+        function avDragMove(e) {
+            if (!avatarDragging) return;
+            e.preventDefault();
+            const pt = e.touches ? e.touches[0] : e;
+            const dx = pt.clientX - avDragStartX;
+            const dy = pt.clientY - avDragStartY;
+            avDragStartX = pt.clientX;
+            avDragStartY = pt.clientY;
+            // Move object-position (invert direction: dragging right should show more of the left side)
+            avOffsetX = Math.max(0, Math.min(100, avOffsetX - dx * 0.5));
+            avOffsetY = Math.max(0, Math.min(100, avOffsetY - dy * 0.5));
+            applyAvatarPosition();
+        }
+
+        function avDragEnd() { avatarDragging = false; }
+
+        function applyAvatarPosition() {
+            const imgEl = avatarEl.querySelector('img');
+            if (imgEl) imgEl.style.objectPosition = `${avOffsetX}% ${avOffsetY}%`;
         }
 
         function displayAvatarPhoto(src) {
@@ -2168,6 +2150,12 @@
             if (!imgEl) { imgEl = document.createElement('img'); el.appendChild(imgEl); }
             imgEl.src = src;
             document.getElementById('avatarInitial').style.display = 'none';
+            // Restore saved position
+            try {
+                const pos = JSON.parse(localStorage.getItem('selekt_avatar_pos'));
+                if (pos) { avOffsetX = pos.x; avOffsetY = pos.y; }
+            } catch (e) { }
+            applyAvatarPosition();
         }
 
         // ===== UI UPDATE =====
