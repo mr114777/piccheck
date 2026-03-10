@@ -1095,16 +1095,84 @@
             <button class="lang-btn" onclick="setLang('zh')" id="langZh"
                 style="background:none;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);padding:2px 6px;border-radius:4px;font-size:10px;cursor:pointer">中</button>
         </div>
-        <a href="SELEKT_Profile.html" title="プロフィール"
-            style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:rgba(74,158,224,0.15);color:var(--accent,#4A9EE0);text-decoration:none;margin-left:8px;transition:background 0.2s"
-            onmouseover="this.style.background='rgba(74,158,224,0.3)'"
-            onmouseout="this.style.background='rgba(74,158,224,0.15)'">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-            </svg>
-        </a>
+        <!-- Hamburger Menu -->
+        <div style="position:relative;margin-left:4px">
+            <button id="hamburgerBtn" onclick="document.getElementById('selektNavMenu').classList.toggle('open')"
+                style="background:none;border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:5px 7px;cursor:pointer;display:flex;align-items:center;color:rgba(255,255,255,0.6);transition:border-color 0.2s"
+                onmouseover="this.style.borderColor='rgba(255,255,255,0.3)'"
+                onmouseout="this.style.borderColor='rgba(255,255,255,0.12)'">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round">
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <line x1="3" y1="12" x2="21" y2="12" />
+                    <line x1="3" y1="18" x2="21" y2="18" />
+                </svg>
+            </button>
+            <div id="selektNavMenu"
+                style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:#1A1E28;border:1px solid #333849;border-radius:10px;padding:6px;min-width:180px;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,0.4)">
+                <a href="SELEKT_Dashboard.html"
+                    style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#7B849A;font-size:12px;font-weight:500;transition:all 0.15s"
+                    onmouseover="this.style.background='#222736';this.style.color='#E8EAF0'"
+                    onmouseout="this.style.background='';this.style.color='#7B849A'">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7" />
+                        <rect x="14" y="3" width="7" height="7" />
+                        <rect x="14" y="14" width="7" height="7" />
+                        <rect x="3" y="14" width="7" height="7" />
+                    </svg>
+                    ダッシュボード</a>
+                <a href="SELEKT_Upload.html"
+                    style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#4A9EE0;font-size:12px;font-weight:600;background:rgba(74,158,224,0.08)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                    アップロード</a>
+                <a href="SELEKT_Pricing.html"
+                    style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#7B849A;font-size:12px;font-weight:500;transition:all 0.15s"
+                    onmouseover="this.style.background='#222736';this.style.color='#E8EAF0'"
+                    onmouseout="this.style.background='';this.style.color='#7B849A'">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                        <line x1="7" y1="7" x2="7.01" y2="7" />
+                    </svg>
+                    プラン</a>
+                <div style="height:1px;background:#2A2F3E;margin:4px 8px"></div>
+                <a href="SELEKT_Profile.html"
+                    style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#7B849A;font-size:12px;font-weight:500;transition:all 0.15s"
+                    onmouseover="this.style.background='#222736';this.style.color='#E8EAF0'"
+                    onmouseout="this.style.background='';this.style.color='#7B849A'">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    プロフィール</a>
+            </div>
+        </div>
+        <style>
+            #selektNavMenu.open {
+                display: block !important;
+                animation: menuFadeIn 0.15s ease;
+            }
+
+            @keyframes menuFadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-4px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        </style>
+        <script>document.addEventListener('click', e => { if (!e.target.closest('#hamburgerBtn') && !e.target.closest('#selektNavMenu')) document.getElementById('selektNavMenu')?.classList.remove('open'); });</script>
     </div>
 
     <!-- STEP INDICATOR -->

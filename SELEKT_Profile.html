@@ -823,6 +823,176 @@
                 grid-template-columns: repeat(3, 1fr);
             }
         }
+
+        /* ===== PREVIEW MODE ===== */
+        .preview-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 16px;
+            padding: 8px 18px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            color: var(--text-sub);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .preview-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(74, 158, 224, 0.06);
+        }
+
+        .preview-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            animation: previewFadeIn 0.2s ease;
+        }
+
+        .preview-overlay.open {
+            display: flex;
+        }
+
+        @keyframes previewFadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .preview-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            max-width: 480px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 32px 28px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+        }
+
+        .preview-close {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-sub);
+            font-size: 14px;
+            transition: all 0.15s;
+        }
+
+        .preview-close:hover {
+            color: var(--text);
+            border-color: var(--text-dim);
+        }
+
+        .preview-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #3578C4, var(--accent2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 800;
+            color: #fff;
+            font-family: 'Syne', sans-serif;
+            margin: 0 auto 14px;
+            box-shadow: 0 4px 16px rgba(74, 158, 224, 0.2);
+        }
+
+        .preview-name {
+            font-size: 22px;
+            font-weight: 700;
+            font-family: 'Syne', 'Zen Kaku Gothic New', sans-serif;
+            margin-bottom: 4px;
+        }
+
+        .preview-bio {
+            font-size: 13px;
+            color: var(--text-sub);
+            line-height: 1.6;
+            margin: 12px 0 16px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .preview-portfolio {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin: 16px 0;
+        }
+
+        .preview-portfolio img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .preview-social {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .preview-social a {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-sub);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .preview-social a:hover {
+            transform: translateY(-2px);
+        }
+
+        .preview-label {
+            display: inline-block;
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-dim);
+            margin-top: 16px;
+            margin-bottom: 4px;
+        }
     </style>
 </head>
 
@@ -832,12 +1002,7 @@
     <div class="topbar">
         <a class="logo" href="SELEKT_Dashboard.html">SE<span>LEKT</span></a>
         <div class="topbar-divider"></div>
-        <div class="nav-links">
-            <a class="nav-link" href="SELEKT_Dashboard.html" data-i18n="navDashboard">ダッシュボード</a>
-            <a class="nav-link" href="SELEKT_Upload.html" data-i18n="navUpload">アップロード</a>
-            <a class="nav-link" href="SELEKT_Pricing.html" data-i18n="navPlan">プラン</a>
-            <a class="nav-link active" href="SELEKT_Profile.html" data-i18n="navProfile">プロフィール</a>
-        </div>
+        <div style="font-size:13px;font-weight:500;color:var(--text-sub)" data-i18n="navProfile">プロフィール</div>
         <div class="topbar-right">
             <div style="display:flex;gap:4px">
                 <button class="lang-btn" onclick="setLang('ja')" id="langJa"
@@ -847,6 +1012,84 @@
                 <button class="lang-btn" onclick="setLang('zh')" id="langZh"
                     style="background:none;border:1px solid var(--border2);color:var(--text-sub);padding:2px 6px;border-radius:4px;font-size:10px;cursor:pointer">中</button>
             </div>
+            <!-- Hamburger Menu -->
+            <div style="position:relative;margin-left:4px">
+                <button id="hamburgerBtn" onclick="document.getElementById('selektNavMenu').classList.toggle('open')"
+                    style="background:none;border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:5px 7px;cursor:pointer;display:flex;align-items:center;color:rgba(255,255,255,0.6);transition:border-color 0.2s"
+                    onmouseover="this.style.borderColor='rgba(255,255,255,0.3)'"
+                    onmouseout="this.style.borderColor='rgba(255,255,255,0.12)'">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round">
+                        <line x1="3" y1="6" x2="21" y2="6" />
+                        <line x1="3" y1="12" x2="21" y2="12" />
+                        <line x1="3" y1="18" x2="21" y2="18" />
+                    </svg>
+                </button>
+                <div id="selektNavMenu"
+                    style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:#1A1E28;border:1px solid #333849;border-radius:10px;padding:6px;min-width:180px;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,0.4)">
+                    <a href="SELEKT_Dashboard.html"
+                        style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#7B849A;font-size:12px;font-weight:500;transition:all 0.15s"
+                        onmouseover="this.style.background='#222736';this.style.color='#E8EAF0'"
+                        onmouseout="this.style.background='';this.style.color='#7B849A'">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7" />
+                            <rect x="14" y="3" width="7" height="7" />
+                            <rect x="14" y="14" width="7" height="7" />
+                            <rect x="3" y="14" width="7" height="7" />
+                        </svg>
+                        ダッシュボード</a>
+                    <a href="SELEKT_Upload.html"
+                        style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#7B849A;font-size:12px;font-weight:500;transition:all 0.15s"
+                        onmouseover="this.style.background='#222736';this.style.color='#E8EAF0'"
+                        onmouseout="this.style.background='';this.style.color='#7B849A'">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                        アップロード</a>
+                    <a href="SELEKT_Pricing.html"
+                        style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#7B849A;font-size:12px;font-weight:500;transition:all 0.15s"
+                        onmouseover="this.style.background='#222736';this.style.color='#E8EAF0'"
+                        onmouseout="this.style.background='';this.style.color='#7B849A'">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                            <line x1="7" y1="7" x2="7.01" y2="7" />
+                        </svg>
+                        プラン</a>
+                    <div style="height:1px;background:#2A2F3E;margin:4px 8px"></div>
+                    <a href="SELEKT_Profile.html"
+                        style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#4A9EE0;font-size:12px;font-weight:600;background:rgba(74,158,224,0.08)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                        </svg>
+                        プロフィール</a>
+                </div>
+            </div>
+            <style>
+                #selektNavMenu.open {
+                    display: block !important;
+                    animation: menuFadeIn 0.15s ease;
+                }
+
+                @keyframes menuFadeIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-4px);
+                    }
+
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+            </style>
+            <script>document.addEventListener('click', e => { if (!e.target.closest('#hamburgerBtn') && !e.target.closest('#selektNavMenu')) document.getElementById('selektNavMenu')?.classList.remove('open'); });</script>
         </div>
     </div>
 
@@ -870,6 +1113,14 @@
     <!-- Bio Section -->
     <div class="bio-section">
         <div class="bio-text" id="bioDisplay"></div>
+        <button class="preview-btn" onclick="openPreview()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+            </svg>
+            <span data-i18n="previewProfile">外部からの見え方を確認</span>
+        </button>
     </div>
 
     <!-- Main Content -->
@@ -1071,6 +1322,20 @@
     <input type="file" id="portfolioInput" class="hidden-input" accept="image/*"
         onchange="handlePortfolioUpload(event)">
 
+    <!-- Preview Modal -->
+    <div class="preview-overlay" id="previewOverlay" onclick="if(event.target===this)closePreview()">
+        <div class="preview-card">
+            <button class="preview-close" onclick="closePreview()">✕</button>
+            <div class="preview-label" data-i18n="previewLabel">外部からの見え方</div>
+            <div class="preview-avatar" id="pvAvatar">?</div>
+            <div class="preview-name" id="pvName">---</div>
+            <div id="pvBadges" style="display:flex;justify-content:center;gap:6px;margin-top:6px"></div>
+            <div class="preview-bio" id="pvBio"></div>
+            <div class="preview-portfolio" id="pvPortfolio"></div>
+            <div class="preview-social" id="pvSocial"></div>
+        </div>
+    </div>
+
     <!-- Toast -->
     <div class="toast" id="toast"></div>
 
@@ -1102,6 +1367,8 @@
                 dangerZone: '危険ゾーン', changePassword: 'パスワードを変更', logoutBtn: 'ログアウト',
                 saved: '✓ 保存しました', passwordNotReady: 'パスワード変更は準備中です',
                 noBio: '自己紹介が未設定です',
+                previewProfile: '外部からの見え方を確認',
+                previewLabel: '外部からの見え方',
                 pageTitle: 'SELEKT — プロフィール',
             },
             en: {
@@ -1122,6 +1389,8 @@
                 dangerZone: 'Danger Zone', changePassword: 'Change Password', logoutBtn: 'Logout',
                 saved: '✓ Saved', passwordNotReady: 'Password change coming soon',
                 noBio: 'No bio set',
+                previewProfile: 'Preview as visitor',
+                previewLabel: 'Visitor view',
                 pageTitle: 'SELEKT — Profile',
             },
             zh: {
@@ -1142,6 +1411,8 @@
                 dangerZone: '危险区域', changePassword: '更改密码', logoutBtn: '退出登录',
                 saved: '✓ 已保存', passwordNotReady: '密码更改功能即将推出',
                 noBio: '未设置自我介绍',
+                previewProfile: '查看外部视图',
+                previewLabel: '外部视图',
                 pageTitle: 'SELEKT — 个人资料',
             }
         };
@@ -1382,6 +1653,56 @@
             localStorage.removeItem('selekt_user');
             window.location.href = 'SELEKT_Auth.html';
         }
+
+        // ===== PREVIEW MODE =====
+        function openPreview() {
+            if (!currentUser) return;
+            document.getElementById('pvAvatar').textContent = currentUser.displayName.charAt(0).toUpperCase();
+            document.getElementById('pvName').textContent = currentUser.displayName;
+
+            // Badges
+            const roleLabel = (ROLE_LABELS[_lang] || ROLE_LABELS.ja)[currentUser.role] || currentUser.role;
+            const planLabel = { pro: 'PRO', basic: 'BASIC' }[currentUser.plan] || 'FREE';
+            document.getElementById('pvBadges').innerHTML =
+                `<span class="badge badge-role">${roleLabel}</span><span class="badge badge-plan ${currentUser.plan || 'free'}">${planLabel}</span>`;
+
+            // Bio
+            const bio = currentUser.bio || document.getElementById('editBio').value.trim();
+            document.getElementById('pvBio').textContent = bio || pt('noBio');
+            document.getElementById('pvBio').style.fontStyle = bio ? 'normal' : 'italic';
+
+            // Portfolio
+            const pvGrid = document.getElementById('pvPortfolio');
+            pvGrid.innerHTML = '';
+            const photos = portfolioPhotos.filter(Boolean);
+            if (photos.length > 0) {
+                photos.forEach(src => { pvGrid.innerHTML += `<img src="${src}" alt="Portfolio">`; });
+                pvGrid.style.gridTemplateColumns = `repeat(${Math.min(photos.length, 5)}, 1fr)`;
+            }
+
+            // Social
+            const svgs = {
+                socialX: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>',
+                socialInstagram: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>',
+                socialYoutube: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>',
+            };
+            const pvSocial = document.getElementById('pvSocial');
+            pvSocial.innerHTML = '';
+            ['socialX', 'socialInstagram', 'socialYoutube'].forEach(key => {
+                const url = currentUser[key] || document.getElementById('edit' + key.replace('social', '')).value.trim();
+                if (url) pvSocial.innerHTML += `<a href="${url}" target="_blank" rel="noopener">${svgs[key]}</a>`;
+            });
+
+            document.getElementById('previewOverlay').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePreview() {
+            document.getElementById('previewOverlay').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closePreview(); });
 
         // ===== INIT =====
         async function init() {
