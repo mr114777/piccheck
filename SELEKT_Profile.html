@@ -111,13 +111,13 @@
         .cover-section {
             position: relative;
             width: 100%;
-            max-width: 680px;
+            max-width: 900px;
             margin: 0 auto;
         }
 
         .cover-photo {
             width: 100%;
-            height: 200px;
+            height: 260px;
             background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 60%, #000));
             border-radius: 0 0 20px 20px;
             object-fit: cover;
@@ -157,20 +157,20 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: -50px;
+            margin-top: -60px;
             position: relative;
             z-index: 2;
         }
 
         .avatar-large {
-            width: 100px;
-            height: 100px;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
             background: var(--accent);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 38px;
+            font-size: 44px;
             font-weight: 800;
             color: #fff;
             font-family: var(--heading-font);
@@ -203,7 +203,7 @@
         }
 
         .profile-name {
-            font-size: 26px;
+            font-size: 30px;
             font-weight: 700;
             margin-top: 12px;
             font-family: var(--heading-font);
@@ -263,7 +263,7 @@
         .bio-section {
             text-align: center;
             padding: 16px 24px 0;
-            max-width: 680px;
+            max-width: 900px;
             margin: 0 auto;
         }
 
@@ -286,7 +286,7 @@
             gap: 8px;
             justify-content: center;
             padding: 16px 24px 0;
-            max-width: 680px;
+            max-width: 900px;
             margin: 0 auto;
             flex-wrap: wrap;
         }
@@ -373,7 +373,7 @@
 
         /* MAIN */
         .main {
-            max-width: 680px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 24px 24px 80px;
         }
@@ -954,7 +954,7 @@
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 20px;
-            max-width: 420px;
+            max-width: 520px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
@@ -1122,6 +1122,7 @@
         }
     </style>
 </head>
+
 <body data-mode="dark" data-font="modern">
     <!-- TOPBAR -->
     <div class="topbar">
@@ -1486,330 +1487,330 @@
     </div>
 
     <div class="toast" id="toast"></div>
-<script>
-    const API = 'https://selekt-server.onrender.com';
-    let currentUser = null;
-    let _lang = localStorage.getItem('selekt_lang') || 'ja';
-    let selectedRole = '';
-    let portfolioPhotos = [];
-    const MAX_PORTFOLIO = 5;
-    let _uploadSlotIdx = -1;
+    <script>
+        const API = 'https://selekt-server.onrender.com';
+        let currentUser = null;
+        let _lang = localStorage.getItem('selekt_lang') || 'ja';
+        let selectedRole = '';
+        let portfolioPhotos = [];
+        const MAX_PORTFOLIO = 5;
+        let _uploadSlotIdx = -1;
 
-    const ROLE_LABELS = { ja: { photographer: 'カメラマン', model: 'モデル', company: '企業', private: 'プライベート' }, en: { photographer: 'Photographer', model: 'Model', company: 'Company', private: 'Private' }, zh: { photographer: '摄影师', model: '模特', company: '企业', private: '个人' } };
+        const ROLE_LABELS = { ja: { photographer: 'カメラマン', model: 'モデル', company: '企業', private: 'プライベート' }, en: { photographer: 'Photographer', model: 'Model', company: 'Company', private: 'Private' }, zh: { photographer: '摄影师', model: '模特', company: '企业', private: '个人' } };
 
-    const I18N = {
-        ja: {
-            navProfile: 'プロフィール', editProfile: 'プロフィール編集', displayName: '表示名', bio: '自己紹介', userId: 'ユーザーID',
-            yourRole: 'あなたの役割', socialLinks: 'SNSリンク', saveChanges: '変更を保存', accountInfo: 'アカウント情報',
-            currentPlan: '現在のプラン', storageUsage: 'ストレージ', totalProjects: 'プロジェクト数',
-            upgradePlan: 'プランをアップグレード', upgradeDesc: 'より多くのストレージと機能をアンロック',
-            dangerZone: '危険ゾーン', changePassword: 'パスワードを変更', logoutBtn: 'ログアウト',
-            saved: '✓ 保存しました', passwordNotReady: 'パスワード変更は準備中です',
-            noBio: '自己紹介が未設定です', previewProfile: '外部からの見え方を確認', previewLabel: '外部からの見え方',
-            portfolio: 'ポートフォリオ', changeCover: 'カバー写真を変更',
-            styleTitle: 'スタイル設定', accentColor: 'アクセントカラー', bgMode: '背景モード', fontStyle: 'フォントスタイル',
-            modeDark: 'ダーク', modeLight: 'ライト',
-            rolePhotographer: 'カメラマン', roleModel: 'モデル', roleCompany: '企業', rolePrivate: 'プライベート',
-            rolePhotographerDesc: '写真を送る側', roleModelDesc: '写真を受け取る側', roleCompanyDesc: 'ビジネス利用', rolePrivateDesc: '個人利用',
-            pageTitle: 'SELEKT — プロフィール',
-        },
-        en: {
-            navProfile: 'Profile', editProfile: 'Edit Profile', displayName: 'Display Name', bio: 'Bio', userId: 'User ID',
-            yourRole: 'Your Role', socialLinks: 'Social Links', saveChanges: 'Save Changes', accountInfo: 'Account Info',
-            currentPlan: 'Current Plan', storageUsage: 'Storage', totalProjects: 'Total Projects',
-            upgradePlan: 'Upgrade Plan', upgradeDesc: 'Unlock more storage and features',
-            dangerZone: 'Danger Zone', changePassword: 'Change Password', logoutBtn: 'Logout',
-            saved: '✓ Saved', passwordNotReady: 'Password change coming soon',
-            noBio: 'No bio set', previewProfile: 'Preview as visitor', previewLabel: 'Visitor view',
-            portfolio: 'Portfolio', changeCover: 'Change cover photo',
-            styleTitle: 'Style Settings', accentColor: 'Accent Color', bgMode: 'Background', fontStyle: 'Font Style',
-            modeDark: 'Dark', modeLight: 'Light',
-            rolePhotographer: 'Photographer', roleModel: 'Model', roleCompany: 'Company', rolePrivate: 'Private',
-            rolePhotographerDesc: 'Send photos', roleModelDesc: 'Receive photos', roleCompanyDesc: 'Business', rolePrivateDesc: 'Personal',
-            pageTitle: 'SELEKT — Profile',
-        },
-        zh: {
-            navProfile: '个人资料', editProfile: '编辑资料', displayName: '显示名', bio: '自我介绍', userId: '用户ID',
-            yourRole: '你的角色', socialLinks: '社交链接', saveChanges: '保存更改', accountInfo: '账户信息',
-            currentPlan: '当前计划', storageUsage: '存储空间', totalProjects: '项目数量',
-            upgradePlan: '升级计划', upgradeDesc: '解锁更多存储和功能',
-            dangerZone: '危险区域', changePassword: '更改密码', logoutBtn: '退出登录',
-            saved: '✓ 已保存', passwordNotReady: '密码更改功能即将推出',
-            noBio: '未设置自我介绍', previewProfile: '查看外部视图', previewLabel: '外部视图',
-            portfolio: '作品集', changeCover: '更改封面照片',
-            styleTitle: '样式设置', accentColor: '强调色', bgMode: '背景模式', fontStyle: '字体风格',
-            modeDark: '深色', modeLight: '浅色',
-            rolePhotographer: '摄影师', roleModel: '模特', roleCompany: '企业', rolePrivate: '个人',
-            rolePhotographerDesc: '发送照片', roleModelDesc: '接收照片', roleCompanyDesc: '商业使用', rolePrivateDesc: '个人使用',
-            pageTitle: 'SELEKT — 个人资料',
-        }
-    };
-
-    function pt(key) { return (I18N[_lang] || I18N.ja)[key] || (I18N.ja)[key] || key; }
-    function setLang(lang) {
-        _lang = lang; localStorage.setItem('selekt_lang', lang);
-        document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.dataset.i18n; if (I18N[lang]?.[k]) el.textContent = I18N[lang][k]; });
-        document.querySelectorAll('.lang-btn').forEach(b => b.style.background = 'none');
-        const lb = document.getElementById('lang' + { ja: 'Ja', en: 'En', zh: 'Zh' }[lang]);
-        if (lb) lb.style.background = 'rgba(74,158,224,0.2)';
-        document.title = pt('pageTitle');
-        if (currentUser) updateUI();
-    }
-
-    // ===== STYLE CUSTOMIZATION =====
-    function getStyle() {
-        try { return JSON.parse(localStorage.getItem('selekt_profile_style')) || {}; } catch (e) { return {}; }
-    }
-    function saveStyle(updates) {
-        const style = { ...getStyle(), ...updates };
-        localStorage.setItem('selekt_profile_style', JSON.stringify(style));
-    }
-
-    function setAccentColor(hex, dotEl) {
-        document.documentElement.style.setProperty('--accent', hex);
-        // Derive a complementary accent2
-        document.documentElement.style.setProperty('--accent2', hex);
-        // Update badge colors dynamically
-        document.querySelectorAll('.badge-role').forEach(b => { b.style.background = hex + '1F'; b.style.color = hex; b.style.borderColor = hex + '40'; });
-        // Update cover gradient
-        const coverEl = document.getElementById('coverPhoto');
-        if (coverEl && !coverEl.querySelector('img')) { coverEl.style.background = `linear-gradient(135deg, ${hex}, color-mix(in srgb, ${hex} 60%, #000))`; }
-        // Update selected dot
-        document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected'));
-        if (dotEl) dotEl.classList.add('selected');
-        document.getElementById('customColorPicker').value = hex;
-        saveStyle({ accent: hex });
-    }
-
-    function setMode(mode) {
-        document.body.dataset.mode = mode;
-        document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
-        saveStyle({ mode });
-    }
-
-    function setFontStyle(font) {
-        document.body.dataset.font = font;
-        document.querySelectorAll('.font-btn').forEach(b => b.classList.toggle('active', b.dataset.font === font));
-        saveStyle({ font });
-    }
-
-    function restoreStyle() {
-        const s = getStyle();
-        if (s.accent) { setAccentColor(s.accent, document.querySelector(`.color-dot[data-color="${s.accent}"]`)); }
-        if (s.mode) setMode(s.mode);
-        if (s.font) setFontStyle(s.font);
-        // Cover photo
-        const cover = localStorage.getItem('selekt_cover_photo');
-        if (cover) { const coverEl = document.getElementById('coverPhoto'); coverEl.innerHTML = `<img src="${cover}"><div class="cover-edit-hint"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span data-i18n="changeCover">${pt('changeCover')}</span></div>`; }
-    }
-
-    // ===== COVER PHOTO =====
-    function handleCoverUpload(e) {
-        const file = e.target.files[0]; if (!file) return;
-        const reader = new FileReader();
-        reader.onload = ev => {
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const maxW = 800; let w = img.width, h = img.height;
-                if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
-                canvas.width = w; canvas.height = h;
-                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                const data = canvas.toDataURL('image/jpeg', 0.8);
-                localStorage.setItem('selekt_cover_photo', data);
-                const coverEl = document.getElementById('coverPhoto');
-                coverEl.innerHTML = `<img src="${data}"><div class="cover-edit-hint"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span>${pt('changeCover')}</span></div>`;
-            };
-            img.src = ev.target.result;
+        const I18N = {
+            ja: {
+                navProfile: 'プロフィール', editProfile: 'プロフィール編集', displayName: '表示名', bio: '自己紹介', userId: 'ユーザーID',
+                yourRole: 'あなたの役割', socialLinks: 'SNSリンク', saveChanges: '変更を保存', accountInfo: 'アカウント情報',
+                currentPlan: '現在のプラン', storageUsage: 'ストレージ', totalProjects: 'プロジェクト数',
+                upgradePlan: 'プランをアップグレード', upgradeDesc: 'より多くのストレージと機能をアンロック',
+                dangerZone: '危険ゾーン', changePassword: 'パスワードを変更', logoutBtn: 'ログアウト',
+                saved: '✓ 保存しました', passwordNotReady: 'パスワード変更は準備中です',
+                noBio: '自己紹介が未設定です', previewProfile: '外部からの見え方を確認', previewLabel: '外部からの見え方',
+                portfolio: 'ポートフォリオ', changeCover: 'カバー写真を変更',
+                styleTitle: 'スタイル設定', accentColor: 'アクセントカラー', bgMode: '背景モード', fontStyle: 'フォントスタイル',
+                modeDark: 'ダーク', modeLight: 'ライト',
+                rolePhotographer: 'カメラマン', roleModel: 'モデル', roleCompany: '企業', rolePrivate: 'プライベート',
+                rolePhotographerDesc: '写真を送る側', roleModelDesc: '写真を受け取る側', roleCompanyDesc: 'ビジネス利用', rolePrivateDesc: '個人利用',
+                pageTitle: 'SELEKT — プロフィール',
+            },
+            en: {
+                navProfile: 'Profile', editProfile: 'Edit Profile', displayName: 'Display Name', bio: 'Bio', userId: 'User ID',
+                yourRole: 'Your Role', socialLinks: 'Social Links', saveChanges: 'Save Changes', accountInfo: 'Account Info',
+                currentPlan: 'Current Plan', storageUsage: 'Storage', totalProjects: 'Total Projects',
+                upgradePlan: 'Upgrade Plan', upgradeDesc: 'Unlock more storage and features',
+                dangerZone: 'Danger Zone', changePassword: 'Change Password', logoutBtn: 'Logout',
+                saved: '✓ Saved', passwordNotReady: 'Password change coming soon',
+                noBio: 'No bio set', previewProfile: 'Preview as visitor', previewLabel: 'Visitor view',
+                portfolio: 'Portfolio', changeCover: 'Change cover photo',
+                styleTitle: 'Style Settings', accentColor: 'Accent Color', bgMode: 'Background', fontStyle: 'Font Style',
+                modeDark: 'Dark', modeLight: 'Light',
+                rolePhotographer: 'Photographer', roleModel: 'Model', roleCompany: 'Company', rolePrivate: 'Private',
+                rolePhotographerDesc: 'Send photos', roleModelDesc: 'Receive photos', roleCompanyDesc: 'Business', rolePrivateDesc: 'Personal',
+                pageTitle: 'SELEKT — Profile',
+            },
+            zh: {
+                navProfile: '个人资料', editProfile: '编辑资料', displayName: '显示名', bio: '自我介绍', userId: '用户ID',
+                yourRole: '你的角色', socialLinks: '社交链接', saveChanges: '保存更改', accountInfo: '账户信息',
+                currentPlan: '当前计划', storageUsage: '存储空间', totalProjects: '项目数量',
+                upgradePlan: '升级计划', upgradeDesc: '解锁更多存储和功能',
+                dangerZone: '危险区域', changePassword: '更改密码', logoutBtn: '退出登录',
+                saved: '✓ 已保存', passwordNotReady: '密码更改功能即将推出',
+                noBio: '未设置自我介绍', previewProfile: '查看外部视图', previewLabel: '外部视图',
+                portfolio: '作品集', changeCover: '更改封面照片',
+                styleTitle: '样式设置', accentColor: '强调色', bgMode: '背景模式', fontStyle: '字体风格',
+                modeDark: '深色', modeLight: '浅色',
+                rolePhotographer: '摄影师', roleModel: '模特', roleCompany: '企业', rolePrivate: '个人',
+                rolePhotographerDesc: '发送照片', roleModelDesc: '接收照片', roleCompanyDesc: '商业使用', rolePrivateDesc: '个人使用',
+                pageTitle: 'SELEKT — 个人资料',
+            }
         };
-        reader.readAsDataURL(file); e.target.value = '';
-    }
 
-    // ===== UI UPDATE =====
-    function updateUI() {
-        if (!currentUser) return;
-        document.getElementById('avatarLarge').querySelector('span').textContent = currentUser.displayName.charAt(0).toUpperCase();
-        document.getElementById('profileName').textContent = currentUser.displayName;
-        document.getElementById('profileId').textContent = '@' + (currentUser.id || currentUser.displayName.toLowerCase().replace(/\s/g, '_'));
-
-        const roleLabel = (ROLE_LABELS[_lang] || ROLE_LABELS.ja)[currentUser.role] || currentUser.role || '---';
-        document.getElementById('roleBadge').textContent = roleLabel;
-        const planBadge = document.getElementById('planBadge');
-        const planLabel = { pro: 'PRO', basic: 'BASIC' }[currentUser.plan] || 'FREE';
-        planBadge.textContent = planLabel;
-        planBadge.className = 'badge badge-plan ' + (currentUser.plan || 'free');
-
-        // Bio display
-        const bio = currentUser.bio || '';
-        const bioEl = document.getElementById('bioDisplay');
-        bioEl.textContent = bio || pt('noBio');
-        bioEl.className = 'bio-text' + (bio ? '' : ' placeholder');
-
-        // Social icons in hero
-        const socialRow = document.getElementById('socialRow');
-        const snsCards = document.getElementById('snsCards');
-        const svgX = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>';
-        const svgIG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>';
-        const svgYT = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>';
-
-        let socialHTML = '', cardHTML = '';
-        const links = [
-            { key: 'socialX', icon: svgX, label: 'X (Twitter)', url: currentUser.socialX },
-            { key: 'socialInstagram', icon: svgIG, label: 'Instagram', url: currentUser.socialInstagram },
-            { key: 'socialYoutube', icon: svgYT, label: 'YouTube', url: currentUser.socialYoutube },
-        ];
-        links.forEach(l => {
-            if (l.url) {
-                socialHTML += `<a href="${l.url}" target="_blank" rel="noopener" class="social-icon-link" title="${l.label}">${l.icon}</a>`;
-                cardHTML += `<a href="${l.url}" target="_blank" rel="noopener" class="sns-card">${l.icon}<span class="sns-label">${l.label}</span></a>`;
-            }
-        });
-        socialRow.innerHTML = socialHTML;
-        socialRow.style.display = socialHTML ? 'flex' : 'none';
-        snsCards.innerHTML = cardHTML;
-        snsCards.style.display = cardHTML ? 'flex' : 'none';
-
-        // Form
-        document.getElementById('editName').value = currentUser.displayName;
-        document.getElementById('editBio').value = currentUser.bio || '';
-        document.getElementById('editId').value = currentUser.id || '';
-        document.getElementById('editX').value = currentUser.socialX || '';
-        document.getElementById('editInstagram').value = currentUser.socialInstagram || '';
-        document.getElementById('editYoutube').value = currentUser.socialYoutube || '';
-        updateCharCount();
-
-        // Role
-        if (currentUser.role) {
-            selectedRole = currentUser.role;
-            document.querySelectorAll('.role-card').forEach(c => c.classList.toggle('selected', c.dataset.role === selectedRole));
+        function pt(key) { return (I18N[_lang] || I18N.ja)[key] || (I18N.ja)[key] || key; }
+        function setLang(lang) {
+            _lang = lang; localStorage.setItem('selekt_lang', lang);
+            document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.dataset.i18n; if (I18N[lang]?.[k]) el.textContent = I18N[lang][k]; });
+            document.querySelectorAll('.lang-btn').forEach(b => b.style.background = 'none');
+            const lb = document.getElementById('lang' + { ja: 'Ja', en: 'En', zh: 'Zh' }[lang]);
+            if (lb) lb.style.background = 'rgba(74,158,224,0.2)';
+            document.title = pt('pageTitle');
+            if (currentUser) updateUI();
         }
 
-        // Account info
-        document.getElementById('statPlan').textContent = { pro: 'PRO', basic: 'BASIC' }[currentUser.plan] || 'FREE';
-        document.getElementById('upgradeBanner').style.display = currentUser.plan === 'pro' ? 'none' : 'flex';
-
-        renderPortfolio();
-    }
-
-    function updateCharCount() {
-        const count = document.getElementById('editBio').value.length;
-        const el = document.getElementById('charCount');
-        el.textContent = `${count} / 250`;
-        el.className = 'char-count' + (count >= 230 ? ' warning' : '');
-    }
-
-    function selectRole(card) {
-        selectedRole = card.dataset.role;
-        document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
-        card.classList.add('selected');
-    }
-
-    // ===== PORTFOLIO =====
-    function renderPortfolio() {
-        const grid = document.getElementById('portfolioGrid'); grid.innerHTML = '';
-        for (let i = 0; i < MAX_PORTFOLIO; i++) {
-            const slot = document.createElement('div');
-            slot.className = 'portfolio-slot' + (portfolioPhotos[i] ? ' filled' : '');
-            if (portfolioPhotos[i]) {
-                slot.innerHTML = `<img src="${portfolioPhotos[i]}" alt="Portfolio ${i + 1}"><button class="slot-remove" onclick="removePortfolioPhoto(${i},event)">✕</button>`;
-            } else {
-                slot.innerHTML = `<div class="slot-placeholder"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>`;
-            }
-            slot.onclick = () => { if (!portfolioPhotos[i]) { _uploadSlotIdx = i; document.getElementById('portfolioInput').click(); } };
-            grid.appendChild(slot);
+        // ===== STYLE CUSTOMIZATION =====
+        function getStyle() {
+            try { return JSON.parse(localStorage.getItem('selekt_profile_style')) || {}; } catch (e) { return {}; }
         }
-    }
+        function saveStyle(updates) {
+            const style = { ...getStyle(), ...updates };
+            localStorage.setItem('selekt_profile_style', JSON.stringify(style));
+        }
 
-    function handlePortfolioUpload(e) {
-        const file = e.target.files[0]; if (!file) return;
-        const reader = new FileReader();
-        reader.onload = ev => {
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const maxSize = 600; let w = img.width, h = img.height;
-                if (w > maxSize || h > maxSize) { if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; } else { w = Math.round(w * maxSize / h); h = maxSize; } }
-                canvas.width = w; canvas.height = h;
-                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-                if (_uploadSlotIdx >= 0 && _uploadSlotIdx < MAX_PORTFOLIO) { portfolioPhotos[_uploadSlotIdx] = dataUrl; } else { portfolioPhotos.push(dataUrl); }
-                savePortfolio(); renderPortfolio();
+        function setAccentColor(hex, dotEl) {
+            document.documentElement.style.setProperty('--accent', hex);
+            // Derive a complementary accent2
+            document.documentElement.style.setProperty('--accent2', hex);
+            // Update badge colors dynamically
+            document.querySelectorAll('.badge-role').forEach(b => { b.style.background = hex + '1F'; b.style.color = hex; b.style.borderColor = hex + '40'; });
+            // Update cover gradient
+            const coverEl = document.getElementById('coverPhoto');
+            if (coverEl && !coverEl.querySelector('img')) { coverEl.style.background = `linear-gradient(135deg, ${hex}, color-mix(in srgb, ${hex} 60%, #000))`; }
+            // Update selected dot
+            document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected'));
+            if (dotEl) dotEl.classList.add('selected');
+            document.getElementById('customColorPicker').value = hex;
+            saveStyle({ accent: hex });
+        }
+
+        function setMode(mode) {
+            document.body.dataset.mode = mode;
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+            saveStyle({ mode });
+        }
+
+        function setFontStyle(font) {
+            document.body.dataset.font = font;
+            document.querySelectorAll('.font-btn').forEach(b => b.classList.toggle('active', b.dataset.font === font));
+            saveStyle({ font });
+        }
+
+        function restoreStyle() {
+            const s = getStyle();
+            if (s.accent) { setAccentColor(s.accent, document.querySelector(`.color-dot[data-color="${s.accent}"]`)); }
+            if (s.mode) setMode(s.mode);
+            if (s.font) setFontStyle(s.font);
+            // Cover photo
+            const cover = localStorage.getItem('selekt_cover_photo');
+            if (cover) { const coverEl = document.getElementById('coverPhoto'); coverEl.innerHTML = `<img src="${cover}"><div class="cover-edit-hint"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span data-i18n="changeCover">${pt('changeCover')}</span></div>`; }
+        }
+
+        // ===== COVER PHOTO =====
+        function handleCoverUpload(e) {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = ev => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const maxW = 800; let w = img.width, h = img.height;
+                    if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    const data = canvas.toDataURL('image/jpeg', 0.8);
+                    localStorage.setItem('selekt_cover_photo', data);
+                    const coverEl = document.getElementById('coverPhoto');
+                    coverEl.innerHTML = `<img src="${data}"><div class="cover-edit-hint"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span>${pt('changeCover')}</span></div>`;
+                };
+                img.src = ev.target.result;
             };
-            img.src = ev.target.result;
-        };
-        reader.readAsDataURL(file); e.target.value = '';
-    }
+            reader.readAsDataURL(file); e.target.value = '';
+        }
 
-    function removePortfolioPhoto(idx, e) { e.stopPropagation(); portfolioPhotos.splice(idx, 1); savePortfolio(); renderPortfolio(); }
-    function savePortfolio() { localStorage.setItem('selekt_portfolio', JSON.stringify(portfolioPhotos)); }
-    function loadPortfolio() { try { const s = localStorage.getItem('selekt_portfolio'); if (s) portfolioPhotos = JSON.parse(s); } catch (e) { } }
+        // ===== UI UPDATE =====
+        function updateUI() {
+            if (!currentUser) return;
+            document.getElementById('avatarLarge').querySelector('span').textContent = currentUser.displayName.charAt(0).toUpperCase();
+            document.getElementById('profileName').textContent = currentUser.displayName;
+            document.getElementById('profileId').textContent = '@' + (currentUser.id || currentUser.displayName.toLowerCase().replace(/\s/g, '_'));
 
-    // ===== SAVE PROFILE =====
-    function showToast(msg, type = '') { const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast show' + (type ? ` ${type}` : ''); setTimeout(() => t.className = 'toast', 2500); }
+            const roleLabel = (ROLE_LABELS[_lang] || ROLE_LABELS.ja)[currentUser.role] || currentUser.role || '---';
+            document.getElementById('roleBadge').textContent = roleLabel;
+            const planBadge = document.getElementById('planBadge');
+            const planLabel = { pro: 'PRO', basic: 'BASIC' }[currentUser.plan] || 'FREE';
+            planBadge.textContent = planLabel;
+            planBadge.className = 'badge badge-plan ' + (currentUser.plan || 'free');
 
-    async function saveProfile() {
-        const newName = document.getElementById('editName').value.trim();
-        const newBio = document.getElementById('editBio').value.trim().substring(0, 250);
-        if (!newName) return;
-        const btn = document.getElementById('saveBtn'); btn.disabled = true;
-        currentUser.displayName = newName; currentUser.bio = newBio;
-        if (selectedRole) currentUser.role = selectedRole;
-        currentUser.socialX = document.getElementById('editX').value.trim();
-        currentUser.socialInstagram = document.getElementById('editInstagram').value.trim();
-        currentUser.socialYoutube = document.getElementById('editYoutube').value.trim();
-        try {
-            const token = localStorage.getItem('selekt_token');
-            if (token) {
-                const res = await fetch(`${API}/api/auth/update-profile`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ displayName: newName, role: selectedRole, bio: newBio, socialX: currentUser.socialX, socialInstagram: currentUser.socialInstagram, socialYoutube: currentUser.socialYoutube }) });
-                if (res.ok) { const data = await res.json(); if (data.user) currentUser = data.user; }
+            // Bio display
+            const bio = currentUser.bio || '';
+            const bioEl = document.getElementById('bioDisplay');
+            bioEl.textContent = bio || pt('noBio');
+            bioEl.className = 'bio-text' + (bio ? '' : ' placeholder');
+
+            // Social icons in hero
+            const socialRow = document.getElementById('socialRow');
+            const snsCards = document.getElementById('snsCards');
+            const svgX = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>';
+            const svgIG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>';
+            const svgYT = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>';
+
+            let socialHTML = '', cardHTML = '';
+            const links = [
+                { key: 'socialX', icon: svgX, label: 'X (Twitter)', url: currentUser.socialX },
+                { key: 'socialInstagram', icon: svgIG, label: 'Instagram', url: currentUser.socialInstagram },
+                { key: 'socialYoutube', icon: svgYT, label: 'YouTube', url: currentUser.socialYoutube },
+            ];
+            links.forEach(l => {
+                if (l.url) {
+                    socialHTML += `<a href="${l.url}" target="_blank" rel="noopener" class="social-icon-link" title="${l.label}">${l.icon}</a>`;
+                    cardHTML += `<a href="${l.url}" target="_blank" rel="noopener" class="sns-card">${l.icon}<span class="sns-label">${l.label}</span></a>`;
+                }
+            });
+            socialRow.innerHTML = socialHTML;
+            socialRow.style.display = socialHTML ? 'flex' : 'none';
+            snsCards.innerHTML = cardHTML;
+            snsCards.style.display = cardHTML ? 'flex' : 'none';
+
+            // Form
+            document.getElementById('editName').value = currentUser.displayName;
+            document.getElementById('editBio').value = currentUser.bio || '';
+            document.getElementById('editId').value = currentUser.id || '';
+            document.getElementById('editX').value = currentUser.socialX || '';
+            document.getElementById('editInstagram').value = currentUser.socialInstagram || '';
+            document.getElementById('editYoutube').value = currentUser.socialYoutube || '';
+            updateCharCount();
+
+            // Role
+            if (currentUser.role) {
+                selectedRole = currentUser.role;
+                document.querySelectorAll('.role-card').forEach(c => c.classList.toggle('selected', c.dataset.role === selectedRole));
             }
-        } catch (e) { }
-        localStorage.setItem('selekt_user', JSON.stringify(currentUser));
-        updateUI(); showToast(pt('saved'), 'success'); setTimeout(() => btn.disabled = false, 500);
-    }
 
-    function changePassword() { showToast(pt('passwordNotReady')); }
-    function logout() { localStorage.removeItem('selekt_token'); localStorage.removeItem('selekt_user'); window.location.href = 'SELEKT_Auth.html'; }
+            // Account info
+            document.getElementById('statPlan').textContent = { pro: 'PRO', basic: 'BASIC' }[currentUser.plan] || 'FREE';
+            document.getElementById('upgradeBanner').style.display = currentUser.plan === 'pro' ? 'none' : 'flex';
 
-    // ===== PREVIEW MODE =====
-    function openPreview() {
-        if (!currentUser) return;
-        document.getElementById('pvAvatar').textContent = currentUser.displayName.charAt(0).toUpperCase();
-        document.getElementById('pvName').textContent = currentUser.displayName;
-        const roleLabel = (ROLE_LABELS[_lang] || ROLE_LABELS.ja)[currentUser.role] || currentUser.role;
-        const planLabel = { pro: 'PRO', basic: 'BASIC' }[currentUser.plan] || 'FREE';
-        document.getElementById('pvBadges').innerHTML = `<span class="badge badge-role">${roleLabel}</span><span class="badge badge-plan ${currentUser.plan || 'free'}">${planLabel}</span>`;
-        const bio = currentUser.bio || ''; document.getElementById('pvBio').textContent = bio || pt('noBio');
-        const pvGrid = document.getElementById('pvPortfolio'); pvGrid.innerHTML = '';
-        const photos = portfolioPhotos.filter(Boolean);
-        if (photos.length > 0) { photos.forEach(src => { pvGrid.innerHTML += `<img src="${src}" alt="Portfolio">`; }); pvGrid.style.gridTemplateColumns = `repeat(${Math.min(photos.length, 5)}, 1fr)`; }
-        const svgs = { socialX: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>', socialInstagram: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>', socialYoutube: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>' };
-        const pvSocial = document.getElementById('pvSocial'); pvSocial.innerHTML = '';
-        ['socialX', 'socialInstagram', 'socialYoutube'].forEach(key => { const url = currentUser[key]; if (url) pvSocial.innerHTML += `<a href="${url}" target="_blank" rel="noopener">${svgs[key]}</a>`; });
-        document.getElementById('previewOverlay').classList.add('open'); document.body.style.overflow = 'hidden';
-    }
-    function closePreview() { document.getElementById('previewOverlay').classList.remove('open'); document.body.style.overflow = ''; }
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closePreview(); });
+            renderPortfolio();
+        }
 
-    // ===== INIT =====
-    async function init() {
-        loadPortfolio(); restoreStyle();
-        try {
-            const token = localStorage.getItem('selekt_token');
-            if (token) {
-                const controller = new AbortController(); setTimeout(() => controller.abort(), 3000);
-                const res = await fetch(`${API}/api/auth/me`, { headers: { 'Authorization': `Bearer ${token}` }, signal: controller.signal });
-                if (res.ok) { const data = await res.json(); currentUser = data.user; updateUI(); return; }
+        function updateCharCount() {
+            const count = document.getElementById('editBio').value.length;
+            const el = document.getElementById('charCount');
+            el.textContent = `${count} / 250`;
+            el.className = 'char-count' + (count >= 230 ? ' warning' : '');
+        }
+
+        function selectRole(card) {
+            selectedRole = card.dataset.role;
+            document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+        }
+
+        // ===== PORTFOLIO =====
+        function renderPortfolio() {
+            const grid = document.getElementById('portfolioGrid'); grid.innerHTML = '';
+            for (let i = 0; i < MAX_PORTFOLIO; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'portfolio-slot' + (portfolioPhotos[i] ? ' filled' : '');
+                if (portfolioPhotos[i]) {
+                    slot.innerHTML = `<img src="${portfolioPhotos[i]}" alt="Portfolio ${i + 1}"><button class="slot-remove" onclick="removePortfolioPhoto(${i},event)">✕</button>`;
+                } else {
+                    slot.innerHTML = `<div class="slot-placeholder"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>`;
+                }
+                slot.onclick = () => { if (!portfolioPhotos[i]) { _uploadSlotIdx = i; document.getElementById('portfolioInput').click(); } };
+                grid.appendChild(slot);
             }
-        } catch (e) { console.log('API unavailable, using local data'); }
-        const stored = localStorage.getItem('selekt_user');
-        if (stored) { currentUser = JSON.parse(stored); updateUI(); return; }
-        currentUser = { id: 'demo_user', displayName: 'Demo User', role: 'photographer', plan: 'free', bio: '' };
-        updateUI(); document.getElementById('statProjects').textContent = '5';
-    }
+        }
 
-    setLang(_lang); init();
-</script>
+        function handlePortfolioUpload(e) {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = ev => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const maxSize = 600; let w = img.width, h = img.height;
+                    if (w > maxSize || h > maxSize) { if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; } else { w = Math.round(w * maxSize / h); h = maxSize; } }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                    if (_uploadSlotIdx >= 0 && _uploadSlotIdx < MAX_PORTFOLIO) { portfolioPhotos[_uploadSlotIdx] = dataUrl; } else { portfolioPhotos.push(dataUrl); }
+                    savePortfolio(); renderPortfolio();
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file); e.target.value = '';
+        }
+
+        function removePortfolioPhoto(idx, e) { e.stopPropagation(); portfolioPhotos.splice(idx, 1); savePortfolio(); renderPortfolio(); }
+        function savePortfolio() { localStorage.setItem('selekt_portfolio', JSON.stringify(portfolioPhotos)); }
+        function loadPortfolio() { try { const s = localStorage.getItem('selekt_portfolio'); if (s) portfolioPhotos = JSON.parse(s); } catch (e) { } }
+
+        // ===== SAVE PROFILE =====
+        function showToast(msg, type = '') { const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast show' + (type ? ` ${type}` : ''); setTimeout(() => t.className = 'toast', 2500); }
+
+        async function saveProfile() {
+            const newName = document.getElementById('editName').value.trim();
+            const newBio = document.getElementById('editBio').value.trim().substring(0, 250);
+            if (!newName) return;
+            const btn = document.getElementById('saveBtn'); btn.disabled = true;
+            currentUser.displayName = newName; currentUser.bio = newBio;
+            if (selectedRole) currentUser.role = selectedRole;
+            currentUser.socialX = document.getElementById('editX').value.trim();
+            currentUser.socialInstagram = document.getElementById('editInstagram').value.trim();
+            currentUser.socialYoutube = document.getElementById('editYoutube').value.trim();
+            try {
+                const token = localStorage.getItem('selekt_token');
+                if (token) {
+                    const res = await fetch(`${API}/api/auth/update-profile`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ displayName: newName, role: selectedRole, bio: newBio, socialX: currentUser.socialX, socialInstagram: currentUser.socialInstagram, socialYoutube: currentUser.socialYoutube }) });
+                    if (res.ok) { const data = await res.json(); if (data.user) currentUser = data.user; }
+                }
+            } catch (e) { }
+            localStorage.setItem('selekt_user', JSON.stringify(currentUser));
+            updateUI(); showToast(pt('saved'), 'success'); setTimeout(() => btn.disabled = false, 500);
+        }
+
+        function changePassword() { showToast(pt('passwordNotReady')); }
+        function logout() { localStorage.removeItem('selekt_token'); localStorage.removeItem('selekt_user'); window.location.href = 'SELEKT_Auth.html'; }
+
+        // ===== PREVIEW MODE =====
+        function openPreview() {
+            if (!currentUser) return;
+            document.getElementById('pvAvatar').textContent = currentUser.displayName.charAt(0).toUpperCase();
+            document.getElementById('pvName').textContent = currentUser.displayName;
+            const roleLabel = (ROLE_LABELS[_lang] || ROLE_LABELS.ja)[currentUser.role] || currentUser.role;
+            const planLabel = { pro: 'PRO', basic: 'BASIC' }[currentUser.plan] || 'FREE';
+            document.getElementById('pvBadges').innerHTML = `<span class="badge badge-role">${roleLabel}</span><span class="badge badge-plan ${currentUser.plan || 'free'}">${planLabel}</span>`;
+            const bio = currentUser.bio || ''; document.getElementById('pvBio').textContent = bio || pt('noBio');
+            const pvGrid = document.getElementById('pvPortfolio'); pvGrid.innerHTML = '';
+            const photos = portfolioPhotos.filter(Boolean);
+            if (photos.length > 0) { photos.forEach(src => { pvGrid.innerHTML += `<img src="${src}" alt="Portfolio">`; }); pvGrid.style.gridTemplateColumns = `repeat(${Math.min(photos.length, 5)}, 1fr)`; }
+            const svgs = { socialX: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>', socialInstagram: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>', socialYoutube: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>' };
+            const pvSocial = document.getElementById('pvSocial'); pvSocial.innerHTML = '';
+            ['socialX', 'socialInstagram', 'socialYoutube'].forEach(key => { const url = currentUser[key]; if (url) pvSocial.innerHTML += `<a href="${url}" target="_blank" rel="noopener">${svgs[key]}</a>`; });
+            document.getElementById('previewOverlay').classList.add('open'); document.body.style.overflow = 'hidden';
+        }
+        function closePreview() { document.getElementById('previewOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closePreview(); });
+
+        // ===== INIT =====
+        async function init() {
+            loadPortfolio(); restoreStyle();
+            try {
+                const token = localStorage.getItem('selekt_token');
+                if (token) {
+                    const controller = new AbortController(); setTimeout(() => controller.abort(), 3000);
+                    const res = await fetch(`${API}/api/auth/me`, { headers: { 'Authorization': `Bearer ${token}` }, signal: controller.signal });
+                    if (res.ok) { const data = await res.json(); currentUser = data.user; updateUI(); return; }
+                }
+            } catch (e) { console.log('API unavailable, using local data'); }
+            const stored = localStorage.getItem('selekt_user');
+            if (stored) { currentUser = JSON.parse(stored); updateUI(); return; }
+            currentUser = { id: 'demo_user', displayName: 'Demo User', role: 'photographer', plan: 'free', bio: '' };
+            updateUI(); document.getElementById('statProjects').textContent = '5';
+        }
+
+        setLang(_lang); init();
+    </script>
 </body>
 
 </html>
