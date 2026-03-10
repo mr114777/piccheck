@@ -2384,9 +2384,10 @@
       </div>
     </div>
     <div class="topbar-divider"></div>
-    <div class="session-name">
+    <div class="session-name" style="display:flex;align-items:center;gap:12px">
       <strong id="sessionTitle" onclick="editSessionTitle()"
-        style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:15px" title="クリックで編集">プロジェクト名未設定
+        style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:17px;font-weight:800"
+        title="クリックで編集">プロジェクト名未設定
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round"
           style="opacity:0.35;transition:opacity 0.15s;vertical-align:middle" onmouseover="this.style.opacity='0.8'"
@@ -2394,9 +2395,76 @@
           <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
           <path d="m15 5 4 4" />
         </svg></strong>
-      <span id="sessionPhotographer" style="color:var(--text-dim);margin-left:8px;font-size:12px"></span>
+      <span id="sessionPhotographer" style="color:var(--text-dim);font-size:12px"></span>
+      <div id="expiryBanner"
+        style="display:none;background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.3);color:var(--coral);padding:5px 14px;border-radius:8px;font-size:13px;font-weight:700;white-space:nowrap">
+        <span id="expiryText"></span>
+      </div>
     </div>
     <div class="topbar-right">
+      <div class="progress-wrap">
+        <span class="progress-label">セレクト進捗</span>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+        </div>
+        <span class="progress-count" id="progressCount">0 / 15</span>
+      </div>
+      <div class="topbar-divider"></div>
+      <div class="topbar-divider"></div>
+      <div class="dl-dropdown" style="position:relative">
+        <button class="btn-download" onclick="toggleDlMenu()" id="dlBtn">
+          <svg viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          DL ▾
+        </button>
+        <div class="dl-menu" id="dlMenu">
+          <div class="dl-menu-label">フルサイズ（原寸）</div>
+          <div class="dl-row">
+            <span class="dl-row-label">全部</span>
+            <button class="dl-row-btn" onclick="downloadPhotos('all','full')">📦 DL</button>
+          </div>
+          <div class="dl-row">
+            <span class="dl-row-label">✓ OKのみ</span>
+            <button class="dl-row-btn" onclick="downloadPhotos('ok','full')">📦 DL</button>
+          </div>
+          <div class="dl-row">
+            <span class="dl-row-label">△ OK+保留</span>
+            <button class="dl-row-btn" onclick="downloadPhotos('ok+nearok','full')">📦 DL</button>
+          </div>
+          <div class="dl-row">
+            <span class="dl-row-label">✕ NGのみ</span>
+            <button class="dl-row-btn" onclick="downloadPhotos('ng','full')">📦 DL</button>
+          </div>
+          <hr class="dl-sep">
+          <div class="dl-menu-label">SNS用（1〜3MB圧縮）</div>
+          <div class="dl-row">
+            <span class="dl-row-label">全部</span>
+            <button class="dl-row-btn" onclick="downloadPhotos('all','sns')">📱 DL</button>
+          </div>
+          <div class="dl-row">
+            <span class="dl-row-label">✓ OKのみ</span>
+            <button class="dl-row-btn" onclick="downloadPhotos('ok','sns')">📱 DL</button>
+            <button class="dl-row-btn" onclick="batchDownloadPhotos('ok')" style="font-size:10px">📱 1枚ずつ保存</button>
+          </div>
+          <div class="dl-row">
+            <span class="dl-row-label">△ OK+保留</span>
+            <button class="dl-row-btn" onclick="downloadPhotos('ok+nearok','sns')">📱 DL</button>
+            <button class="dl-row-btn" onclick="batchDownloadPhotos('ok+nearok')" style="font-size:10px">📱
+              1枚ずつ保存</button>
+          </div>
+          <div class="dl-row">
+            <span class="dl-row-label">✕ NGのみ</span>
+            <button class="dl-row-btn" onclick="downloadPhotos('ng','sns')">📱 DL</button>
+          </div>
+        </div>
+      </div>
+      <button class="btn-complete" onclick="openConfirm()">
+        セレクト結果を書き出す →
+      </button>
+      <button class="btn-complete" onclick="confirmComplete()">✓ セレクト完了</button>
       <select id="langSelect" onchange="setLang(this.value)"
         style="background:var(--surface3);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:3px 8px;font-size:11px;cursor:pointer;font-family:inherit">
         <option value="ja">JP 日本語</option>
@@ -2434,76 +2502,6 @@
     }
   </style>
   <script>document.addEventListener('click', e => { if (!e.target.closest('#hamburgerBtn') && !e.target.closest('#selektNavMenu')) document.getElementById('selektNavMenu')?.classList.remove('open'); });</script>
-  <div id="expiryBanner"
-    style="display:none;background:var(--surface2);border:1px solid var(--border2);color:var(--text-sub);padding:4px 14px;border-radius:8px;font-size:11px;font-weight:500;white-space:nowrap;margin-left:auto;margin-right:8px;">
-    <span id="expiryText"></span>
-  </div>
-  <div class="topbar-right">
-    <div class="progress-wrap">
-      <span class="progress-label">セレクト進捗</span>
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
-      </div>
-      <span class="progress-count" id="progressCount">0 / 15</span>
-    </div>
-    <div class="topbar-divider"></div>
-    <div class="topbar-divider"></div>
-    <div class="dl-dropdown" style="position:relative">
-      <button class="btn-download" onclick="toggleDlMenu()" id="dlBtn">
-        <svg viewBox="0 0 24 24">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-          <polyline points="7 10 12 15 17 10" />
-          <line x1="12" y1="15" x2="12" y2="3" />
-        </svg>
-        DL ▾
-      </button>
-      <div class="dl-menu" id="dlMenu">
-        <div class="dl-menu-label">フルサイズ（原寸）</div>
-        <div class="dl-row">
-          <span class="dl-row-label">全部</span>
-          <button class="dl-row-btn" onclick="downloadPhotos('all','full')">📦 DL</button>
-        </div>
-        <div class="dl-row">
-          <span class="dl-row-label">✓ OKのみ</span>
-          <button class="dl-row-btn" onclick="downloadPhotos('ok','full')">📦 DL</button>
-        </div>
-        <div class="dl-row">
-          <span class="dl-row-label">△ OK+保留</span>
-          <button class="dl-row-btn" onclick="downloadPhotos('ok+nearok','full')">📦 DL</button>
-        </div>
-        <div class="dl-row">
-          <span class="dl-row-label">✕ NGのみ</span>
-          <button class="dl-row-btn" onclick="downloadPhotos('ng','full')">📦 DL</button>
-        </div>
-        <hr class="dl-sep">
-        <div class="dl-menu-label">SNS用（1〜3MB圧縮）</div>
-        <div class="dl-row">
-          <span class="dl-row-label">全部</span>
-          <button class="dl-row-btn" onclick="downloadPhotos('all','sns')">📱 DL</button>
-        </div>
-        <div class="dl-row">
-          <span class="dl-row-label">✓ OKのみ</span>
-          <button class="dl-row-btn" onclick="downloadPhotos('ok','sns')">📱 DL</button>
-          <button class="dl-row-btn" onclick="batchDownloadPhotos('ok')" style="font-size:10px">📱 1枚ずつ保存</button>
-        </div>
-        <div class="dl-row">
-          <span class="dl-row-label">△ OK+保留</span>
-          <button class="dl-row-btn" onclick="downloadPhotos('ok+nearok','sns')">📱 DL</button>
-          <button class="dl-row-btn" onclick="batchDownloadPhotos('ok+nearok')" style="font-size:10px">📱
-            1枚ずつ保存</button>
-        </div>
-        <div class="dl-row">
-          <span class="dl-row-label">✕ NGのみ</span>
-          <button class="dl-row-btn" onclick="downloadPhotos('ng','sns')">📱 DL</button>
-        </div>
-      </div>
-    </div>
-    <button class="btn-complete" onclick="openConfirm()">
-      セレクト結果を書き出す →
-    </button>
-    <button class="btn-complete" onclick="confirmComplete()">✓ セレクト完了</button>
-  </div>
-  </div>
 
   <!-- Mobile progress bar -->
   <div class="mobile-progress" id="mobileProgress">
