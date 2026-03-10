@@ -87,6 +87,24 @@
       z-index: 100;
     }
 
+    .topbar #sessionTitle {
+      color: #fff;
+    }
+
+    .topbar #expiryBanner {
+      color: #fff;
+    }
+
+    [data-theme="light"] .topbar #sessionTitle {
+      color: #111;
+    }
+
+    [data-theme="light"] .topbar #expiryBanner {
+      color: #111;
+      background: rgba(0, 0, 0, 0.06);
+      border-color: rgba(0, 0, 0, 0.12);
+    }
+
     .logo {
       font-size: 18px;
       font-weight: 800;
@@ -2396,7 +2414,7 @@
     <div class="topbar-divider"></div>
     <div class="session-name" style="display:flex;align-items:center;gap:12px">
       <strong id="sessionTitle" onclick="editSessionTitle()"
-        style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:19px;font-weight:800;color:var(--text)"
+        style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:19px;font-weight:800;color:#fff"
         title="クリックで編集">プロジェクト名未設定
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round"
@@ -2407,7 +2425,7 @@
         </svg></strong>
       <span id="sessionPhotographer" style="color:var(--text-dim);font-size:12px"></span>
       <div id="expiryBanner"
-        style="display:none;background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.3);color:var(--coral);padding:5px 14px;border-radius:8px;font-size:13px;font-weight:700;white-space:nowrap">
+        style="display:none;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;padding:5px 14px;border-radius:8px;font-size:14px;font-weight:700;white-space:nowrap">
         <span id="expiryText"></span>
       </div>
     </div>
