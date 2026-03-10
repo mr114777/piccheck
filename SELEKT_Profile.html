@@ -1848,27 +1848,6 @@
     <input type="file" id="portfolioInput" class="hidden-input" accept="image/*"
         onchange="handlePortfolioUpload(event)">
 
-    <!-- CROPPER MODAL -->
-    <div class="modal-overlay" id="cropModal">
-        <div class="modal">
-            <h3 data-i18n="cropAvatar">アイコンの位置調整</h3>
-            <div class="crop-container" id="cropContainer">
-                <canvas id="cropCanvas"></canvas>
-                <div class="crop-mask"></div>
-            </div>
-            <div class="crop-controls">
-                <span>-</span>
-                <input type="range" id="cropZoom" min="1" max="3" step="0.01" value="1">
-                <span>+</span>
-            </div>
-            <div style="display: flex; gap: 12px; margin-top: 24px;">
-                <button class="btn-outline" onclick="closeCropModal()" style="flex:1"
-                    data-i18n="cancelBtn">キャンセル</button>
-                <button class="btn" onclick="applyCrop()" style="flex:1" data-i18n="applyBtn">適用</button>
-            </div>
-        </div>
-    </div>
-
     <!-- PREMIUM PUBLIC PROFILE PREVIEW (LIT.LINK / APP CARD STYLE) -->
     <div class="preview-overlay" id="previewOverlay">
         <!-- Top bar -->
