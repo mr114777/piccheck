@@ -831,6 +831,24 @@
             border-radius: 2px;
         }
 
+        /* ── Cropper Modal Specifics ── */
+        #cropModal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        #cropModal.open {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
         /* ── Cropper Modal ── */
         .crop-container {
             width: 100%;
