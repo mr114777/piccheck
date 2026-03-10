@@ -1173,8 +1173,7 @@
         .pv-card {
             position: relative;
             z-index: 2;
-            /* In dark mode, mix accent with dark bg. In light mode, mix accent with white. */
-            background: color-mix(in srgb, var(--accent) 45%, var(--bg));
+            background: var(--accent);
             border-radius: 40px 40px 0 0;
             margin-top: -60px;
             padding: 0 28px 40px;
@@ -1187,7 +1186,7 @@
         }
 
         body[data-mode="light"] .pv-card {
-            background: color-mix(in srgb, var(--accent) 25%, var(--bg));
+            background: var(--accent);
             box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.08);
             border-top: 1px solid rgba(255, 255, 255, 0.5);
         }
@@ -1206,15 +1205,14 @@
             width: 140px;
             height: 140px;
             border-radius: 50%;
-            /* Matches pv-card bg */
-            background: color-mix(in srgb, var(--accent) 45%, var(--bg));
+            background: var(--accent);
             padding: 8px;
             margin-bottom: 16px;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
         }
 
         body[data-mode="light"] .pv-avatar-outer {
-            background: color-mix(in srgb, var(--accent) 25%, var(--bg));
+            background: var(--accent);
         }
 
         .pv-avatar {
