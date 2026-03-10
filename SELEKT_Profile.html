@@ -804,9 +804,82 @@
             transform: translateY(-1px);
         }
 
-        .btn-primary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        /* ── Range Slider ── */
+        input[type=range] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: var(--border);
+            border-radius: 2px;
+        }
+
+        /* ── Cropper Modal ── */
+        .crop-container {
+            width: 100%;
+            height: 300px;
+            position: relative;
+            background: #111;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 20px 0;
+            touch-action: none;
+            /* Prevent scrolling while dragging */
+        }
+
+        #cropCanvas {
+            position: absolute;
+            transform-origin: center;
+            cursor: grab;
+        }
+
+        #cropCanvas:active {
+            cursor: grabbing;
+        }
+
+        .crop-mask {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            /* Creates a dark overlay with a transparent hole in the middle */
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6);
+            border-radius: 50%;
+            width: 250px;
+            height: 250px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .crop-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 0 16px;
+        }
+
+        .crop-controls span {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--text-sub);
         }
 
         .btn-outline {
@@ -1048,7 +1121,8 @@
             height: 360px;
             margin-top: 48px;
             overflow: hidden;
-            background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 60%, #1a0520));
+            background: var(--surface);
+            /* Changed from accent so the card can take the theme color */
         }
 
         .pv-hero img {
@@ -1074,7 +1148,8 @@
         .pv-card {
             position: relative;
             z-index: 2;
-            background: var(--surface);
+            /* In dark mode, mix accent with dark bg. In light mode, mix accent with white. */
+            background: color-mix(in srgb, var(--accent) 15%, var(--bg));
             border-radius: 40px 40px 0 0;
             margin-top: -60px;
             padding: 0 28px 40px;
@@ -1087,6 +1162,7 @@
         }
 
         body[data-mode="light"] .pv-card {
+            background: color-mix(in srgb, var(--accent) 8%, var(--bg));
             box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.08);
             border-top: 1px solid rgba(255, 255, 255, 0.5);
         }
@@ -1105,11 +1181,15 @@
             width: 140px;
             height: 140px;
             border-radius: 50%;
-            background: var(--surface);
-            /* Matches card bg to create cutout effect */
+            /* Matches pv-card bg */
+            background: color-mix(in srgb, var(--accent) 15%, var(--bg));
             padding: 8px;
             margin-bottom: 16px;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        body[data-mode="light"] .pv-avatar-outer {
+            background: color-mix(in srgb, var(--accent) 8%, var(--bg));
         }
 
         .pv-avatar {
@@ -1750,6 +1830,27 @@
     <input type="file" id="portfolioInput" class="hidden-input" accept="image/*"
         onchange="handlePortfolioUpload(event)">
 
+    <!-- CROPPER MODAL -->
+    <div class="modal-overlay" id="cropModal">
+        <div class="modal">
+            <h3 data-i18n="cropAvatar">アイコンの位置調整</h3>
+            <div class="crop-container" id="cropContainer">
+                <canvas id="cropCanvas"></canvas>
+                <div class="crop-mask"></div>
+            </div>
+            <div class="crop-controls">
+                <span>-</span>
+                <input type="range" id="cropZoom" min="1" max="3" step="0.01" value="1">
+                <span>+</span>
+            </div>
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button class="btn-outline" onclick="closeCropModal()" style="flex:1"
+                    data-i18n="cancelBtn">キャンセル</button>
+                <button class="btn" onclick="applyCrop()" style="flex:1" data-i18n="applyBtn">適用</button>
+            </div>
+        </div>
+    </div>
+
     <!-- PREMIUM PUBLIC PROFILE PREVIEW (LIT.LINK / APP CARD STYLE) -->
     <div class="preview-overlay" id="previewOverlay">
         <!-- Top bar -->
@@ -1946,26 +2047,122 @@
             reader.readAsDataURL(file); e.target.value = '';
         }
 
-        // ===== AVATAR PHOTO =====
+        // ===== AVATAR PHOTO CROPPER =====
+        let cropImg = null;
+        let cropX = 0, cropY = 0;
+        let cropScale = 1;
+        let isDragging = false;
+        let startX, startY;
+        const cropCanvas = document.getElementById('cropCanvas');
+        const cropCtx = cropCanvas.getContext('2d');
+        const cropModal = document.getElementById('cropModal');
+        const cropZoom = document.getElementById('cropZoom');
+
+        function drawCrop() {
+            if (!cropImg) return;
+            const targetSize = 300; // Internal resolution of cropped image
+            // Canvas display size in UI:
+            const displaySize = 250;
+            cropCanvas.width = displaySize;
+            cropCanvas.height = displaySize;
+
+            // clear background
+            cropCtx.clearRect(0, 0, displaySize, displaySize);
+
+            // Calc dimensions based on scale
+            const w = cropImg.width * cropScale * (displaySize / targetSize);
+            const h = cropImg.height * cropScale * (displaySize / targetSize);
+
+            // Draw image centered at current X/Y offset
+            cropCtx.drawImage(cropImg, (displaySize / 2) - (w / 2) + cropX, (displaySize / 2) - (h / 2) + cropY, w, h);
+        }
+
+        cropZoom.addEventListener('input', (e) => {
+            cropScale = parseFloat(e.target.value);
+            drawCrop();
+        });
+
+        // Mouse/Touch Drag Events
+        function onDragStart(e) {
+            isDragging = true;
+            startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            startY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+        }
+
+        function onDragMove(e) {
+            if (!isDragging) return;
+            e.preventDefault(); // prevent scrolling
+            const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+            cropX += (clientX - startX);
+            cropY += (clientY - startY);
+            startX = clientX;
+            startY = clientY;
+            drawCrop();
+        }
+
+        function onDragEnd() { isDragging = false; }
+
+        cropCanvas.addEventListener('mousedown', onDragStart);
+        window.addEventListener('mousemove', onDragMove);
+        window.addEventListener('mouseup', onDragEnd);
+        cropCanvas.addEventListener('touchstart', onDragStart, { passive: false });
+        window.addEventListener('touchmove', onDragMove, { passive: false });
+        window.addEventListener('touchend', onDragEnd);
+
         function handleAvatarUpload(e) {
             const file = e.target.files[0]; if (!file) return;
             const reader = new FileReader();
             reader.onload = ev => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const size = 300; let w = img.width, h = img.height;
-                    const min = Math.min(w, h);
-                    const sx = (w - min) / 2, sy = (h - min) / 2;
-                    canvas.width = size; canvas.height = size;
-                    canvas.getContext('2d').drawImage(img, sx, sy, min, min, 0, 0, size, size);
-                    const data = canvas.toDataURL('image/jpeg', 0.85);
-                    localStorage.setItem('selekt_avatar_photo', data);
-                    displayAvatarPhoto(data);
+                cropImg = new Image();
+                cropImg.onload = () => {
+                    // Reset cropper state
+                    cropX = 0; cropY = 0;
+                    // Auto-calculate initial scale so the smallest dimension fills the 300px circle
+                    const minDim = Math.min(cropImg.width, cropImg.height);
+                    cropScale = 300 / minDim;
+
+                    // Update slider (min is filling, max is 3x Zoom)
+                    cropZoom.min = cropScale;
+                    cropZoom.max = cropScale * 3;
+                    cropZoom.value = cropScale;
+
+                    cropModal.classList.add('open');
+                    drawCrop();
+                    document.body.style.overflow = 'hidden';
                 };
-                img.src = ev.target.result;
+                cropImg.src = ev.target.result;
             };
             reader.readAsDataURL(file); e.target.value = '';
+        }
+
+        function closeCropModal() {
+            cropModal.classList.remove('open');
+            document.body.style.overflow = '';
+            cropImg = null;
+        }
+
+        function applyCrop() {
+            if (!cropImg) return;
+            // Native render size
+            const size = 300;
+            const finalCanvas = document.createElement('canvas');
+            finalCanvas.width = size;
+            finalCanvas.height = size;
+            const ctx = finalCanvas.getContext('2d');
+
+            // Draw matching the display ratios
+            const w = cropImg.width * cropScale;
+            const h = cropImg.height * cropScale;
+            // The display size ratio vs target size 
+            const ratio = size / 250; // because display canvas is 250x250
+
+            ctx.drawImage(cropImg, (size / 2) - (w / 2) + (cropX * ratio), (size / 2) - (h / 2) + (cropY * ratio), w, h);
+
+            const data = finalCanvas.toDataURL('image/jpeg', 0.9);
+            localStorage.setItem('selekt_avatar_photo', data);
+            displayAvatarPhoto(data);
+            closeCropModal();
         }
 
         function displayAvatarPhoto(src) {
