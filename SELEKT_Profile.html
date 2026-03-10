@@ -117,7 +117,7 @@
 
         .cover-photo {
             width: 100%;
-            height: 260px;
+            height: 320px;
             background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 60%, #000));
             border-radius: 0 0 20px 20px;
             object-fit: cover;
@@ -157,25 +157,55 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: -60px;
+            margin-top: -70px;
             position: relative;
             z-index: 2;
         }
 
         .avatar-large {
-            width: 120px;
-            height: 120px;
+            width: 140px;
+            height: 140px;
             border-radius: 50%;
             background: var(--accent);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 44px;
+            font-size: 48px;
             font-weight: 800;
             color: #fff;
             font-family: var(--heading-font);
             box-shadow: 0 0 0 4px var(--bg), 0 4px 20px rgba(0, 0, 0, 0.3);
             position: relative;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .avatar-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+        }
+
+        .avatar-edit-hint {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 3;
+            color: #fff;
+        }
+
+        .avatar-large:hover .avatar-edit-hint {
+            opacity: 1;
         }
 
         .avatar-ring {
@@ -203,9 +233,9 @@
         }
 
         .profile-name {
-            font-size: 30px;
+            font-size: 34px;
             font-weight: 700;
-            margin-top: 12px;
+            margin-top: 14px;
             font-family: var(--heading-font);
             transition: letter-spacing 0.3s, text-transform 0.3s;
         }
@@ -1209,12 +1239,19 @@
         </div>
     </div>
     <input type="file" id="coverInput" class="hidden-input" accept="image/*" onchange="handleCoverUpload(event)">
+    <input type="file" id="avatarInput" class="hidden-input" accept="image/*" onchange="handleAvatarUpload(event)">
 
     <!-- AVATAR + INFO -->
     <div class="avatar-area">
-        <div class="avatar-large" id="avatarLarge">
+        <div class="avatar-large" id="avatarLarge" onclick="document.getElementById('avatarInput').click()">
             <div class="avatar-ring"></div>
-            <span style="position:relative;z-index:1">?</span>
+            <span style="position:relative;z-index:1" id="avatarInitial">?</span>
+            <div class="avatar-edit-hint">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                    <circle cx="12" cy="13" r="4" />
+                </svg>
+            </div>
         </div>
         <div class="profile-name" id="profileName">---</div>
         <div class="profile-id" id="profileId">@---</div>
@@ -1602,6 +1639,9 @@
             // Cover photo
             const cover = localStorage.getItem('selekt_cover_photo');
             if (cover) { const coverEl = document.getElementById('coverPhoto'); coverEl.innerHTML = `<img src="${cover}"><div class="cover-edit-hint"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span data-i18n="changeCover">${pt('changeCover')}</span></div>`; }
+            // Avatar photo
+            const avatarSrc = localStorage.getItem('selekt_avatar_photo');
+            if (avatarSrc) { displayAvatarPhoto(avatarSrc); }
         }
 
         // ===== COVER PHOTO =====
@@ -1626,10 +1666,44 @@
             reader.readAsDataURL(file); e.target.value = '';
         }
 
+        // ===== AVATAR PHOTO =====
+        function handleAvatarUpload(e) {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = ev => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const size = 300; let w = img.width, h = img.height;
+                    const min = Math.min(w, h);
+                    const sx = (w - min) / 2, sy = (h - min) / 2;
+                    canvas.width = size; canvas.height = size;
+                    canvas.getContext('2d').drawImage(img, sx, sy, min, min, 0, 0, size, size);
+                    const data = canvas.toDataURL('image/jpeg', 0.85);
+                    localStorage.setItem('selekt_avatar_photo', data);
+                    displayAvatarPhoto(data);
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file); e.target.value = '';
+        }
+
+        function displayAvatarPhoto(src) {
+            const el = document.getElementById('avatarLarge');
+            let imgEl = el.querySelector('img');
+            if (!imgEl) { imgEl = document.createElement('img'); el.appendChild(imgEl); }
+            imgEl.src = src;
+            document.getElementById('avatarInitial').style.display = 'none';
+        }
+
         // ===== UI UPDATE =====
         function updateUI() {
             if (!currentUser) return;
-            document.getElementById('avatarLarge').querySelector('span').textContent = currentUser.displayName.charAt(0).toUpperCase();
+            const avatarPhoto = localStorage.getItem('selekt_avatar_photo');
+            if (avatarPhoto) { displayAvatarPhoto(avatarPhoto); } else {
+                document.getElementById('avatarInitial').textContent = currentUser.displayName.charAt(0).toUpperCase();
+                document.getElementById('avatarInitial').style.display = '';
+            }
             document.getElementById('profileName').textContent = currentUser.displayName;
             document.getElementById('profileId').textContent = '@' + (currentUser.id || currentUser.displayName.toLowerCase().replace(/\s/g, '_'));
 
