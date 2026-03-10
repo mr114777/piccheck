@@ -1173,7 +1173,7 @@
         .pv-card {
             position: relative;
             z-index: 2;
-            background: color-mix(in srgb, var(--accent) 15%, var(--bg));
+            background: color-mix(in srgb, var(--accent) 40%, var(--bg));
             border-radius: 40px 40px 0 0;
             margin-top: -60px;
             padding: 0 28px 40px;
@@ -1186,7 +1186,7 @@
         }
 
         body[data-mode="light"] .pv-card {
-            background: color-mix(in srgb, var(--accent) 8%, var(--bg));
+            background: color-mix(in srgb, var(--accent) 25%, var(--bg));
             box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.08);
             border-top: 1px solid rgba(255, 255, 255, 0.5);
         }
@@ -1205,14 +1205,14 @@
             width: 140px;
             height: 140px;
             border-radius: 50%;
-            background: color-mix(in srgb, var(--accent) 15%, var(--bg));
+            background: color-mix(in srgb, var(--accent) 40%, var(--bg));
             padding: 8px;
             margin-bottom: 16px;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
         }
 
         body[data-mode="light"] .pv-avatar-outer {
-            background: color-mix(in srgb, var(--accent) 8%, var(--bg));
+            background: color-mix(in srgb, var(--accent) 25%, var(--bg));
         }
 
         .pv-avatar {
@@ -1661,24 +1661,24 @@
                 <div class="style-row">
                     <div class="style-label" data-i18n="accentColor">アクセントカラー</div>
                     <div class="color-presets" id="colorPresets">
-                        <div class="color-dot selected" data-color="#4A9EE0" style="background:#16232f"
+                        <div class="color-dot selected" data-color="#4A9EE0" style="background:#254763"
                             onclick="setAccentColor('#4A9EE0',this)"></div>
-                        <div class="color-dot" data-color="#A78BFA" style="background:#242033"
+                        <div class="color-dot" data-color="#A78BFA" style="background:#4b3f6e"
                             onclick="setAccentColor('#A78BFA',this)"></div>
-                        <div class="color-dot" data-color="#F472B6" style="background:#301c29"
+                        <div class="color-dot" data-color="#F472B6" style="background:#693552"
                             onclick="setAccentColor('#F472B6',this)"></div>
-                        <div class="color-dot" data-color="#E63946" style="background:#2e1418"
+                        <div class="color-dot" data-color="#E63946" style="background:#641f26"
                             onclick="setAccentColor('#E63946',this)"></div>
-                        <div class="color-dot" data-color="#FB923C" style="background:#312117"
+                        <div class="color-dot" data-color="#FB923C" style="background:#6c4222"
                             onclick="setAccentColor('#FB923C',this)"></div>
-                        <div class="color-dot" data-color="#4CAF7D" style="background:#162520"
+                        <div class="color-dot" data-color="#4CAF7D" style="background:#264e3c"
                             onclick="setAccentColor('#4CAF7D',this)"></div>
-                        <div class="color-dot" data-color="#B8860B" style="background:#271f0f"
+                        <div class="color-dot" data-color="#B8860B" style="background:#513d0e"
                             onclick="setAccentColor('#B8860B',this)"></div>
-                        <div class="color-dot" data-color="#E8EAF0" style="background:#2e2e32"
+                        <div class="color-dot" data-color="#E8EAF0" style="background:#65656a"
                             onclick="setAccentColor('#E8EAF0',this)"></div>
                         <div class="color-dot" data-color="#000000"
-                            style="background:#0b0b0e; border: 1px solid rgba(255,255,255,0.25)"
+                            style="background:#08080a; border: 1px solid rgba(255,255,255,0.25)"
                             onclick="setAccentColor('#000000',this)"></div>
                         <div class="color-picker-wrap"><input type="color" id="customColorPicker" value="#4A9EE0"
                                 oninput="setAccentColor(this.value,null)"></div>
