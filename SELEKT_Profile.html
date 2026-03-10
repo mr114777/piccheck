@@ -1041,91 +1041,69 @@
             transform: scale(1.04);
         }
 
-        /* ── Hero Cover Section ── */
+        /* ── Hero Cover Section (Background Header) ── */
         .pv-hero {
             position: relative;
             width: 100%;
-            min-height: 520px;
+            height: 320px;
             margin-top: 48px;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-end;
-            padding-bottom: 60px;
+            background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 60%, #1a0520));
         }
 
-        .pv-hero-bg {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(160deg, var(--accent), color-mix(in srgb, var(--accent) 40%, #1a0520));
-            z-index: 0;
-        }
-
-        .pv-hero-bg img {
+        .pv-hero img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            opacity: 0.85;
+            opacity: 0.9;
         }
 
         .pv-hero-gradient {
             position: absolute;
             inset: 0;
             z-index: 1;
-            background: linear-gradient(180deg,
-                    rgba(0, 0, 0, 0) 0%,
-                    rgba(0, 0, 0, 0.05) 40%,
-                    rgba(0, 0, 0, 0.4) 70%,
-                    rgba(0, 0, 0, 0.75) 100%);
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.3) 100%);
             pointer-events: none;
         }
 
         body[data-mode="light"] .pv-hero-gradient {
-            background: linear-gradient(180deg,
-                    rgba(255, 255, 255, 0) 0%,
-                    rgba(255, 255, 255, 0.05) 40%,
-                    rgba(0, 0, 0, 0.15) 70%,
-                    rgba(0, 0, 0, 0.5) 100%);
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.15) 100%);
         }
 
-        .pv-hero-vignette {
-            position: absolute;
-            inset: 0;
-            z-index: 1;
-            box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.3);
-            pointer-events: none;
-        }
-
-        /* ── Avatar + Info (inside hero) ── */
-        .pv-profile-info {
+        /* ── Main Content Card (Overlaps Hero) ── */
+        .pv-card {
             position: relative;
-            z-index: 3;
+            z-index: 2;
+            background: var(--bg);
+            border-radius: 40px 40px 0 0;
+            margin-top: -60px;
+            padding: 0 28px 40px;
+            min-height: calc(100vh - 320px + 60px);
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.1);
+            max-width: 860px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* ── Avatar (Overlaps Card Border) ── */
+        .pv-profile-info {
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
+            transform: translateY(-56px);
+            margin-bottom: -30px;
         }
 
         .pv-avatar-outer {
-            width: 164px;
-            height: 164px;
+            width: 112px;
+            height: 112px;
             border-radius: 50%;
-            padding: 4px;
-            background: conic-gradient(from 0deg, var(--accent), #fff, var(--accent), #fff, var(--accent));
-            animation: pvRingSpin 6s linear infinite;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
-        }
-
-        @keyframes pvRingSpin {
-            from {
-                transform: rotate(0deg);
-            }
-
-            to {
-                transform: rotate(360deg);
-            }
+            background: var(--bg);
+            /* Matches card bg to create cutout effect */
+            padding: 6px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         }
 
         .pv-avatar {
@@ -1136,7 +1114,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 56px;
+            font-size: 36px;
             font-weight: 800;
             color: #fff;
             font-family: var(--heading-font);
@@ -1153,155 +1131,118 @@
         }
 
         .pv-name {
-            font-size: 42px;
+            font-size: 28px;
             font-weight: 800;
             font-family: var(--heading-font);
-            color: #fff;
-            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+            color: var(--text);
             letter-spacing: -0.5px;
-            line-height: 1.1;
+            line-height: 1.2;
         }
 
         .pv-id {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.6);
-            margin-top: 6px;
-            font-weight: 400;
+            font-size: 13px;
+            color: var(--text-sub);
+            margin-top: 4px;
+            font-weight: 500;
             letter-spacing: 0.5px;
         }
 
         .pv-badges {
             display: flex;
             justify-content: center;
-            gap: 8px;
-            margin-top: 12px;
+            gap: 6px;
+            margin-top: 14px;
         }
 
         .pv-badges .badge {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            color: #fff;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
             font-size: 11px;
-            padding: 5px 14px;
-            border-radius: 20px;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 10px;
         }
 
-        body[data-mode="light"] .pv-badges .badge {
-            background: rgba(0, 0, 0, 0.1);
-            border-color: rgba(0, 0, 0, 0.15);
-            color: #fff;
-        }
-
-        /* ── Content Area (below hero) ── */
+        /* ── Content Area (Inside Card) ── */
         .pv-content {
-            max-width: 860px;
-            margin: 0 auto;
-            padding: 0 28px;
+            width: 100%;
         }
 
         /* Bio Section */
         .pv-bio-section {
-            padding: 40px 0 0;
             text-align: center;
+            margin-bottom: 32px;
         }
 
         .pv-bio {
-            font-size: 16px;
+            font-size: 15px;
             color: var(--text-sub);
-            line-height: 2;
-            max-width: 560px;
+            line-height: 1.8;
+            max-width: 500px;
             margin: 0 auto;
             white-space: pre-wrap;
-            font-style: italic;
         }
 
-        /* ── SNS Links ── */
+        /* ── SNS Links (Lit.Link Style Pill Buttons) ── */
         .pv-sns-section {
-            padding: 32px 0 0;
+            margin-bottom: 40px;
         }
 
-        .pv-section-title {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            color: var(--text-dim);
-            margin-bottom: 18px;
-            text-align: center;
-        }
-
-        .pv-sns-row {
+        .pv-sns-list {
             display: flex;
-            gap: 14px;
-            justify-content: center;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 480px;
+            margin: 0 auto;
         }
 
         .pv-sns-card {
             display: flex;
             align-items: center;
-            gap: 14px;
-            padding: 18px 28px;
+            padding: 12px 20px;
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 16px;
+            border-radius: 40px;
+            /* Pill shape */
             color: var(--text);
             text-decoration: none;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            min-width: 200px;
-            justify-content: center;
+            transition: all 0.2s;
             position: relative;
-            overflow: hidden;
         }
 
-        .pv-sns-card::before {
-            content: '';
+        .pv-sns-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            border-color: var(--text-dim);
+        }
+
+        /* Disabled/Unset State */
+        .pv-sns-card.unset {
+            opacity: 0.4;
+            pointer-events: none;
+            filter: grayscale(100%);
+        }
+
+        .pv-sns-card.unset::after {
+            content: '未設定';
             position: absolute;
-            inset: 0;
-            opacity: 0;
-            transition: opacity 0.3s;
-            border-radius: 16px;
-        }
-
-        .pv-sns-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
-            border-color: transparent;
-        }
-
-        .pv-sns-card:hover::before {
-            opacity: 1;
-        }
-
-        .pv-sns-card.sns-x::before {
-            background: linear-gradient(135deg, #1a1a1a, #333);
-        }
-
-        .pv-sns-card.sns-ig::before {
-            background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-        }
-
-        .pv-sns-card.sns-yt::before {
-            background: linear-gradient(135deg, #FF0000, #cc0000);
-        }
-
-        .pv-sns-card:hover {
-            color: #fff;
+            right: 20px;
+            font-size: 11px;
+            color: var(--text-dim);
+            font-weight: 500;
         }
 
         .pv-sns-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
-            z-index: 1;
-            flex-shrink: 0;
+            margin-right: 16px;
         }
 
         .pv-sns-icon.x {
@@ -1319,9 +1260,15 @@
             color: #fff;
         }
 
-        .pv-sns-card span.pv-sns-text {
-            position: relative;
-            z-index: 1;
+        body[data-mode="light"] .pv-sns-icon.x {
+            background: #000;
+        }
+
+        .pv-sns-text {
+            flex-grow: 1;
+            text-align: center;
+            padding-right: 32px;
+            /* Balance the icon width to truly center the text */
         }
 
         /* ── Portfolio ── */
@@ -1797,7 +1744,7 @@
     <input type="file" id="portfolioInput" class="hidden-input" accept="image/*"
         onchange="handlePortfolioUpload(event)">
 
-    <!-- PREMIUM PUBLIC PROFILE PREVIEW -->
+    <!-- PREMIUM PUBLIC PROFILE PREVIEW (LIT.LINK / APP CARD STYLE) -->
     <div class="preview-overlay" id="previewOverlay">
         <!-- Top bar -->
         <div class="pv-topbar">
@@ -1805,11 +1752,14 @@
             <button class="pv-close-btn" onclick="closePreview()">✕ 閉じる</button>
         </div>
 
-        <!-- Hero Section: cover + avatar + name -->
+        <!-- Hero Section: Background Header -->
         <div class="pv-hero">
             <div class="pv-hero-bg" id="pvHeroBg"></div>
             <div class="pv-hero-gradient"></div>
-            <div class="pv-hero-vignette"></div>
+        </div>
+
+        <!-- Main Card Section (Overlaps Hero) -->
+        <div class="pv-card">
             <div class="pv-profile-info">
                 <div class="pv-avatar-outer">
                     <div class="pv-avatar" id="pvAvatar">
@@ -1820,31 +1770,29 @@
                 <div class="pv-id" id="pvId">@---</div>
                 <div class="pv-badges" id="pvBadges"></div>
             </div>
-        </div>
 
-        <!-- Content below hero -->
-        <div class="pv-content">
-            <!-- Bio -->
-            <div class="pv-bio-section">
-                <div class="pv-bio" id="pvBio"></div>
-            </div>
+            <div class="pv-content">
+                <!-- Bio -->
+                <div class="pv-bio-section">
+                    <div class="pv-bio" id="pvBio"></div>
+                </div>
 
-            <!-- SNS Cards -->
-            <div class="pv-sns-section" id="pvSnsSection" style="display:none">
-                <div class="pv-section-title">SOCIAL</div>
-                <div class="pv-sns-row" id="pvSnsRow"></div>
-            </div>
+                <!-- SNS Cards (Always visible, Lit.Link style) -->
+                <div class="pv-sns-section" id="pvSnsSection">
+                    <div class="pv-sns-list" id="pvSnsRow"></div>
+                </div>
 
-            <!-- Portfolio -->
-            <div class="pv-portfolio" id="pvPortfolioSection" style="display:none">
-                <div class="pv-section-title" data-i18n="portfolio">PORTFOLIO</div>
-                <div class="pv-portfolio-grid" id="pvPortfolio"></div>
-            </div>
+                <!-- Portfolio -->
+                <div class="pv-portfolio" id="pvPortfolioSection" style="display:none">
+                    <div class="pv-section-title" data-i18n="portfolio">PORTFOLIO</div>
+                    <div class="pv-portfolio-grid" id="pvPortfolio"></div>
+                </div>
 
-            <!-- Footer -->
-            <div class="pv-footer">
-                <div class="pv-divider"></div>
-                <span class="pv-powered">Powered by SELEKT</span>
+                <!-- Footer -->
+                <div class="pv-footer">
+                    <div class="pv-divider"></div>
+                    <span class="pv-powered">Powered by SELEKT</span>
+                </div>
             </div>
         </div>
     </div>
@@ -2211,7 +2159,6 @@
             const snsRow = document.getElementById('pvSnsRow');
             const snsSection = document.getElementById('pvSnsSection');
             snsRow.innerHTML = '';
-            let hasSns = false;
             const snsConfig = [
                 { key: 'socialX', label: 'X (Twitter)', cls: 'x', snsCls: 'sns-x', svg: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>' },
                 { key: 'socialInstagram', label: 'Instagram', cls: 'ig', snsCls: 'sns-ig', svg: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>' },
@@ -2220,11 +2167,13 @@
             snsConfig.forEach(({ key, label, cls, snsCls, svg }) => {
                 const url = currentUser[key];
                 if (url) {
-                    hasSns = true;
                     snsRow.innerHTML += `<a class="pv-sns-card ${snsCls}" href="${url}" target="_blank" rel="noopener"><span class="pv-sns-icon ${cls}">${svg}</span><span class="pv-sns-text">${label}</span></a>`;
+                } else {
+                    snsRow.innerHTML += `<a class="pv-sns-card ${snsCls} unset" href="#" onclick="event.preventDefault()"><span class="pv-sns-icon ${cls}">${svg}</span><span class="pv-sns-text">${label}</span></a>`;
                 }
             });
-            snsSection.style.display = hasSns ? '' : 'none';
+            // snsSection is always visible now to maintain design layout
+            snsSection.style.display = '';
 
             // Portfolio (3-col grid, first image featured)
             const pvGrid = document.getElementById('pvPortfolio');
