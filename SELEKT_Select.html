@@ -2329,10 +2329,10 @@
     <div class="logo">SE<span>LEKT</span></div>
     <div style="position:relative;flex-shrink:0">
       <button id="hamburgerBtn" onclick="document.getElementById('selektNavMenu').classList.toggle('open')"
-        style="background:none;border:1px solid var(--border);border-radius:8px;padding:6px 8px;cursor:pointer;display:flex;align-items:center;color:var(--text-sub);transition:all 0.2s"
-        onmouseover="this.style.borderColor='var(--text-sub)';this.style.color='var(--text)'"
-        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-sub)'">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        style="background:none;border:1px solid var(--border2);border-radius:8px;padding:7px 9px;cursor:pointer;display:flex;align-items:center;color:var(--text);transition:all 0.2s"
+        onmouseover="this.style.borderColor='var(--text-sub)';this.style.background='var(--surface2)'"
+        onmouseout="this.style.borderColor='var(--border2)';this.style.background='none'">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
           stroke-linecap="round">
           <line x1="3" y1="6" x2="21" y2="6" />
           <line x1="3" y1="12" x2="21" y2="12" />
@@ -2386,7 +2386,7 @@
     <div class="topbar-divider"></div>
     <div class="session-name" style="display:flex;align-items:center;gap:12px">
       <strong id="sessionTitle" onclick="editSessionTitle()"
-        style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:17px;font-weight:800"
+        style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:19px;font-weight:800;color:var(--text)"
         title="クリックで編集">プロジェクト名未設定
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round"
@@ -2471,16 +2471,16 @@
         <option value="en">EN English</option>
         <option value="zh">ZH 中文</option>
       </select>
-      <a href="SELEKT_Profile.html" title="アカウント"
-        style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:var(--surface3);border:1px solid var(--border);color:var(--text-sub);transition:all 0.2s;text-decoration:none"
-        onmouseover="this.style.borderColor='var(--text-sub)';this.style.color='var(--text)'"
-        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-sub)'">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
+      <a href="SELEKT_Profile.html" title="プロフィール" id="topbarAvatar"
+        style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:var(--surface3);border:2px solid var(--border2);color:var(--text-sub);transition:all 0.2s;text-decoration:none;overflow:hidden"
+        onmouseover="this.style.borderColor='var(--text-sub)'" onmouseout="this.style.borderColor='var(--border2)'">
+        <svg class="avatar-fallback" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
           <circle cx="12" cy="7" r="4" />
         </svg>
       </a>
+      <script>(function () { var p = localStorage.getItem('selekt_avatar_photo'); if (p) { var a = document.getElementById('topbarAvatar'); a.innerHTML = '<img src="' + p + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'; } })()</script>
     </div>
   </div>
   <style>
