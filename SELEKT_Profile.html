@@ -1,12 +1,12 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SELEKT — プロフィール</title>
+    <title>SELEKT 窶・繝励Ο繝輔ぅ繝ｼ繝ｫ</title>
     <link
-        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <style>
         :root {
@@ -22,8 +22,35 @@
             --accent: #4A9EE0;
             --accent2: #3BBFA5;
             --coral: #FF6B6B;
-            --green: #4CAF7D;
-            --yellow: #F5C842;
+            --heading-font: 'Syne', sans-serif;
+            --body-font: 'Zen Kaku Gothic New', sans-serif;
+        }
+
+        body[data-mode="light"] {
+            --bg: #F8F9FC;
+            --surface: #FFFFFF;
+            --surface2: #F0F1F5;
+            --surface3: #E8E9EE;
+            --border: #DFE1E8;
+            --border2: #CFD1D8;
+            --text: #1A1D26;
+            --text-sub: #6B7080;
+            --text-dim: #A0A5B0;
+        }
+
+        body[data-font="elegant"] {
+            --heading-font: 'Cormorant Garamond', serif;
+            --body-font: 'Inter', sans-serif;
+        }
+
+        body[data-font="bold"] {
+            --heading-font: 'Bebas Neue', sans-serif;
+            --body-font: 'Inter', sans-serif;
+        }
+
+        body[data-font="bold"] .profile-name {
+            letter-spacing: 4px;
+            text-transform: uppercase;
         }
 
         * {
@@ -33,36 +60,34 @@
         }
 
         body {
-            font-family: 'Zen Kaku Gothic New', sans-serif;
+            font-family: var(--body-font);
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
+            transition: background 0.4s, color 0.3s;
         }
 
-        /* ===== TOPBAR ===== */
+        /* TOPBAR */
         .topbar {
-            height: 56px;
+            height: 52px;
             background: var(--surface);
             border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
-            padding: 0 24px;
-            gap: 16px;
+            padding: 0 20px;
+            gap: 12px;
             position: sticky;
             top: 0;
-            z-index: 50;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            z-index: 100;
         }
 
         .logo {
-            font-size: 18px;
+            font-family: 'Syne', sans-serif;
             font-weight: 800;
+            font-size: 18px;
             color: var(--text);
-            letter-spacing: 2px;
-            text-transform: uppercase;
             text-decoration: none;
-            white-space: nowrap;
+            letter-spacing: 1px;
         }
 
         .logo span {
@@ -71,33 +96,8 @@
 
         .topbar-divider {
             width: 1px;
-            height: 24px;
+            height: 20px;
             background: var(--border);
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 4px;
-        }
-
-        .nav-link {
-            padding: 8px 14px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-sub);
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-
-        .nav-link:hover {
-            background: var(--surface2);
-            color: var(--text);
-        }
-
-        .nav-link.active {
-            background: var(--surface3);
-            color: var(--text);
         }
 
         .topbar-right {
@@ -107,85 +107,127 @@
             gap: 8px;
         }
 
-        /* ===== HERO HEADER ===== */
-        .profile-hero {
+        /* COVER PHOTO */
+        .cover-section {
             position: relative;
-            padding: 48px 24px 32px;
-            text-align: center;
-            overflow: hidden;
+            width: 100%;
+            max-width: 680px;
+            margin: 0 auto;
         }
 
-        .profile-hero::before {
-            content: '';
+        .cover-photo {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 60%, #000));
+            border-radius: 0 0 20px 20px;
+            object-fit: cover;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: background 0.3s;
+        }
+
+        .cover-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .cover-edit-hint {
             position: absolute;
             inset: 0;
-            background: radial-gradient(ellipse 600px 300px at 50% 0%, rgba(74, 158, 224, 0.08), transparent),
-                radial-gradient(ellipse 400px 200px at 30% 100%, rgba(59, 191, 165, 0.05), transparent);
-            pointer-events: none;
-        }
-
-        .avatar-wrap {
-            position: relative;
-            width: 110px;
-            height: 110px;
-            margin: 0 auto 20px;
-        }
-
-        .avatar-large {
-            width: 110px;
-            height: 110px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent), #3578C4, var(--accent2));
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 44px;
+            background: rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            transition: opacity 0.2s;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 500;
+            gap: 6px;
+        }
+
+        .cover-photo:hover .cover-edit-hint {
+            opacity: 1;
+        }
+
+        /* AVATAR OVERLAP */
+        .avatar-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: -50px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .avatar-large {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 38px;
             font-weight: 800;
             color: #fff;
-            font-family: 'Syne', sans-serif;
-            box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px rgba(74, 158, 224, 0.3), 0 8px 32px rgba(74, 158, 224, 0.2);
+            font-family: var(--heading-font);
+            box-shadow: 0 0 0 4px var(--bg), 0 4px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
         }
 
         .avatar-ring {
             position: absolute;
             inset: -4px;
             border-radius: 50%;
-            background: conic-gradient(from 0deg, var(--accent), var(--accent2), var(--accent));
-            -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #fff calc(100% - 2px));
-            mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #fff calc(100% - 2px));
-            animation: spin 8s linear infinite;
+            background: conic-gradient(from 0deg, var(--accent), var(--accent2, var(--accent)), var(--accent));
+            opacity: 0.4;
+            animation: ringPulse 3s infinite;
+            z-index: -1;
         }
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
+        @keyframes ringPulse {
+
+            0%,
+            100% {
+                opacity: 0.3;
+                transform: scale(1)
+            }
+
+            50% {
+                opacity: 0.6;
+                transform: scale(1.03)
             }
         }
 
         .profile-name {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 700;
-            margin-bottom: 4px;
-            font-family: 'Syne', 'Zen Kaku Gothic New', sans-serif;
+            margin-top: 12px;
+            font-family: var(--heading-font);
+            transition: letter-spacing 0.3s, text-transform 0.3s;
         }
 
         .profile-id {
             font-size: 13px;
             color: var(--text-sub);
-            margin-bottom: 14px;
+            margin-top: 2px;
         }
 
         .badge-row {
             display: flex;
-            justify-content: center;
-            gap: 8px;
+            gap: 6px;
+            margin-top: 10px;
             flex-wrap: wrap;
+            justify-content: center;
         }
 
         .badge {
-            padding: 5px 14px;
+            padding: 4px 12px;
             border-radius: 20px;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
             letter-spacing: 0.3px;
         }
@@ -206,29 +248,29 @@
         }
 
         .badge-plan.basic {
-            background: rgba(74, 158, 224, 0.1);
-            color: var(--accent);
-            border-color: rgba(74, 158, 224, 0.3);
+            background: rgba(245, 200, 66, 0.1);
+            color: #F5C842;
+            border-color: rgba(245, 200, 66, 0.3);
         }
 
         .badge-plan.pro {
-            background: rgba(59, 191, 165, 0.1);
-            color: var(--accent2);
-            border-color: rgba(59, 191, 165, 0.3);
+            background: rgba(167, 139, 250, 0.1);
+            color: #A78BFA;
+            border-color: rgba(167, 139, 250, 0.3);
         }
 
-        /* ===== BIO ===== */
+        /* BIO */
         .bio-section {
-            max-width: 520px;
-            margin: 0 auto 8px;
-            padding: 0 24px;
             text-align: center;
+            padding: 16px 24px 0;
+            max-width: 680px;
+            margin: 0 auto;
         }
 
         .bio-text {
-            font-size: 14px;
-            color: var(--text-sub);
+            font-size: 13px;
             line-height: 1.7;
+            color: var(--text-sub);
             white-space: pre-wrap;
             word-break: break-word;
         }
@@ -238,14 +280,104 @@
             color: var(--text-dim);
         }
 
-        /* ===== MAIN CONTENT ===== */
+        /* SNS LINK CARDS */
+        .sns-cards {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            padding: 16px 24px 0;
+            max-width: 680px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+        }
+
+        .sns-card {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text);
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+            min-width: 120px;
+        }
+
+        .sns-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .sns-card svg {
+            flex-shrink: 0;
+        }
+
+        .sns-card .sns-label {
+            color: var(--text-sub);
+        }
+
+        /* SOCIAL ROW (icon-only, hero) */
+        .social-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .social-icon-link {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-sub);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .social-icon-link:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        /* PREVIEW BTN */
+        .preview-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 14px;
+            padding: 7px 16px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            color: var(--text-sub);
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .preview-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* MAIN */
         .main {
             max-width: 680px;
             margin: 0 auto;
             padding: 24px 24px 80px;
         }
 
-        /* ===== PORTFOLIO ===== */
         .section {
             margin-bottom: 28px;
         }
@@ -259,19 +391,14 @@
 
         .section-title {
             font-size: 13px;
-            font-weight: 700;
+            font-weight: 600;
             color: var(--text-sub);
-            text-transform: uppercase;
-            letter-spacing: 1px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .section-title svg {
-            opacity: 0.5;
-        }
-
+        /* PORTFOLIO */
         .portfolio-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -287,7 +414,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s;
             position: relative;
             overflow: hidden;
         }
@@ -296,7 +423,6 @@
             border-color: var(--accent);
             background: rgba(74, 158, 224, 0.05);
             transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
         }
 
         .portfolio-slot.filled {
@@ -315,35 +441,29 @@
             transform: scale(1.05);
         }
 
-        .portfolio-slot .remove-btn {
+        .slot-remove {
             position: absolute;
-            top: 6px;
-            right: 6px;
-            width: 22px;
-            height: 22px;
+            top: 4px;
+            right: 4px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             background: rgba(0, 0, 0, 0.7);
+            color: #fff;
             border: none;
-            color: var(--coral);
-            font-size: 12px;
             cursor: pointer;
+            font-size: 10px;
             display: none;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(4px);
-            transition: background 0.15s;
+            z-index: 2;
         }
 
-        .portfolio-slot.filled:hover .remove-btn {
+        .portfolio-slot.filled:hover .slot-remove {
             display: flex;
         }
 
-        .portfolio-slot .remove-btn:hover {
-            background: rgba(255, 107, 107, 0.3);
-        }
-
         .slot-placeholder {
-            color: var(--text-dim);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -357,10 +477,9 @@
         .slot-placeholder span {
             font-size: 9px;
             opacity: 0.5;
-            letter-spacing: 0.3px;
         }
 
-        /* ===== CARD ===== */
+        /* CARD */
         .card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -374,32 +493,20 @@
         }
 
         .card-title {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-sub);
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-size: 14px;
+            font-weight: 600;
             margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 8px;
+            color: var(--text);
         }
 
-        .card-title svg {
-            opacity: 0.5;
-        }
-
-        /* ===== FORM ===== */
         .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group:last-child {
-            margin-bottom: 0;
+            margin-bottom: 18px;
         }
 
         .form-label {
-            display: block;
             font-size: 11px;
             font-weight: 600;
             color: var(--text-dim);
@@ -411,57 +518,170 @@
         .form-input,
         .form-textarea {
             width: 100%;
-            padding: 12px 14px;
             background: var(--surface2);
             border: 1px solid var(--border);
             border-radius: 10px;
+            padding: 12px 14px;
             color: var(--text);
-            font-size: 14px;
+            font-size: 13px;
             font-family: inherit;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            transition: border-color 0.2s;
+            outline: none;
         }
 
         .form-input:focus,
         .form-textarea:focus {
-            outline: none;
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(74, 158, 224, 0.1);
-        }
-
-        .form-input::placeholder,
-        .form-textarea::placeholder {
-            color: var(--text-dim);
-        }
-
-        .form-input:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
         }
 
         .form-textarea {
-            resize: vertical;
             min-height: 80px;
-            max-height: 160px;
-            line-height: 1.6;
+            resize: vertical;
         }
 
         .char-count {
             text-align: right;
-            font-size: 11px;
+            font-size: 10px;
             color: var(--text-dim);
             margin-top: 4px;
-            transition: color 0.2s;
         }
 
         .char-count.warning {
-            color: var(--yellow);
-        }
-
-        .char-count.over {
             color: var(--coral);
         }
 
-        /* Role grid */
+        /* STYLE CUSTOMIZER */
+        .style-section {
+            padding: 20px;
+        }
+
+        .style-row {
+            margin-bottom: 18px;
+        }
+
+        .style-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-dim);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .color-presets {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .color-dot {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .color-dot:hover {
+            transform: scale(1.15);
+        }
+
+        .color-dot.selected {
+            border-color: var(--text);
+            box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--text-sub);
+        }
+
+        .color-picker-wrap {
+            position: relative;
+        }
+
+        .color-picker-wrap input[type="color"] {
+            width: 28px;
+            height: 28px;
+            border: 2px dashed var(--border);
+            border-radius: 50%;
+            cursor: pointer;
+            background: none;
+            padding: 0;
+            -webkit-appearance: none;
+        }
+
+        .color-picker-wrap input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 2px;
+        }
+
+        .color-picker-wrap input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 50%;
+        }
+
+        .mode-toggle {
+            display: flex;
+            gap: 6px;
+        }
+
+        .mode-btn {
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--surface2);
+            color: var(--text-sub);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .mode-btn.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(74, 158, 224, 0.08);
+        }
+
+        .font-options {
+            display: flex;
+            gap: 6px;
+        }
+
+        .font-btn {
+            padding: 8px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--surface2);
+            color: var(--text-sub);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .font-btn.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(74, 158, 224, 0.08);
+        }
+
+        .font-btn[data-font="modern"] {
+            font-family: 'Syne', sans-serif;
+        }
+
+        .font-btn[data-font="elegant"] {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 14px;
+        }
+
+        .font-btn[data-font="bold"] {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 14px;
+            letter-spacing: 2px;
+        }
+
+        /* ROLE GRID */
         .role-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -469,268 +689,42 @@
         }
 
         .role-card {
-            padding: 12px 10px;
             background: var(--surface2);
             border: 2px solid var(--border);
-            border-radius: 10px;
+            border-radius: 12px;
+            padding: 14px;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .role-card:hover {
-            border-color: var(--text-dim);
+            border-color: var(--accent);
         }
 
         .role-card.selected {
             border-color: var(--accent);
             background: rgba(74, 158, 224, 0.06);
-            box-shadow: 0 0 0 1px rgba(74, 158, 224, 0.15);
+            box-shadow: 0 0 0 1px var(--accent);
         }
 
-        .role-card .role-icon {
-            margin-bottom: 4px;
-            opacity: 0.6;
+        .role-icon {
+            margin-bottom: 6px;
+            color: var(--text-sub);
         }
 
-        .role-card.selected .role-icon {
-            opacity: 1;
-        }
-
-        .role-card .role-name {
+        .role-name {
             font-size: 12px;
             font-weight: 600;
         }
 
-        .role-card .role-desc {
+        .role-desc {
             font-size: 10px;
             color: var(--text-dim);
-            margin-top: 1px;
+            margin-top: 2px;
         }
 
-        /* ===== BUTTONS ===== */
-        .btn-primary {
-            width: 100%;
-            padding: 13px;
-            background: linear-gradient(135deg, var(--accent), #3578C4);
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: opacity 0.2s, transform 0.1s;
-            letter-spacing: 0.3px;
-        }
-
-        .btn-primary:hover {
-            opacity: 0.9;
-        }
-
-        .btn-primary:active {
-            transform: scale(0.98);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-
-        .btn-outline {
-            width: 100%;
-            padding: 11px;
-            background: none;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            color: var(--text-sub);
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-outline:hover {
-            border-color: var(--text-dim);
-            color: var(--text);
-        }
-
-        .btn-danger {
-            width: 100%;
-            padding: 11px;
-            background: rgba(255, 107, 107, 0.06);
-            border: 1px solid rgba(255, 107, 107, 0.15);
-            border-radius: 10px;
-            color: var(--coral);
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-danger:hover {
-            background: rgba(255, 107, 107, 0.12);
-            border-color: rgba(255, 107, 107, 0.3);
-        }
-
-        /* ===== STAT ROW ===== */
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(42, 47, 62, 0.5);
-        }
-
-        .stat-row:last-of-type {
-            border-bottom: none;
-        }
-
-        .stat-label {
-            font-size: 13px;
-            color: var(--text-sub);
-        }
-
-        .stat-value {
-            font-size: 13px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .usage-bar-sm {
-            width: 80px;
-            height: 3px;
-            background: var(--border);
-            border-radius: 2px;
-            overflow: hidden;
-        }
-
-        .usage-bar-sm .fill {
-            height: 100%;
-            background: var(--accent);
-            border-radius: 2px;
-            transition: width 0.3s;
-        }
-
-        /* Upgrade link */
-        .upgrade-link {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 14px 16px;
-            margin-top: 16px;
-            background: linear-gradient(135deg, rgba(59, 191, 165, 0.06), rgba(74, 158, 224, 0.06));
-            border: 1px solid rgba(59, 191, 165, 0.15);
-            border-radius: 12px;
-            text-decoration: none;
-            color: inherit;
-            transition: border-color 0.2s, transform 0.1s;
-        }
-
-        .upgrade-link:hover {
-            border-color: rgba(59, 191, 165, 0.4);
-            transform: translateY(-1px);
-        }
-
-        .upgrade-link .upgrade-title {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--accent2);
-        }
-
-        .upgrade-link .upgrade-desc {
-            font-size: 10px;
-            color: var(--text-dim);
-            margin-top: 1px;
-        }
-
-        .upgrade-link .arrow {
-            margin-left: auto;
-            color: var(--accent2);
-            font-size: 16px;
-        }
-
-        /* ===== TOAST ===== */
-        .toast {
-            position: fixed;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%) translateY(80px);
-            background: var(--surface3);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 10px 24px;
-            font-size: 13px;
-            color: var(--text);
-            z-index: 999;
-            backdrop-filter: blur(12px);
-            transition: transform 0.3s ease;
-            pointer-events: none;
-        }
-
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-        }
-
-        .toast.success {
-            border-color: rgba(76, 175, 125, 0.4);
-            color: var(--green);
-        }
-
-        /* ===== DANGER SECTION ===== */
-        .danger-section {
-            border-color: rgba(255, 107, 107, 0.1);
-        }
-
-        .danger-section .card-title {
-            color: rgba(255, 107, 107, 0.7);
-        }
-
-        /* ===== SOCIAL LINKS ===== */
-        .social-row {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            margin-top: 14px;
-        }
-
-        .social-icon-link {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: var(--surface2);
-            border: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-sub);
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-
-        .social-icon-link:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-            background: rgba(74, 158, 224, 0.08);
-            transform: translateY(-2px);
-        }
-
-        .social-icon-link.x:hover {
-            color: #fff;
-            border-color: #fff;
-        }
-
-        .social-icon-link.instagram:hover {
-            color: #E4405F;
-            border-color: #E4405F;
-        }
-
-        .social-icon-link.youtube:hover {
-            color: #FF0000;
-            border-color: #FF0000;
-        }
-
+        /* SNS inputs */
         .social-input-group {
             display: flex;
             align-items: center;
@@ -760,93 +754,175 @@
             font-size: 13px;
         }
 
-        /* Hidden file input */
-        .hidden-input {
-            display: none;
+        /* BUTTONS */
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
         }
 
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 600px) {
-            .topbar {
-                padding: 0 12px;
-                gap: 8px;
-            }
-
-            .nav-links {
-                display: none;
-            }
-
-            .main {
-                padding: 20px 16px 80px;
-            }
-
-            .profile-hero {
-                padding: 32px 16px 24px;
-            }
-
-            .avatar-wrap {
-                width: 88px;
-                height: 88px;
-            }
-
-            .avatar-large {
-                width: 88px;
-                height: 88px;
-                font-size: 36px;
-            }
-
-            .profile-name {
-                font-size: 24px;
-            }
-
-            .portfolio-grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 6px;
-            }
-
-            .card {
-                padding: 20px 16px;
-                border-radius: 14px;
-            }
-
-            .role-grid {
-                gap: 6px;
-            }
-
-            .bio-section {
-                padding: 0 16px;
-            }
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
         }
 
-        @media (max-width: 380px) {
-            .portfolio-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
-        /* ===== PREVIEW MODE ===== */
-        .preview-btn {
-            display: inline-flex;
+        .btn-outline {
+            padding: 10px 16px;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-sub);
+            border-radius: 10px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            width: 100%;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--text-dim);
+            color: var(--text);
+        }
+
+        .btn-danger {
+            padding: 10px 16px;
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.25);
+            color: var(--coral);
+            border-radius: 10px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            width: 100%;
+        }
+
+        /* STAT ROW */
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 6px;
-            margin-top: 16px;
-            padding: 8px 18px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-sub);
+        }
+
+        .stat-value {
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .usage-bar-sm {
+            width: 80px;
+            height: 4px;
+            background: var(--surface3);
+            border-radius: 2px;
+            display: inline-block;
+        }
+
+        .usage-bar-sm .fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 2px;
+            display: block;
+        }
+
+        /* UPGRADE */
+        .upgrade-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
             background: var(--surface2);
             border: 1px solid var(--border);
-            border-radius: 20px;
-            color: var(--text-sub);
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text);
+            margin-top: 12px;
             transition: all 0.2s;
         }
 
-        .preview-btn:hover {
+        .upgrade-link:hover {
             border-color: var(--accent);
-            color: var(--accent);
-            background: rgba(74, 158, 224, 0.06);
+            transform: translateY(-1px);
         }
 
+        .upgrade-title {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .upgrade-desc {
+            font-size: 11px;
+            color: var(--text-sub);
+            margin-top: 2px;
+        }
+
+        .upgrade-link .arrow {
+            margin-left: auto;
+            font-size: 18px;
+            color: var(--text-dim);
+        }
+
+        /* DANGER */
+        .danger-section {
+            border-color: rgba(255, 107, 107, 0.15);
+        }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--surface3);
+            color: var(--text);
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: #1a3a2a;
+            color: #4CAF7D;
+            border: 1px solid rgba(76, 175, 125, 0.3);
+        }
+
+        /* PREVIEW OVERLAY */
         .preview-overlay {
             display: none;
             position: fixed;
@@ -854,24 +930,23 @@
             z-index: 2000;
             background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
             justify-content: center;
             align-items: center;
             padding: 24px;
-            animation: previewFadeIn 0.2s ease;
         }
 
         .preview-overlay.open {
             display: flex;
+            animation: pvFadeIn 0.2s ease;
         }
 
-        @keyframes previewFadeIn {
+        @keyframes pvFadeIn {
             from {
-                opacity: 0;
+                opacity: 0
             }
 
             to {
-                opacity: 1;
+                opacity: 1
             }
         }
 
@@ -879,11 +954,11 @@
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 20px;
-            max-width: 480px;
+            max-width: 420px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
-            padding: 32px 28px;
+            padding: 28px 24px;
             text-align: center;
             position: relative;
             box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
@@ -891,19 +966,19 @@
 
         .preview-close {
             position: absolute;
-            top: 14px;
-            right: 14px;
+            top: 12px;
+            right: 12px;
             background: var(--surface2);
             border: 1px solid var(--border);
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 28px;
+            height: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             color: var(--text-sub);
-            font-size: 14px;
+            font-size: 13px;
             transition: all 0.15s;
         }
 
@@ -913,42 +988,39 @@
         }
 
         .preview-avatar {
-            width: 80px;
-            height: 80px;
+            width: 72px;
+            height: 72px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent), #3578C4, var(--accent2));
+            background: var(--accent);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 800;
             color: #fff;
-            font-family: 'Syne', sans-serif;
-            margin: 0 auto 14px;
-            box-shadow: 0 4px 16px rgba(74, 158, 224, 0.2);
+            font-family: var(--heading-font);
+            margin: 0 auto 12px;
         }
 
         .preview-name {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
-            font-family: 'Syne', 'Zen Kaku Gothic New', sans-serif;
-            margin-bottom: 4px;
+            font-family: var(--heading-font);
         }
 
         .preview-bio {
-            font-size: 13px;
+            font-size: 12px;
             color: var(--text-sub);
             line-height: 1.6;
-            margin: 12px 0 16px;
+            margin: 10px 0 14px;
             white-space: pre-wrap;
-            word-break: break-word;
         }
 
         .preview-portfolio {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 6px;
-            margin: 16px 0;
+            gap: 5px;
+            margin: 14px 0;
         }
 
         .preview-portfolio img {
@@ -961,13 +1033,13 @@
         .preview-social {
             display: flex;
             justify-content: center;
-            gap: 10px;
-            margin-top: 14px;
+            gap: 8px;
+            margin-top: 12px;
         }
 
         .preview-social a {
-            width: 32px;
-            height: 32px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             background: var(--surface2);
             border: 1px solid var(--border);
@@ -979,30 +1051,83 @@
             transition: all 0.2s;
         }
 
-        .preview-social a:hover {
-            transform: translateY(-2px);
-        }
-
         .preview-label {
-            display: inline-block;
             font-size: 9px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 1px;
             color: var(--text-dim);
-            margin-top: 16px;
-            margin-bottom: 4px;
+            margin-bottom: 8px;
+        }
+
+        /* MENU */
+        #selektNavMenu.open {
+            display: block !important;
+            animation: menuFadeIn 0.15s ease;
+        }
+
+        @keyframes menuFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-4px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .hidden-input {
+            display: none;
+        }
+
+        /* RESPONSIVE */
+        @media(max-width:600px) {
+            .cover-photo {
+                height: 160px;
+                border-radius: 0 0 16px 16px;
+            }
+
+            .portfolio-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .sns-cards {
+                gap: 6px;
+            }
+
+            .sns-card {
+                min-width: auto;
+                flex: 1;
+                padding: 8px 12px;
+            }
+
+            .card {
+                padding: 20px 16px;
+                border-radius: 14px;
+            }
+
+            .role-grid {
+                gap: 6px;
+            }
+
+            .bio-section {
+                padding: 14px 16px 0;
+            }
+
+            .main {
+                padding: 20px 16px 80px;
+            }
         }
     </style>
 </head>
-
-<body>
-
-    <!-- Topbar -->
+<body data-mode="dark" data-font="modern">
+    <!-- TOPBAR -->
     <div class="topbar">
         <a class="logo" href="SELEKT_Dashboard.html">SE<span>LEKT</span></a>
         <div class="topbar-divider"></div>
-        <div style="font-size:13px;font-weight:500;color:var(--text-sub)" data-i18n="navProfile">プロフィール</div>
+        <div style="font-size:13px;font-weight:500;color:var(--text-sub)" data-i18n="navProfile">繝励Ο繝輔ぅ繝ｼ繝ｫ</div>
         <div class="topbar-right">
             <div style="display:flex;gap:4px">
                 <button class="lang-btn" onclick="setLang('ja')" id="langJa"
@@ -1010,9 +1135,8 @@
                 <button class="lang-btn" onclick="setLang('en')" id="langEn"
                     style="background:none;border:1px solid var(--border2);color:var(--text-sub);padding:2px 6px;border-radius:4px;font-size:10px;cursor:pointer">EN</button>
                 <button class="lang-btn" onclick="setLang('zh')" id="langZh"
-                    style="background:none;border:1px solid var(--border2);color:var(--text-sub);padding:2px 6px;border-radius:4px;font-size:10px;cursor:pointer">中</button>
+                    style="background:none;border:1px solid var(--border2);color:var(--text-sub);padding:2px 6px;border-radius:4px;font-size:10px;cursor:pointer">荳ｭ</button>
             </div>
-            <!-- Hamburger Menu -->
             <div style="position:relative;margin-left:4px">
                 <button id="hamburgerBtn" onclick="document.getElementById('selektNavMenu').classList.toggle('open')"
                     style="background:none;border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:5px 7px;cursor:pointer;display:flex;align-items:center;color:rgba(255,255,255,0.6);transition:border-color 0.2s"
@@ -1030,74 +1154,66 @@
                     <a href="SELEKT_Dashboard.html"
                         style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#7B849A;font-size:12px;font-weight:500;transition:all 0.15s"
                         onmouseover="this.style.background='#222736';this.style.color='#E8EAF0'"
-                        onmouseout="this.style.background='';this.style.color='#7B849A'">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        onmouseout="this.style.background='';this.style.color='#7B849A'"><svg width="14" height="14"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="3" width="7" height="7" />
                             <rect x="14" y="3" width="7" height="7" />
                             <rect x="14" y="14" width="7" height="7" />
                             <rect x="3" y="14" width="7" height="7" />
-                        </svg>
-                        ダッシュボード</a>
+                        </svg>繝繝・す繝･繝懊・繝・/a>
                     <a href="SELEKT_Upload.html"
                         style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#7B849A;font-size:12px;font-weight:500;transition:all 0.15s"
                         onmouseover="this.style.background='#222736';this.style.color='#E8EAF0'"
-                        onmouseout="this.style.background='';this.style.color='#7B849A'">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        onmouseout="this.style.background='';this.style.color='#7B849A'"><svg width="14" height="14"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                             <polyline points="17 8 12 3 7 8" />
                             <line x1="12" y1="3" x2="12" y2="15" />
-                        </svg>
-                        アップロード</a>
+                        </svg>繧｢繝・・繝ｭ繝ｼ繝・/a>
                     <a href="SELEKT_Pricing.html"
                         style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#7B849A;font-size:12px;font-weight:500;transition:all 0.15s"
                         onmouseover="this.style.background='#222736';this.style.color='#E8EAF0'"
-                        onmouseout="this.style.background='';this.style.color='#7B849A'">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        onmouseout="this.style.background='';this.style.color='#7B849A'"><svg width="14" height="14"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
                             <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
                             <line x1="7" y1="7" x2="7.01" y2="7" />
-                        </svg>
-                        プラン</a>
+                        </svg>繝励Λ繝ｳ</a>
                     <div style="height:1px;background:#2A2F3E;margin:4px 8px"></div>
                     <a href="SELEKT_Profile.html"
-                        style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#4A9EE0;font-size:12px;font-weight:600;background:rgba(74,158,224,0.08)">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#4A9EE0;font-size:12px;font-weight:600;background:rgba(74,158,224,0.08)"><svg
+                            width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                             <circle cx="12" cy="7" r="4" />
-                        </svg>
-                        プロフィール</a>
+                        </svg>繝励Ο繝輔ぅ繝ｼ繝ｫ</a>
                 </div>
             </div>
-            <style>
-                #selektNavMenu.open {
-                    display: block !important;
-                    animation: menuFadeIn 0.15s ease;
-                }
-
-                @keyframes menuFadeIn {
-                    from {
-                        opacity: 0;
-                        transform: translateY(-4px);
-                    }
-
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
-            </style>
-            <script>document.addEventListener('click', e => { if (!e.target.closest('#hamburgerBtn') && !e.target.closest('#selektNavMenu')) document.getElementById('selektNavMenu')?.classList.remove('open'); });</script>
+            <script>document.addEventListener('click', e => { if (!e.target.closest('#hamburgerBtn') && !e.target.closest('#selektNavMenu')) document.getElementById('selektNavMenu')?.classList.remove('open') });</script>
         </div>
     </div>
 
-    <!-- Profile Hero -->
-    <div class="profile-hero">
-        <div class="avatar-wrap">
+    <!-- COVER PHOTO -->
+    <div class="cover-section">
+        <div class="cover-photo" id="coverPhoto" onclick="document.getElementById('coverInput').click()">
+            <div class="cover-edit-hint">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                    <circle cx="12" cy="13" r="4" />
+                </svg>
+                <span data-i18n="changeCover">繧ｫ繝舌・蜀咏悄繧貞､画峩</span>
+            </div>
+        </div>
+    </div>
+    <input type="file" id="coverInput" class="hidden-input" accept="image/*" onchange="handleCoverUpload(event)">
+
+    <!-- AVATAR + INFO -->
+    <div class="avatar-area">
+        <div class="avatar-large" id="avatarLarge">
             <div class="avatar-ring"></div>
-            <div class="avatar-large" id="avatarLarge">?</div>
+            <span style="position:relative;z-index:1">?</span>
         </div>
         <div class="profile-name" id="profileName">---</div>
         <div class="profile-id" id="profileId">@---</div>
@@ -1105,27 +1221,27 @@
             <span class="badge badge-role" id="roleBadge">---</span>
             <span class="badge badge-plan" id="planBadge">FREE</span>
         </div>
-        <div class="social-row" id="socialRow" style="display:none">
-            <!-- Rendered by JS when links exist -->
-        </div>
     </div>
 
-    <!-- Bio Section -->
+    <!-- Bio -->
     <div class="bio-section">
         <div class="bio-text" id="bioDisplay"></div>
+        <div class="social-row" id="socialRow" style="display:none"></div>
         <button class="preview-btn" onclick="openPreview()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round">
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                 <circle cx="12" cy="12" r="3" />
             </svg>
-            <span data-i18n="previewProfile">外部からの見え方を確認</span>
+            <span data-i18n="previewProfile">螟夜Κ縺九ｉ縺ｮ隕九∴譁ｹ繧堤｢ｺ隱・/span>
         </button>
     </div>
 
-    <!-- Main Content -->
-    <div class="main">
+    <!-- SNS CARDS -->
+    <div class="sns-cards" id="snsCards" style="display:none"></div>
 
+    <!-- MAIN -->
+    <div class="main">
         <!-- Portfolio -->
         <div class="section">
             <div class="section-header">
@@ -1136,11 +1252,69 @@
                         <circle cx="8.5" cy="8.5" r="1.5" />
                         <polyline points="21 15 16 10 5 21" />
                     </svg>
-                    <span data-i18n="portfolio">ポートフォリオ</span>
+                    <span data-i18n="portfolio">繝昴・繝医ヵ繧ｩ繝ｪ繧ｪ</span>
                 </div>
             </div>
-            <div class="portfolio-grid" id="portfolioGrid">
-                <!-- Slots rendered by JS -->
+            <div class="portfolio-grid" id="portfolioGrid"></div>
+        </div>
+
+        <!-- Style Customizer -->
+        <div class="section">
+            <div class="card style-section">
+                <div class="card-title">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5" />
+                        <line x1="12" y1="1" x2="12" y2="3" />
+                        <line x1="12" y1="21" x2="12" y2="23" />
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                        <line x1="1" y1="12" x2="3" y2="12" />
+                        <line x1="21" y1="12" x2="23" y2="12" />
+                    </svg>
+                    <span data-i18n="styleTitle">繧ｹ繧ｿ繧､繝ｫ險ｭ螳・/span>
+                </div>
+                <div class="style-row">
+                    <div class="style-label" data-i18n="accentColor">繧｢繧ｯ繧ｻ繝ｳ繝医き繝ｩ繝ｼ</div>
+                    <div class="color-presets" id="colorPresets">
+                        <div class="color-dot selected" data-color="#4A9EE0" style="background:#4A9EE0"
+                            onclick="setAccentColor('#4A9EE0',this)"></div>
+                        <div class="color-dot" data-color="#A78BFA" style="background:#A78BFA"
+                            onclick="setAccentColor('#A78BFA',this)"></div>
+                        <div class="color-dot" data-color="#F472B6" style="background:#F472B6"
+                            onclick="setAccentColor('#F472B6',this)"></div>
+                        <div class="color-dot" data-color="#E63946" style="background:#E63946"
+                            onclick="setAccentColor('#E63946',this)"></div>
+                        <div class="color-dot" data-color="#FB923C" style="background:#FB923C"
+                            onclick="setAccentColor('#FB923C',this)"></div>
+                        <div class="color-dot" data-color="#4CAF7D" style="background:#4CAF7D"
+                            onclick="setAccentColor('#4CAF7D',this)"></div>
+                        <div class="color-dot" data-color="#B8860B" style="background:#B8860B"
+                            onclick="setAccentColor('#B8860B',this)"></div>
+                        <div class="color-dot" data-color="#E8EAF0" style="background:#E8EAF0"
+                            onclick="setAccentColor('#E8EAF0',this)"></div>
+                        <div class="color-picker-wrap"><input type="color" id="customColorPicker" value="#4A9EE0"
+                                oninput="setAccentColor(this.value,null)"></div>
+                    </div>
+                </div>
+                <div class="style-row">
+                    <div class="style-label" data-i18n="bgMode">閭梧勹繝｢繝ｼ繝・/div>
+                    <div class="mode-toggle">
+                        <button class="mode-btn active" data-mode="dark" onclick="setMode('dark')">嫌 <span
+                                data-i18n="modeDark">繝繝ｼ繧ｯ</span></button>
+                        <button class="mode-btn" data-mode="light" onclick="setMode('light')">笘・・<span
+                                data-i18n="modeLight">繝ｩ繧､繝・/span></button>
+                    </div>
+                </div>
+                <div class="style-row" style="margin-bottom:0">
+                    <div class="style-label" data-i18n="fontStyle">繝輔か繝ｳ繝医せ繧ｿ繧､繝ｫ</div>
+                    <div class="font-options">
+                        <button class="font-btn active" data-font="modern"
+                            onclick="setFontStyle('modern')">Modern</button>
+                        <button class="font-btn" data-font="elegant" onclick="setFontStyle('elegant')">Elegant</button>
+                        <button class="font-btn" data-font="bold" onclick="setFontStyle('bold')">BOLD</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1153,24 +1327,19 @@
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                     </svg>
-                    <span data-i18n="editProfile">プロフィール編集</span>
+                    <span data-i18n="editProfile">繝励Ο繝輔ぅ繝ｼ繝ｫ邱ｨ髮・/span>
                 </div>
-                <div class="form-group">
-                    <label class="form-label" data-i18n="displayName">表示名</label>
-                    <input class="form-input" type="text" id="editName" placeholder="表示名を入力">
-                </div>
-                <div class="form-group">
-                    <label class="form-label" data-i18n="bio">自己紹介</label>
-                    <textarea class="form-textarea" id="editBio" maxlength="250" placeholder="自己紹介を入力（250文字以内）"
+                <div class="form-group"><label class="form-label" data-i18n="displayName">陦ｨ遉ｺ蜷・/label><input
+                        class="form-input" type="text" id="editName" placeholder="陦ｨ遉ｺ蜷阪ｒ蜈･蜉・></div>
+                <div class="form-group"><label class="form-label" data-i18n="bio">閾ｪ蟾ｱ邏ｹ莉・/label><textarea
+                        class="form-textarea" id="editBio" maxlength="250" placeholder="閾ｪ蟾ｱ邏ｹ莉九ｒ蜈･蜉幢ｼ・50譁・ｭ嶺ｻ･蜀・ｼ・
                         oninput="updateCharCount()"></textarea>
                     <div class="char-count" id="charCount">0 / 250</div>
                 </div>
+                <div class="form-group"><label class="form-label" data-i18n="userId">繝ｦ繝ｼ繧ｶ繝ｼID</label><input
+                        class="form-input" type="text" id="editId" disabled></div>
                 <div class="form-group">
-                    <label class="form-label" data-i18n="userId">ユーザーID</label>
-                    <input class="form-input" type="text" id="editId" disabled>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" data-i18n="yourRole">あなたの役割</label>
+                    <label class="form-label" data-i18n="yourRole">縺ゅ↑縺溘・蠖ｹ蜑ｲ</label>
                     <div class="role-grid" id="roleGrid">
                         <div class="role-card" data-role="photographer" onclick="selectRole(this)">
                             <div class="role-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -1180,8 +1349,8 @@
                                         d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
                                     <circle cx="12" cy="13" r="4" />
                                 </svg></div>
-                            <div class="role-name" data-i18n="rolePhotographer">カメラマン</div>
-                            <div class="role-desc" data-i18n="rolePhotographerDesc">写真を送る側</div>
+                            <div class="role-name" data-i18n="rolePhotographer">繧ｫ繝｡繝ｩ繝槭Φ</div>
+                            <div class="role-desc" data-i18n="rolePhotographerDesc">蜀咏悄繧帝√ｋ蛛ｴ</div>
                         </div>
                         <div class="role-card" data-role="model" onclick="selectRole(this)">
                             <div class="role-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -1190,8 +1359,8 @@
                                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                                     <circle cx="12" cy="7" r="4" />
                                 </svg></div>
-                            <div class="role-name" data-i18n="roleModel">モデル</div>
-                            <div class="role-desc" data-i18n="roleModelDesc">写真を受け取る側</div>
+                            <div class="role-name" data-i18n="roleModel">繝｢繝・Ν</div>
+                            <div class="role-desc" data-i18n="roleModelDesc">蜀咏悄繧貞女縺大叙繧句・</div>
                         </div>
                         <div class="role-card" data-role="company" onclick="selectRole(this)">
                             <div class="role-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -1204,8 +1373,8 @@
                                     <line x1="15" y1="10" x2="15" y2="10.01" />
                                     <line x1="9" y1="14" x2="15" y2="14" />
                                 </svg></div>
-                            <div class="role-name" data-i18n="roleCompany">企業</div>
-                            <div class="role-desc" data-i18n="roleCompanyDesc">ビジネス利用</div>
+                            <div class="role-name" data-i18n="roleCompany">莨∵･ｭ</div>
+                            <div class="role-desc" data-i18n="roleCompanyDesc">繝薙ず繝阪せ蛻ｩ逕ｨ</div>
                         </div>
                         <div class="role-card" data-role="private" onclick="selectRole(this)">
                             <div class="role-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -1215,85 +1384,68 @@
                                     <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                                     <circle cx="12" cy="16" r="1" />
                                 </svg></div>
-                            <div class="role-name" data-i18n="rolePrivate">プライベート</div>
-                            <div class="role-desc" data-i18n="rolePrivateDesc">個人利用</div>
+                            <div class="role-name" data-i18n="rolePrivate">繝励Λ繧､繝吶・繝・/div>
+                            <div class="role-desc" data-i18n="rolePrivateDesc">蛟倶ｺｺ蛻ｩ逕ｨ</div>
                         </div>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" data-i18n="socialLinks">SNSリンク</label>
+                    <label class="form-label" data-i18n="socialLinks">SNS繝ｪ繝ｳ繧ｯ</label>
                     <div class="social-input-group">
-                        <div class="social-input-icon">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <div class="social-input-icon"><svg width="14" height="14" viewBox="0 0 24 24"
+                                fill="currentColor">
                                 <path
                                     d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                            </svg>
-                        </div>
-                        <input class="form-input" type="url" id="editX" placeholder="https://x.com/username">
+                            </svg></div><input class="form-input" type="url" id="editX"
+                            placeholder="https://x.com/username">
                     </div>
                     <div class="social-input-group">
-                        <div class="social-input-icon">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <div class="social-input-icon"><svg width="14" height="14" viewBox="0 0 24 24"
+                                fill="currentColor">
                                 <path
                                     d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
-                            </svg>
-                        </div>
-                        <input class="form-input" type="url" id="editInstagram"
+                            </svg></div><input class="form-input" type="url" id="editInstagram"
                             placeholder="https://instagram.com/username">
                     </div>
                     <div class="social-input-group">
-                        <div class="social-input-icon">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <div class="social-input-icon"><svg width="14" height="14" viewBox="0 0 24 24"
+                                fill="currentColor">
                                 <path
                                     d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-                            </svg>
-                        </div>
-                        <input class="form-input" type="url" id="editYoutube"
+                            </svg></div><input class="form-input" type="url" id="editYoutube"
                             placeholder="https://youtube.com/@channel">
                     </div>
                 </div>
-                <button class="btn-primary" onclick="saveProfile()" id="saveBtn" data-i18n="saveChanges">変更を保存</button>
+                <button class="btn-primary" onclick="saveProfile()" id="saveBtn" data-i18n="saveChanges">螟画峩繧剃ｿ晏ｭ・/button>
             </div>
         </div>
 
         <!-- Account Info -->
         <div class="section">
             <div class="card">
-                <div class="card-title">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
+                <div class="card-title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="3" />
                         <path
                             d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                    </svg>
-                    <span data-i18n="accountInfo">アカウント情報</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label" data-i18n="currentPlan">現在のプラン</span>
-                    <span class="stat-value" id="statPlan">FREE</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label" data-i18n="storageUsage">ストレージ</span>
-                    <span class="stat-value">
-                        <span id="statStorage">0.8 / 2 GB</span>
-                        <span class="usage-bar-sm"><span class="fill" id="storageBar" style="width:40%"></span></span>
-                    </span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label" data-i18n="totalProjects">プロジェクト数</span>
-                    <span class="stat-value" id="statProjects">—</span>
-                </div>
-                <a href="SELEKT_Pricing.html" class="upgrade-link" id="upgradeBanner">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
+                    </svg><span data-i18n="accountInfo">繧｢繧ｫ繧ｦ繝ｳ繝域ュ蝣ｱ</span></div>
+                <div class="stat-row"><span class="stat-label" data-i18n="currentPlan">迴ｾ蝨ｨ縺ｮ繝励Λ繝ｳ</span><span
+                        class="stat-value" id="statPlan">FREE</span></div>
+                <div class="stat-row"><span class="stat-label" data-i18n="storageUsage">繧ｹ繝医Ξ繝ｼ繧ｸ</span><span
+                        class="stat-value"><span id="statStorage">0.8 / 2 GB</span><span class="usage-bar-sm"><span
+                                class="fill" id="storageBar" style="width:40%"></span></span></span></div>
+                <div class="stat-row"><span class="stat-label" data-i18n="totalProjects">繝励Ο繧ｸ繧ｧ繧ｯ繝域焚</span><span
+                        class="stat-value" id="statProjects">窶・/span></div>
+                <a href="SELEKT_Pricing.html" class="upgrade-link" id="upgradeBanner"><svg width="20" height="20"
+                        viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
                         <polygon
                             points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                     </svg>
                     <div>
-                        <div class="upgrade-title" data-i18n="upgradePlan">プランをアップグレード</div>
-                        <div class="upgrade-desc" data-i18n="upgradeDesc">より多くのストレージと機能をアンロック</div>
-                    </div>
-                    <span class="arrow">→</span>
+                        <div class="upgrade-title" data-i18n="upgradePlan">繝励Λ繝ｳ繧偵い繝・・繧ｰ繝ｬ繝ｼ繝・/div>
+                        <div class="upgrade-desc" data-i18n="upgradeDesc">繧医ｊ螟壹￥縺ｮ繧ｹ繝医Ξ繝ｼ繧ｸ縺ｨ讖溯・繧偵い繝ｳ繝ｭ繝・け</div>
+                    </div><span class="arrow">竊・/span>
                 </a>
             </div>
         </div>
@@ -1301,19 +1453,16 @@
         <!-- Danger Zone -->
         <div class="section">
             <div class="card danger-section">
-                <div class="card-title">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
+                <div class="card-title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path
                             d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
                         <line x1="12" y1="9" x2="12" y2="13" />
                         <line x1="12" y1="17" x2="12.01" y2="17" />
-                    </svg>
-                    <span data-i18n="dangerZone">危険ゾーン</span>
-                </div>
+                    </svg><span data-i18n="dangerZone">蜊ｱ髯ｺ繧ｾ繝ｼ繝ｳ</span></div>
                 <div style="display:flex;flex-direction:column;gap:8px">
-                    <button class="btn-outline" onclick="changePassword()" data-i18n="changePassword">パスワードを変更</button>
-                    <button class="btn-danger" onclick="logout()" data-i18n="logoutBtn">ログアウト</button>
+                    <button class="btn-outline" onclick="changePassword()" data-i18n="changePassword">繝代せ繝ｯ繝ｼ繝峨ｒ螟画峩</button>
+                    <button class="btn-danger" onclick="logout()" data-i18n="logoutBtn">繝ｭ繧ｰ繧｢繧ｦ繝・/button>
                 </div>
             </div>
         </div>
@@ -1325,8 +1474,8 @@
     <!-- Preview Modal -->
     <div class="preview-overlay" id="previewOverlay" onclick="if(event.target===this)closePreview()">
         <div class="preview-card">
-            <button class="preview-close" onclick="closePreview()">✕</button>
-            <div class="preview-label" data-i18n="previewLabel">外部からの見え方</div>
+            <button class="preview-close" onclick="closePreview()">笨・/button>
+            <div class="preview-label" data-i18n="previewLabel">螟夜Κ縺九ｉ縺ｮ隕九∴譁ｹ</div>
             <div class="preview-avatar" id="pvAvatar">?</div>
             <div class="preview-name" id="pvName">---</div>
             <div id="pvBadges" style="display:flex;justify-content:center;gap:6px;margin-top:6px"></div>
@@ -1336,420 +1485,331 @@
         </div>
     </div>
 
-    <!-- Toast -->
     <div class="toast" id="toast"></div>
+<script>
+    const API = 'https://selekt-server.onrender.com';
+    let currentUser = null;
+    let _lang = localStorage.getItem('selekt_lang') || 'ja';
+    let selectedRole = '';
+    let portfolioPhotos = [];
+    const MAX_PORTFOLIO = 5;
+    let _uploadSlotIdx = -1;
 
-    <script>
-        const API = 'https://selekt-api.mr-mail114.workers.dev';
-        let currentUser = null;
-        let selectedRole = null;
-        let portfolioPhotos = []; // Array of data URLs (max 5)
-        const MAX_PORTFOLIO = 5;
-        let _uploadSlotIdx = -1;
+    const ROLE_LABELS = { ja: { photographer: '繧ｫ繝｡繝ｩ繝槭Φ', model: '繝｢繝・Ν', company: '莨∵･ｭ', private: '繝励Λ繧､繝吶・繝・ }, en: { photographer: 'Photographer', model: 'Model', company: 'Company', private: 'Private' }, zh: { photographer: '鞫・ｽｱ蟶・, model: '讓｡迚ｹ', company: '莨∽ｸ・, private: '荳ｪ莠ｺ' } };
 
-        // ===== I18N =====
-        const PROFILE_I18N = {
-            ja: {
-                navDashboard: 'ダッシュボード', navUpload: 'アップロード', navPlan: 'プラン', navProfile: 'プロフィール',
-                portfolio: 'ポートフォリオ', addPhoto: '追加',
-                editProfile: 'プロフィール編集', displayName: '表示名', bio: '自己紹介',
-                bioPlaceholder: '自己紹介を入力（250文字以内）', userId: 'ユーザーID',
-                yourRole: 'あなたの役割',
-                socialLinks: 'SNSリンク',
-                rolePhotographer: 'カメラマン', rolePhotographerDesc: '写真を送る側',
-                roleModel: 'モデル', roleModelDesc: '写真を受け取る側',
-                roleCompany: '企業', roleCompanyDesc: 'ビジネス利用',
-                rolePrivate: 'プライベート', rolePrivateDesc: '個人利用',
-                saveChanges: '変更を保存',
-                accountInfo: 'アカウント情報', currentPlan: '現在のプラン',
-                storageUsage: 'ストレージ', totalProjects: 'プロジェクト数',
-                upgradePlan: 'プランをアップグレード', upgradeDesc: 'より多くのストレージと機能をアンロック',
-                dangerZone: '危険ゾーン', changePassword: 'パスワードを変更', logoutBtn: 'ログアウト',
-                saved: '✓ 保存しました', passwordNotReady: 'パスワード変更は準備中です',
-                noBio: '自己紹介が未設定です',
-                previewProfile: '外部からの見え方を確認',
-                previewLabel: '外部からの見え方',
-                pageTitle: 'SELEKT — プロフィール',
-            },
-            en: {
-                navDashboard: 'Dashboard', navUpload: 'Upload', navPlan: 'Plan', navProfile: 'Profile',
-                portfolio: 'Portfolio', addPhoto: 'Add',
-                editProfile: 'Edit Profile', displayName: 'Display Name', bio: 'Bio',
-                bioPlaceholder: 'Write a short bio (max 250 chars)', userId: 'User ID',
-                yourRole: 'Your Role',
-                socialLinks: 'Social Links',
-                rolePhotographer: 'Photographer', rolePhotographerDesc: 'Send photos',
-                roleModel: 'Model', roleModelDesc: 'Receive photos',
-                roleCompany: 'Company', roleCompanyDesc: 'Business use',
-                rolePrivate: 'Private', rolePrivateDesc: 'Personal use',
-                saveChanges: 'Save Changes',
-                accountInfo: 'Account Info', currentPlan: 'Current Plan',
-                storageUsage: 'Storage', totalProjects: 'Projects',
-                upgradePlan: 'Upgrade Plan', upgradeDesc: 'Unlock more storage and features',
-                dangerZone: 'Danger Zone', changePassword: 'Change Password', logoutBtn: 'Logout',
-                saved: '✓ Saved', passwordNotReady: 'Password change coming soon',
-                noBio: 'No bio set',
-                previewProfile: 'Preview as visitor',
-                previewLabel: 'Visitor view',
-                pageTitle: 'SELEKT — Profile',
-            },
-            zh: {
-                navDashboard: '仪表板', navUpload: '上传', navPlan: '方案', navProfile: '个人资料',
-                portfolio: '作品集', addPhoto: '添加',
-                editProfile: '编辑资料', displayName: '显示名称', bio: '自我介绍',
-                bioPlaceholder: '写一段简短的自我介绍（最多250字）', userId: '用户ID',
-                yourRole: '您的角色',
-                socialLinks: '社交链接',
-                rolePhotographer: '摄影师', rolePhotographerDesc: '发送照片',
-                roleModel: '模特', roleModelDesc: '接收照片',
-                roleCompany: '企业', roleCompanyDesc: '商业用途',
-                rolePrivate: '个人', rolePrivateDesc: '个人使用',
-                saveChanges: '保存更改',
-                accountInfo: '账户信息', currentPlan: '当前方案',
-                storageUsage: '存储', totalProjects: '项目数',
-                upgradePlan: '升级方案', upgradeDesc: '解锁更多存储和功能',
-                dangerZone: '危险区域', changePassword: '更改密码', logoutBtn: '退出登录',
-                saved: '✓ 已保存', passwordNotReady: '密码更改功能即将推出',
-                noBio: '未设置自我介绍',
-                previewProfile: '查看外部视图',
-                previewLabel: '外部视图',
-                pageTitle: 'SELEKT — 个人资料',
-            }
-        };
-
-        const ROLE_LABELS = {
-            ja: { photographer: 'カメラマン', model: 'モデル', company: '企業', private: 'プライベート' },
-            en: { photographer: 'Photographer', model: 'Model', company: 'Company', private: 'Private' },
-            zh: { photographer: '摄影师', model: '模特', company: '企业', private: '个人' },
-        };
-
-        let _lang = localStorage.getItem('selekt-lang') || 'ja';
-        function pt(key) { return (PROFILE_I18N[_lang] && PROFILE_I18N[_lang][key]) || PROFILE_I18N.ja[key] || key; }
-
-        function setLang(lang) {
-            _lang = lang;
-            localStorage.setItem('selekt-lang', lang);
-            document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = pt(el.dataset.i18n));
-            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => el.placeholder = pt(el.dataset.i18nPlaceholder));
-            document.title = pt('pageTitle');
-            document.querySelectorAll('.lang-btn').forEach(b => b.style.borderColor = 'var(--border2)');
-            const active = document.getElementById('lang' + lang.charAt(0).toUpperCase() + lang.slice(1));
-            if (active) active.style.borderColor = 'var(--accent)';
-            // Update bio placeholder
-            const bioEl = document.getElementById('editBio');
-            if (bioEl) bioEl.placeholder = pt('bioPlaceholder');
-            if (currentUser) updateUI();
+    const I18N = {
+        ja: {
+            navProfile: '繝励Ο繝輔ぅ繝ｼ繝ｫ', editProfile: '繝励Ο繝輔ぅ繝ｼ繝ｫ邱ｨ髮・, displayName: '陦ｨ遉ｺ蜷・, bio: '閾ｪ蟾ｱ邏ｹ莉・, userId: '繝ｦ繝ｼ繧ｶ繝ｼID',
+            yourRole: '縺ゅ↑縺溘・蠖ｹ蜑ｲ', socialLinks: 'SNS繝ｪ繝ｳ繧ｯ', saveChanges: '螟画峩繧剃ｿ晏ｭ・, accountInfo: '繧｢繧ｫ繧ｦ繝ｳ繝域ュ蝣ｱ',
+            currentPlan: '迴ｾ蝨ｨ縺ｮ繝励Λ繝ｳ', storageUsage: '繧ｹ繝医Ξ繝ｼ繧ｸ', totalProjects: '繝励Ο繧ｸ繧ｧ繧ｯ繝域焚',
+            upgradePlan: '繝励Λ繝ｳ繧偵い繝・・繧ｰ繝ｬ繝ｼ繝・, upgradeDesc: '繧医ｊ螟壹￥縺ｮ繧ｹ繝医Ξ繝ｼ繧ｸ縺ｨ讖溯・繧偵い繝ｳ繝ｭ繝・け',
+            dangerZone: '蜊ｱ髯ｺ繧ｾ繝ｼ繝ｳ', changePassword: '繝代せ繝ｯ繝ｼ繝峨ｒ螟画峩', logoutBtn: '繝ｭ繧ｰ繧｢繧ｦ繝・,
+            saved: '笨・菫晏ｭ倥＠縺ｾ縺励◆', passwordNotReady: '繝代せ繝ｯ繝ｼ繝牙､画峩縺ｯ貅門ｙ荳ｭ縺ｧ縺・,
+            noBio: '閾ｪ蟾ｱ邏ｹ莉九′譛ｪ險ｭ螳壹〒縺・, previewProfile: '螟夜Κ縺九ｉ縺ｮ隕九∴譁ｹ繧堤｢ｺ隱・, previewLabel: '螟夜Κ縺九ｉ縺ｮ隕九∴譁ｹ',
+            portfolio: '繝昴・繝医ヵ繧ｩ繝ｪ繧ｪ', changeCover: '繧ｫ繝舌・蜀咏悄繧貞､画峩',
+            styleTitle: '繧ｹ繧ｿ繧､繝ｫ險ｭ螳・, accentColor: '繧｢繧ｯ繧ｻ繝ｳ繝医き繝ｩ繝ｼ', bgMode: '閭梧勹繝｢繝ｼ繝・, fontStyle: '繝輔か繝ｳ繝医せ繧ｿ繧､繝ｫ',
+            modeDark: '繝繝ｼ繧ｯ', modeLight: '繝ｩ繧､繝・,
+            rolePhotographer: '繧ｫ繝｡繝ｩ繝槭Φ', roleModel: '繝｢繝・Ν', roleCompany: '莨∵･ｭ', rolePrivate: '繝励Λ繧､繝吶・繝・,
+            rolePhotographerDesc: '蜀咏悄繧帝√ｋ蛛ｴ', roleModelDesc: '蜀咏悄繧貞女縺大叙繧句・', roleCompanyDesc: '繝薙ず繝阪せ蛻ｩ逕ｨ', rolePrivateDesc: '蛟倶ｺｺ蛻ｩ逕ｨ',
+            pageTitle: 'SELEKT 窶・繝励Ο繝輔ぅ繝ｼ繝ｫ',
+        },
+        en: {
+            navProfile: 'Profile', editProfile: 'Edit Profile', displayName: 'Display Name', bio: 'Bio', userId: 'User ID',
+            yourRole: 'Your Role', socialLinks: 'Social Links', saveChanges: 'Save Changes', accountInfo: 'Account Info',
+            currentPlan: 'Current Plan', storageUsage: 'Storage', totalProjects: 'Total Projects',
+            upgradePlan: 'Upgrade Plan', upgradeDesc: 'Unlock more storage and features',
+            dangerZone: 'Danger Zone', changePassword: 'Change Password', logoutBtn: 'Logout',
+            saved: '笨・Saved', passwordNotReady: 'Password change coming soon',
+            noBio: 'No bio set', previewProfile: 'Preview as visitor', previewLabel: 'Visitor view',
+            portfolio: 'Portfolio', changeCover: 'Change cover photo',
+            styleTitle: 'Style Settings', accentColor: 'Accent Color', bgMode: 'Background', fontStyle: 'Font Style',
+            modeDark: 'Dark', modeLight: 'Light',
+            rolePhotographer: 'Photographer', roleModel: 'Model', roleCompany: 'Company', rolePrivate: 'Private',
+            rolePhotographerDesc: 'Send photos', roleModelDesc: 'Receive photos', roleCompanyDesc: 'Business', rolePrivateDesc: 'Personal',
+            pageTitle: 'SELEKT 窶・Profile',
+        },
+        zh: {
+            navProfile: '荳ｪ莠ｺ襍・侭', editProfile: '郛冶ｾ題ｵ・侭', displayName: '譏ｾ遉ｺ蜷・, bio: '閾ｪ謌台ｻ狗ｻ・, userId: '逕ｨ謌ｷID',
+            yourRole: '菴逧・ｧ定牡', socialLinks: '遉ｾ莠､體ｾ謗･', saveChanges: '菫晏ｭ俶峩謾ｹ', accountInfo: '雍ｦ謌ｷ菫｡諱ｯ',
+            currentPlan: '蠖灘燕隶｡蛻・, storageUsage: '蟄伜お遨ｺ髣ｴ', totalProjects: '鬘ｹ逶ｮ謨ｰ驥・,
+            upgradePlan: '蜊・ｺｧ隶｡蛻・, upgradeDesc: '隗｣髞∵峩螟壼ｭ伜お蜥悟粥閭ｽ',
+            dangerZone: '蜊ｱ髯ｩ蛹ｺ蝓・, changePassword: '譖ｴ謾ｹ蟇・・, logoutBtn: '騾蜃ｺ逋ｻ蠖・,
+            saved: '笨・蟾ｲ菫晏ｭ・, passwordNotReady: '蟇・∵峩謾ｹ蜉溯・蜊ｳ蟆・耳蜃ｺ',
+            noBio: '譛ｪ隶ｾ鄂ｮ閾ｪ謌台ｻ狗ｻ・, previewProfile: '譟･逵句､夜Κ隗・崟', previewLabel: '螟夜Κ隗・崟',
+            portfolio: '菴懷刀髮・, changeCover: '譖ｴ謾ｹ蟆・擇辣ｧ迚・,
+            styleTitle: '譬ｷ蠑剰ｮｾ鄂ｮ', accentColor: '蠑ｺ隹・牡', bgMode: '閭梧勹讓｡蠑・, fontStyle: '蟄嶺ｽ馴｣取ｼ',
+            modeDark: '豺ｱ濶ｲ', modeLight: '豬・牡',
+            rolePhotographer: '鞫・ｽｱ蟶・, roleModel: '讓｡迚ｹ', roleCompany: '莨∽ｸ・, rolePrivate: '荳ｪ莠ｺ',
+            rolePhotographerDesc: '蜿鷹∫・迚・, roleModelDesc: '謗･謾ｶ辣ｧ迚・, roleCompanyDesc: '蝠・ｸ壻ｽｿ逕ｨ', rolePrivateDesc: '荳ｪ莠ｺ菴ｿ逕ｨ',
+            pageTitle: 'SELEKT 窶・荳ｪ莠ｺ襍・侭',
         }
+    };
 
-        function selectRole(el) {
-            document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
-            el.classList.add('selected');
-            selectedRole = el.dataset.role;
-        }
+    function pt(key) { return (I18N[_lang] || I18N.ja)[key] || (I18N.ja)[key] || key; }
+    function setLang(lang) {
+        _lang = lang; localStorage.setItem('selekt_lang', lang);
+        document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.dataset.i18n; if (I18N[lang]?.[k]) el.textContent = I18N[lang][k]; });
+        document.querySelectorAll('.lang-btn').forEach(b => b.style.background = 'none');
+        const lb = document.getElementById('lang' + { ja: 'Ja', en: 'En', zh: 'Zh' }[lang]);
+        if (lb) lb.style.background = 'rgba(74,158,224,0.2)';
+        document.title = pt('pageTitle');
+        if (currentUser) updateUI();
+    }
 
-        function updateUI() {
-            if (!currentUser) return;
-            document.getElementById('avatarLarge').textContent = currentUser.displayName.charAt(0).toUpperCase();
-            document.getElementById('profileName').textContent = currentUser.displayName;
-            document.getElementById('profileId').textContent = `@${currentUser.id}`;
+    // ===== STYLE CUSTOMIZATION =====
+    function getStyle() {
+        try { return JSON.parse(localStorage.getItem('selekt_profile_style')) || {}; } catch (e) { return {}; }
+    }
+    function saveStyle(updates) {
+        const style = { ...getStyle(), ...updates };
+        localStorage.setItem('selekt_profile_style', JSON.stringify(style));
+    }
 
-            const roleLabel = (ROLE_LABELS[_lang] || ROLE_LABELS.ja)[currentUser.role] || currentUser.role;
-            document.getElementById('roleBadge').textContent = roleLabel;
+    function setAccentColor(hex, dotEl) {
+        document.documentElement.style.setProperty('--accent', hex);
+        // Derive a complementary accent2
+        document.documentElement.style.setProperty('--accent2', hex);
+        // Update badge colors dynamically
+        document.querySelectorAll('.badge-role').forEach(b => { b.style.background = hex + '1F'; b.style.color = hex; b.style.borderColor = hex + '40'; });
+        // Update cover gradient
+        const coverEl = document.getElementById('coverPhoto');
+        if (coverEl && !coverEl.querySelector('img')) { coverEl.style.background = `linear-gradient(135deg, ${hex}, color-mix(in srgb, ${hex} 60%, #000))`; }
+        // Update selected dot
+        document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected'));
+        if (dotEl) dotEl.classList.add('selected');
+        document.getElementById('customColorPicker').value = hex;
+        saveStyle({ accent: hex });
+    }
 
-            const planLabel = { pro: 'PRO', basic: 'BASIC' }[currentUser.plan] || 'FREE';
-            const planBadge = document.getElementById('planBadge');
-            planBadge.textContent = planLabel;
-            planBadge.className = `badge badge-plan ${currentUser.plan || 'free'}`;
+    function setMode(mode) {
+        document.body.dataset.mode = mode;
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+        saveStyle({ mode });
+    }
 
-            document.getElementById('statPlan').textContent = planLabel;
-            document.getElementById('editName').value = currentUser.displayName;
-            document.getElementById('editId').value = currentUser.id;
+    function setFontStyle(font) {
+        document.body.dataset.font = font;
+        document.querySelectorAll('.font-btn').forEach(b => b.classList.toggle('active', b.dataset.font === font));
+        saveStyle({ font });
+    }
 
-            // Bio
-            const bio = currentUser.bio || '';
-            document.getElementById('editBio').value = bio;
-            updateCharCount();
-            const bioDisplay = document.getElementById('bioDisplay');
-            if (bio) {
-                bioDisplay.textContent = bio;
-                bioDisplay.classList.remove('placeholder');
-            } else {
-                bioDisplay.textContent = pt('noBio');
-                bioDisplay.classList.add('placeholder');
+    function restoreStyle() {
+        const s = getStyle();
+        if (s.accent) { setAccentColor(s.accent, document.querySelector(`.color-dot[data-color="${s.accent}"]`)); }
+        if (s.mode) setMode(s.mode);
+        if (s.font) setFontStyle(s.font);
+        // Cover photo
+        const cover = localStorage.getItem('selekt_cover_photo');
+        if (cover) { const coverEl = document.getElementById('coverPhoto'); coverEl.innerHTML = `<img src="${cover}"><div class="cover-edit-hint"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span data-i18n="changeCover">${pt('changeCover')}</span></div>`; }
+    }
+
+    // ===== COVER PHOTO =====
+    function handleCoverUpload(e) {
+        const file = e.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const maxW = 800; let w = img.width, h = img.height;
+                if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+                canvas.width = w; canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                const data = canvas.toDataURL('image/jpeg', 0.8);
+                localStorage.setItem('selekt_cover_photo', data);
+                const coverEl = document.getElementById('coverPhoto');
+                coverEl.innerHTML = `<img src="${data}"><div class="cover-edit-hint"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span>${pt('changeCover')}</span></div>`;
+            };
+            img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file); e.target.value = '';
+    }
+
+    // ===== UI UPDATE =====
+    function updateUI() {
+        if (!currentUser) return;
+        document.getElementById('avatarLarge').querySelector('span').textContent = currentUser.displayName.charAt(0).toUpperCase();
+        document.getElementById('profileName').textContent = currentUser.displayName;
+        document.getElementById('profileId').textContent = '@' + (currentUser.id || currentUser.displayName.toLowerCase().replace(/\s/g, '_'));
+
+        const roleLabel = (ROLE_LABELS[_lang] || ROLE_LABELS.ja)[currentUser.role] || currentUser.role || '---';
+        document.getElementById('roleBadge').textContent = roleLabel;
+        const planBadge = document.getElementById('planBadge');
+        const planLabel = { pro: 'PRO', basic: 'BASIC' }[currentUser.plan] || 'FREE';
+        planBadge.textContent = planLabel;
+        planBadge.className = 'badge badge-plan ' + (currentUser.plan || 'free');
+
+        // Bio display
+        const bio = currentUser.bio || '';
+        const bioEl = document.getElementById('bioDisplay');
+        bioEl.textContent = bio || pt('noBio');
+        bioEl.className = 'bio-text' + (bio ? '' : ' placeholder');
+
+        // Social icons in hero
+        const socialRow = document.getElementById('socialRow');
+        const snsCards = document.getElementById('snsCards');
+        const svgX = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>';
+        const svgIG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>';
+        const svgYT = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>';
+
+        let socialHTML = '', cardHTML = '';
+        const links = [
+            { key: 'socialX', icon: svgX, label: 'X (Twitter)', url: currentUser.socialX },
+            { key: 'socialInstagram', icon: svgIG, label: 'Instagram', url: currentUser.socialInstagram },
+            { key: 'socialYoutube', icon: svgYT, label: 'YouTube', url: currentUser.socialYoutube },
+        ];
+        links.forEach(l => {
+            if (l.url) {
+                socialHTML += `<a href="${l.url}" target="_blank" rel="noopener" class="social-icon-link" title="${l.label}">${l.icon}</a>`;
+                cardHTML += `<a href="${l.url}" target="_blank" rel="noopener" class="sns-card">${l.icon}<span class="sns-label">${l.label}</span></a>`;
             }
+        });
+        socialRow.innerHTML = socialHTML;
+        socialRow.style.display = socialHTML ? 'flex' : 'none';
+        snsCards.innerHTML = cardHTML;
+        snsCards.style.display = cardHTML ? 'flex' : 'none';
 
-            // Role
-            document.querySelectorAll('.role-card').forEach(c => c.classList.toggle('selected', c.dataset.role === currentUser.role));
+        // Form
+        document.getElementById('editName').value = currentUser.displayName;
+        document.getElementById('editBio').value = currentUser.bio || '';
+        document.getElementById('editId').value = currentUser.id || '';
+        document.getElementById('editX').value = currentUser.socialX || '';
+        document.getElementById('editInstagram').value = currentUser.socialInstagram || '';
+        document.getElementById('editYoutube').value = currentUser.socialYoutube || '';
+        updateCharCount();
+
+        // Role
+        if (currentUser.role) {
             selectedRole = currentUser.role;
-
-            // Social links - form
-            document.getElementById('editX').value = currentUser.socialX || '';
-            document.getElementById('editInstagram').value = currentUser.socialInstagram || '';
-            document.getElementById('editYoutube').value = currentUser.socialYoutube || '';
-
-            // Social links - display in hero
-            renderSocialRow();
-
-            // Hide upgrade for pro
-            if (currentUser.plan === 'pro') document.getElementById('upgradeBanner').style.display = 'none';
-
-            renderPortfolio();
+            document.querySelectorAll('.role-card').forEach(c => c.classList.toggle('selected', c.dataset.role === selectedRole));
         }
 
-        function renderSocialRow() {
-            const row = document.getElementById('socialRow');
-            const links = [
-                { key: 'socialX', cls: 'x', svg: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>' },
-                { key: 'socialInstagram', cls: 'instagram', svg: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>' },
-                { key: 'socialYoutube', cls: 'youtube', svg: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>' },
-            ];
-            const active = links.filter(l => currentUser[l.key]);
-            if (active.length === 0) { row.style.display = 'none'; return; }
-            row.style.display = 'flex';
-            row.innerHTML = active.map(l => `<a href="${currentUser[l.key]}" target="_blank" rel="noopener" class="social-icon-link ${l.cls}">${l.svg}</a>`).join('');
-        }
+        // Account info
+        document.getElementById('statPlan').textContent = { pro: 'PRO', basic: 'BASIC' }[currentUser.plan] || 'FREE';
+        document.getElementById('upgradeBanner').style.display = currentUser.plan === 'pro' ? 'none' : 'flex';
 
-        function updateCharCount() {
-            const textarea = document.getElementById('editBio');
-            const counter = document.getElementById('charCount');
-            const len = textarea.value.length;
-            counter.textContent = `${len} / 250`;
-            counter.className = 'char-count' + (len > 230 ? (len > 250 ? ' over' : ' warning') : '');
-        }
+        renderPortfolio();
+    }
 
-        // ===== PORTFOLIO =====
-        function renderPortfolio() {
-            const grid = document.getElementById('portfolioGrid');
-            grid.innerHTML = '';
+    function updateCharCount() {
+        const count = document.getElementById('editBio').value.length;
+        const el = document.getElementById('charCount');
+        el.textContent = `${count} / 250`;
+        el.className = 'char-count' + (count >= 230 ? ' warning' : '');
+    }
 
-            for (let i = 0; i < MAX_PORTFOLIO; i++) {
-                const slot = document.createElement('div');
-                slot.className = 'portfolio-slot' + (portfolioPhotos[i] ? ' filled' : '');
+    function selectRole(card) {
+        selectedRole = card.dataset.role;
+        document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+    }
 
-                if (portfolioPhotos[i]) {
-                    slot.innerHTML = `
-                        <img src="${portfolioPhotos[i]}" alt="Portfolio ${i + 1}">
-                        <button class="remove-btn" onclick="removePortfolioPhoto(${i}, event)" title="削除">✕</button>
-                    `;
-                } else {
-                    slot.innerHTML = `
-                        <div class="slot-placeholder">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                            </svg>
-                        </div>
-                    `;
-                    slot.onclick = () => { _uploadSlotIdx = i; document.getElementById('portfolioInput').click(); };
-                }
-
-                grid.appendChild(slot);
+    // ===== PORTFOLIO =====
+    function renderPortfolio() {
+        const grid = document.getElementById('portfolioGrid'); grid.innerHTML = '';
+        for (let i = 0; i < MAX_PORTFOLIO; i++) {
+            const slot = document.createElement('div');
+            slot.className = 'portfolio-slot' + (portfolioPhotos[i] ? ' filled' : '');
+            if (portfolioPhotos[i]) {
+                slot.innerHTML = `<img src="${portfolioPhotos[i]}" alt="Portfolio ${i + 1}"><button class="slot-remove" onclick="removePortfolioPhoto(${i},event)">笨・/button>`;
+            } else {
+                slot.innerHTML = `<div class="slot-placeholder"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>`;
             }
+            slot.onclick = () => { if (!portfolioPhotos[i]) { _uploadSlotIdx = i; document.getElementById('portfolioInput').click(); } };
+            grid.appendChild(slot);
         }
+    }
 
-        function handlePortfolioUpload(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function (ev) {
-                // Resize to max 600px for localStorage efficiency
-                const img = new Image();
-                img.onload = function () {
-                    const canvas = document.createElement('canvas');
-                    const maxSize = 600;
-                    let w = img.width, h = img.height;
-                    if (w > maxSize || h > maxSize) {
-                        if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
-                        else { w = Math.round(w * maxSize / h); h = maxSize; }
-                    }
-                    canvas.width = w;
-                    canvas.height = h;
-                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-
-                    if (_uploadSlotIdx >= 0 && _uploadSlotIdx < MAX_PORTFOLIO) {
-                        portfolioPhotos[_uploadSlotIdx] = dataUrl;
-                    } else {
-                        portfolioPhotos.push(dataUrl);
-                    }
-
-                    savePortfolio();
-                    renderPortfolio();
-                };
-                img.src = ev.target.result;
+    function handlePortfolioUpload(e) {
+        const file = e.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const maxSize = 600; let w = img.width, h = img.height;
+                if (w > maxSize || h > maxSize) { if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; } else { w = Math.round(w * maxSize / h); h = maxSize; } }
+                canvas.width = w; canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                if (_uploadSlotIdx >= 0 && _uploadSlotIdx < MAX_PORTFOLIO) { portfolioPhotos[_uploadSlotIdx] = dataUrl; } else { portfolioPhotos.push(dataUrl); }
+                savePortfolio(); renderPortfolio();
             };
-            reader.readAsDataURL(file);
-            e.target.value = '';
-        }
+            img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file); e.target.value = '';
+    }
 
-        function removePortfolioPhoto(idx, e) {
-            e.stopPropagation();
-            portfolioPhotos.splice(idx, 1);
-            savePortfolio();
-            renderPortfolio();
-        }
+    function removePortfolioPhoto(idx, e) { e.stopPropagation(); portfolioPhotos.splice(idx, 1); savePortfolio(); renderPortfolio(); }
+    function savePortfolio() { localStorage.setItem('selekt_portfolio', JSON.stringify(portfolioPhotos)); }
+    function loadPortfolio() { try { const s = localStorage.getItem('selekt_portfolio'); if (s) portfolioPhotos = JSON.parse(s); } catch (e) { } }
 
-        function savePortfolio() {
-            localStorage.setItem('selekt_portfolio', JSON.stringify(portfolioPhotos));
-        }
+    // ===== SAVE PROFILE =====
+    function showToast(msg, type = '') { const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast show' + (type ? ` ${type}` : ''); setTimeout(() => t.className = 'toast', 2500); }
 
-        function loadPortfolio() {
-            try {
-                const stored = localStorage.getItem('selekt_portfolio');
-                if (stored) portfolioPhotos = JSON.parse(stored);
-            } catch (e) { }
-        }
-
-        // ===== SAVE PROFILE =====
-        function showToast(msg, type = '') {
-            const toast = document.getElementById('toast');
-            toast.textContent = msg;
-            toast.className = 'toast show' + (type ? ` ${type}` : '');
-            setTimeout(() => toast.className = 'toast', 2500);
-        }
-
-        async function saveProfile() {
-            const newName = document.getElementById('editName').value.trim();
-            const newBio = document.getElementById('editBio').value.trim().substring(0, 250);
-            if (!newName) return;
-
-            const btn = document.getElementById('saveBtn');
-            btn.disabled = true;
-
-            currentUser.displayName = newName;
-            currentUser.bio = newBio;
-            if (selectedRole) currentUser.role = selectedRole;
-
-            // Social links
-            currentUser.socialX = document.getElementById('editX').value.trim();
-            currentUser.socialInstagram = document.getElementById('editInstagram').value.trim();
-            currentUser.socialYoutube = document.getElementById('editYoutube').value.trim();
-
-            try {
-                const token = localStorage.getItem('selekt_token');
-                if (token) {
-                    const res = await fetch(`${API}/api/auth/update-profile`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                        body: JSON.stringify({ displayName: newName, role: selectedRole, bio: newBio, socialX: currentUser.socialX, socialInstagram: currentUser.socialInstagram, socialYoutube: currentUser.socialYoutube }),
-                    });
-                    if (res.ok) {
-                        const data = await res.json();
-                        if (data.user) currentUser = data.user;
-                    }
-                }
-            } catch (e) { }
-
-            localStorage.setItem('selekt_user', JSON.stringify(currentUser));
-            updateUI();
-            showToast(pt('saved'), 'success');
-            setTimeout(() => btn.disabled = false, 500);
-        }
-
-        function changePassword() { showToast(pt('passwordNotReady')); }
-
-        function logout() {
-            localStorage.removeItem('selekt_token');
-            localStorage.removeItem('selekt_user');
-            window.location.href = 'SELEKT_Auth.html';
-        }
-
-        // ===== PREVIEW MODE =====
-        function openPreview() {
-            if (!currentUser) return;
-            document.getElementById('pvAvatar').textContent = currentUser.displayName.charAt(0).toUpperCase();
-            document.getElementById('pvName').textContent = currentUser.displayName;
-
-            // Badges
-            const roleLabel = (ROLE_LABELS[_lang] || ROLE_LABELS.ja)[currentUser.role] || currentUser.role;
-            const planLabel = { pro: 'PRO', basic: 'BASIC' }[currentUser.plan] || 'FREE';
-            document.getElementById('pvBadges').innerHTML =
-                `<span class="badge badge-role">${roleLabel}</span><span class="badge badge-plan ${currentUser.plan || 'free'}">${planLabel}</span>`;
-
-            // Bio
-            const bio = currentUser.bio || document.getElementById('editBio').value.trim();
-            document.getElementById('pvBio').textContent = bio || pt('noBio');
-            document.getElementById('pvBio').style.fontStyle = bio ? 'normal' : 'italic';
-
-            // Portfolio
-            const pvGrid = document.getElementById('pvPortfolio');
-            pvGrid.innerHTML = '';
-            const photos = portfolioPhotos.filter(Boolean);
-            if (photos.length > 0) {
-                photos.forEach(src => { pvGrid.innerHTML += `<img src="${src}" alt="Portfolio">`; });
-                pvGrid.style.gridTemplateColumns = `repeat(${Math.min(photos.length, 5)}, 1fr)`;
+    async function saveProfile() {
+        const newName = document.getElementById('editName').value.trim();
+        const newBio = document.getElementById('editBio').value.trim().substring(0, 250);
+        if (!newName) return;
+        const btn = document.getElementById('saveBtn'); btn.disabled = true;
+        currentUser.displayName = newName; currentUser.bio = newBio;
+        if (selectedRole) currentUser.role = selectedRole;
+        currentUser.socialX = document.getElementById('editX').value.trim();
+        currentUser.socialInstagram = document.getElementById('editInstagram').value.trim();
+        currentUser.socialYoutube = document.getElementById('editYoutube').value.trim();
+        try {
+            const token = localStorage.getItem('selekt_token');
+            if (token) {
+                const res = await fetch(`${API}/api/auth/update-profile`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ displayName: newName, role: selectedRole, bio: newBio, socialX: currentUser.socialX, socialInstagram: currentUser.socialInstagram, socialYoutube: currentUser.socialYoutube }) });
+                if (res.ok) { const data = await res.json(); if (data.user) currentUser = data.user; }
             }
+        } catch (e) { }
+        localStorage.setItem('selekt_user', JSON.stringify(currentUser));
+        updateUI(); showToast(pt('saved'), 'success'); setTimeout(() => btn.disabled = false, 500);
+    }
 
-            // Social
-            const svgs = {
-                socialX: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>',
-                socialInstagram: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>',
-                socialYoutube: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>',
-            };
-            const pvSocial = document.getElementById('pvSocial');
-            pvSocial.innerHTML = '';
-            ['socialX', 'socialInstagram', 'socialYoutube'].forEach(key => {
-                const url = currentUser[key] || document.getElementById('edit' + key.replace('social', '')).value.trim();
-                if (url) pvSocial.innerHTML += `<a href="${url}" target="_blank" rel="noopener">${svgs[key]}</a>`;
-            });
+    function changePassword() { showToast(pt('passwordNotReady')); }
+    function logout() { localStorage.removeItem('selekt_token'); localStorage.removeItem('selekt_user'); window.location.href = 'SELEKT_Auth.html'; }
 
-            document.getElementById('previewOverlay').classList.add('open');
-            document.body.style.overflow = 'hidden';
-        }
+    // ===== PREVIEW MODE =====
+    function openPreview() {
+        if (!currentUser) return;
+        document.getElementById('pvAvatar').textContent = currentUser.displayName.charAt(0).toUpperCase();
+        document.getElementById('pvName').textContent = currentUser.displayName;
+        const roleLabel = (ROLE_LABELS[_lang] || ROLE_LABELS.ja)[currentUser.role] || currentUser.role;
+        const planLabel = { pro: 'PRO', basic: 'BASIC' }[currentUser.plan] || 'FREE';
+        document.getElementById('pvBadges').innerHTML = `<span class="badge badge-role">${roleLabel}</span><span class="badge badge-plan ${currentUser.plan || 'free'}">${planLabel}</span>`;
+        const bio = currentUser.bio || ''; document.getElementById('pvBio').textContent = bio || pt('noBio');
+        const pvGrid = document.getElementById('pvPortfolio'); pvGrid.innerHTML = '';
+        const photos = portfolioPhotos.filter(Boolean);
+        if (photos.length > 0) { photos.forEach(src => { pvGrid.innerHTML += `<img src="${src}" alt="Portfolio">`; }); pvGrid.style.gridTemplateColumns = `repeat(${Math.min(photos.length, 5)}, 1fr)`; }
+        const svgs = { socialX: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>', socialInstagram: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>', socialYoutube: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>' };
+        const pvSocial = document.getElementById('pvSocial'); pvSocial.innerHTML = '';
+        ['socialX', 'socialInstagram', 'socialYoutube'].forEach(key => { const url = currentUser[key]; if (url) pvSocial.innerHTML += `<a href="${url}" target="_blank" rel="noopener">${svgs[key]}</a>`; });
+        document.getElementById('previewOverlay').classList.add('open'); document.body.style.overflow = 'hidden';
+    }
+    function closePreview() { document.getElementById('previewOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closePreview(); });
 
-        function closePreview() {
-            document.getElementById('previewOverlay').classList.remove('open');
-            document.body.style.overflow = '';
-        }
-
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') closePreview(); });
-
-        // ===== INIT =====
-        async function init() {
-            loadPortfolio();
-
-            try {
-                const token = localStorage.getItem('selekt_token');
-                if (token) {
-                    const controller = new AbortController();
-                    setTimeout(() => controller.abort(), 3000);
-                    const res = await fetch(`${API}/api/auth/me`, {
-                        headers: { 'Authorization': `Bearer ${token}` },
-                        signal: controller.signal
-                    });
-                    if (res.ok) {
-                        const data = await res.json();
-                        currentUser = data.user;
-                        updateUI();
-                        return;
-                    }
-                }
-            } catch (e) {
-                console.log('API unavailable, using local data');
+    // ===== INIT =====
+    async function init() {
+        loadPortfolio(); restoreStyle();
+        try {
+            const token = localStorage.getItem('selekt_token');
+            if (token) {
+                const controller = new AbortController(); setTimeout(() => controller.abort(), 3000);
+                const res = await fetch(`${API}/api/auth/me`, { headers: { 'Authorization': `Bearer ${token}` }, signal: controller.signal });
+                if (res.ok) { const data = await res.json(); currentUser = data.user; updateUI(); return; }
             }
+        } catch (e) { console.log('API unavailable, using local data'); }
+        const stored = localStorage.getItem('selekt_user');
+        if (stored) { currentUser = JSON.parse(stored); updateUI(); return; }
+        currentUser = { id: 'demo_user', displayName: 'Demo User', role: 'photographer', plan: 'free', bio: '' };
+        updateUI(); document.getElementById('statProjects').textContent = '5';
+    }
 
-            const stored = localStorage.getItem('selekt_user');
-            if (stored) {
-                currentUser = JSON.parse(stored);
-                updateUI();
-                return;
-            }
-
-            // Demo mode
-            currentUser = {
-                id: 'demo_user',
-                displayName: 'Demo User',
-                role: 'photographer',
-                plan: 'free',
-                bio: ''
-            };
-            updateUI();
-            document.getElementById('statProjects').textContent = '5';
-        }
-
-        setLang(_lang);
-        init();
-    </script>
+    setLang(_lang); init();
+</script>
 </body>
 
 </html>
