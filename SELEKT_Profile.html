@@ -2053,15 +2053,23 @@
             reader.readAsDataURL(file); e.target.value = '';
         }
 
-        // ===== AVATAR PHOTO — INLINE DRAG-TO-REPOSITION =====
+        // ===== AVATAR PHOTO — INLINE DRAG-TO-REPOSITION + ZOOM =====
         let avatarAdjusting = false;
         let avatarDragging = false;
         let avDragStartX, avDragStartY;
-        // Translate offsets in pixels (0,0 = centered)
         let avTransX = 0, avTransY = 0;
-        const AV_SCALE = 1.35; // Zoom factor — gives ~35% extra room on all sides
-        const AV_MAX_PAN = 25; // Max translate in pixels
+        let avScale = 1.35;
+        const AV_SCALE_MIN = 1.0;
+        const AV_SCALE_MAX = 3.0;
         const avatarEl = document.getElementById('avatarLarge');
+
+        function getMaxPan() { return Math.max(0, (avScale - 1) * 45); }
+
+        function clampPan() {
+            const m = getMaxPan();
+            avTransX = Math.max(-m, Math.min(m, avTransX));
+            avTransY = Math.max(-m, Math.min(m, avTransY));
+        }
 
         function onAvatarClick() {
             if (avatarAdjusting) return;
@@ -2085,8 +2093,8 @@
                     canvas.getContext('2d').drawImage(img, 0, 0, w, h);
                     const data = canvas.toDataURL('image/jpeg', 0.92);
                     localStorage.setItem('selekt_avatar_photo', data);
-                    avTransX = 0; avTransY = 0;
-                    localStorage.setItem('selekt_avatar_pos', JSON.stringify({ tx: 0, ty: 0 }));
+                    avTransX = 0; avTransY = 0; avScale = 1.35;
+                    localStorage.setItem('selekt_avatar_pos', JSON.stringify({ tx: 0, ty: 0, s: 1.35 }));
                     displayAvatarPhoto(data);
                     enterAvatarAdjust();
                 };
@@ -2105,9 +2113,10 @@
             avatarAdjusting = false;
             avatarEl.classList.remove('adjusting');
             avatarEl.style.touchAction = '';
-            localStorage.setItem('selekt_avatar_pos', JSON.stringify({ tx: avTransX, ty: avTransY }));
+            localStorage.setItem('selekt_avatar_pos', JSON.stringify({ tx: avTransX, ty: avTransY, s: avScale }));
         }
 
+        // --- Drag (pan) ---
         avatarEl.addEventListener('mousedown', avDragStart);
         avatarEl.addEventListener('touchstart', avDragStart, { passive: false });
         window.addEventListener('mousemove', avDragMove);
@@ -2117,6 +2126,7 @@
 
         function avDragStart(e) {
             if (!avatarAdjusting) return;
+            if (e.touches && e.touches.length === 2) return; // let pinch handle 2-finger
             e.preventDefault();
             avatarDragging = true;
             const pt = e.touches ? e.touches[0] : e;
@@ -2126,22 +2136,55 @@
 
         function avDragMove(e) {
             if (!avatarDragging) return;
+            if (e.touches && e.touches.length === 2) { avatarDragging = false; return; }
             e.preventDefault();
             const pt = e.touches ? e.touches[0] : e;
             const dx = pt.clientX - avDragStartX;
             const dy = pt.clientY - avDragStartY;
             avDragStartX = pt.clientX;
             avDragStartY = pt.clientY;
-            avTransX = Math.max(-AV_MAX_PAN, Math.min(AV_MAX_PAN, avTransX + dx));
-            avTransY = Math.max(-AV_MAX_PAN, Math.min(AV_MAX_PAN, avTransY + dy));
+            avTransX += dx; avTransY += dy;
+            clampPan();
             applyAvatarPosition();
         }
 
         function avDragEnd() { avatarDragging = false; }
 
+        // --- Scroll-wheel zoom (desktop) ---
+        avatarEl.addEventListener('wheel', (e) => {
+            if (!avatarAdjusting) return;
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? -0.05 : 0.05;
+            avScale = Math.max(AV_SCALE_MIN, Math.min(AV_SCALE_MAX, avScale + delta));
+            clampPan();
+            applyAvatarPosition();
+        }, { passive: false });
+
+        // --- Pinch-to-zoom (mobile) ---
+        let pinchStartDist = 0;
+        let pinchStartScale = 1;
+
+        avatarEl.addEventListener('touchstart', (e) => {
+            if (!avatarAdjusting || e.touches.length !== 2) return;
+            e.preventDefault();
+            const t = e.touches;
+            pinchStartDist = Math.hypot(t[1].clientX - t[0].clientX, t[1].clientY - t[0].clientY);
+            pinchStartScale = avScale;
+        }, { passive: false });
+
+        avatarEl.addEventListener('touchmove', (e) => {
+            if (!avatarAdjusting || e.touches.length !== 2) return;
+            e.preventDefault();
+            const t = e.touches;
+            const dist = Math.hypot(t[1].clientX - t[0].clientX, t[1].clientY - t[0].clientY);
+            avScale = Math.max(AV_SCALE_MIN, Math.min(AV_SCALE_MAX, pinchStartScale * (dist / pinchStartDist)));
+            clampPan();
+            applyAvatarPosition();
+        }, { passive: false });
+
         function applyAvatarPosition() {
             const imgEl = avatarEl.querySelector('img');
-            if (imgEl) imgEl.style.transform = `scale(${AV_SCALE}) translate(${avTransX}px, ${avTransY}px)`;
+            if (imgEl) imgEl.style.transform = `scale(${avScale}) translate(${avTransX}px, ${avTransY}px)`;
         }
 
         function displayAvatarPhoto(src) {
@@ -2153,6 +2196,7 @@
             try {
                 const pos = JSON.parse(localStorage.getItem('selekt_avatar_pos'));
                 if (pos && pos.tx !== undefined) { avTransX = pos.tx; avTransY = pos.ty; }
+                if (pos && pos.s !== undefined) avScale = pos.s;
             } catch (e) { }
             applyAvatarPosition();
         }
