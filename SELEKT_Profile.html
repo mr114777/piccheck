@@ -188,6 +188,8 @@
             position: absolute;
             inset: 0;
             z-index: 1;
+            transform-origin: center;
+            /* Default scale applied via JS for pan room */
         }
 
         .avatar-edit-hint {
@@ -2055,11 +2057,14 @@
         let avatarAdjusting = false;
         let avatarDragging = false;
         let avDragStartX, avDragStartY;
-        let avOffsetX = 50, avOffsetY = 50; // object-position percentages (50,50 = centered)
+        // Translate offsets in pixels (0,0 = centered)
+        let avTransX = 0, avTransY = 0;
+        const AV_SCALE = 1.35; // Zoom factor — gives ~35% extra room on all sides
+        const AV_MAX_PAN = 25; // Max translate in pixels
         const avatarEl = document.getElementById('avatarLarge');
 
         function onAvatarClick() {
-            if (avatarAdjusting) return; // ignore clicks during adjustment
+            if (avatarAdjusting) return;
             document.getElementById('avatarInput').click();
         }
 
@@ -2069,7 +2074,6 @@
             reader.onload = ev => {
                 const img = new Image();
                 img.onload = () => {
-                    // Resize for storage but keep good quality
                     const canvas = document.createElement('canvas');
                     const maxSize = 800;
                     let w = img.width, h = img.height;
@@ -2081,11 +2085,9 @@
                     canvas.getContext('2d').drawImage(img, 0, 0, w, h);
                     const data = canvas.toDataURL('image/jpeg', 0.92);
                     localStorage.setItem('selekt_avatar_photo', data);
-                    // Reset position to center
-                    avOffsetX = 50; avOffsetY = 50;
-                    localStorage.setItem('selekt_avatar_pos', JSON.stringify({ x: 50, y: 50 }));
+                    avTransX = 0; avTransY = 0;
+                    localStorage.setItem('selekt_avatar_pos', JSON.stringify({ tx: 0, ty: 0 }));
                     displayAvatarPhoto(data);
-                    // Enter adjust mode
                     enterAvatarAdjust();
                 };
                 img.src = ev.target.result;
@@ -2103,10 +2105,9 @@
             avatarAdjusting = false;
             avatarEl.classList.remove('adjusting');
             avatarEl.style.touchAction = '';
-            localStorage.setItem('selekt_avatar_pos', JSON.stringify({ x: avOffsetX, y: avOffsetY }));
+            localStorage.setItem('selekt_avatar_pos', JSON.stringify({ tx: avTransX, ty: avTransY }));
         }
 
-        // Drag events on the avatar itself
         avatarEl.addEventListener('mousedown', avDragStart);
         avatarEl.addEventListener('touchstart', avDragStart, { passive: false });
         window.addEventListener('mousemove', avDragMove);
@@ -2131,9 +2132,8 @@
             const dy = pt.clientY - avDragStartY;
             avDragStartX = pt.clientX;
             avDragStartY = pt.clientY;
-            // Move object-position (invert direction: dragging right should show more of the left side)
-            avOffsetX = Math.max(0, Math.min(100, avOffsetX - dx * 0.5));
-            avOffsetY = Math.max(0, Math.min(100, avOffsetY - dy * 0.5));
+            avTransX = Math.max(-AV_MAX_PAN, Math.min(AV_MAX_PAN, avTransX + dx));
+            avTransY = Math.max(-AV_MAX_PAN, Math.min(AV_MAX_PAN, avTransY + dy));
             applyAvatarPosition();
         }
 
@@ -2141,7 +2141,7 @@
 
         function applyAvatarPosition() {
             const imgEl = avatarEl.querySelector('img');
-            if (imgEl) imgEl.style.objectPosition = `${avOffsetX}% ${avOffsetY}%`;
+            if (imgEl) imgEl.style.transform = `scale(${AV_SCALE}) translate(${avTransX}px, ${avTransY}px)`;
         }
 
         function displayAvatarPhoto(src) {
@@ -2150,10 +2150,9 @@
             if (!imgEl) { imgEl = document.createElement('img'); el.appendChild(imgEl); }
             imgEl.src = src;
             document.getElementById('avatarInitial').style.display = 'none';
-            // Restore saved position
             try {
                 const pos = JSON.parse(localStorage.getItem('selekt_avatar_pos'));
-                if (pos) { avOffsetX = pos.x; avOffsetY = pos.y; }
+                if (pos && pos.tx !== undefined) { avTransX = pos.tx; avTransY = pos.ty; }
             } catch (e) { }
             applyAvatarPosition();
         }
