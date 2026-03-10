@@ -2325,7 +2325,8 @@
 
   <!-- ===== TOP BAR ===== -->
   <div class="topbar">
-    <!-- Left: Hamburger + Logo -->
+    <!-- Left: Logo + Hamburger -->
+    <div class="logo">SE<span>LEKT</span></div>
     <div style="position:relative;flex-shrink:0">
       <button id="hamburgerBtn" onclick="document.getElementById('selektNavMenu').classList.toggle('open')"
         style="background:none;border:1px solid var(--border);border-radius:8px;padding:6px 8px;cursor:pointer;display:flex;align-items:center;color:var(--text-sub);transition:all 0.2s"
@@ -2382,7 +2383,6 @@
           </svg>プロフィール</a>
       </div>
     </div>
-    <div class="logo">SE<span>LEKT</span></div>
     <div class="topbar-divider"></div>
     <div class="session-name">
       <strong id="sessionTitle" onclick="editSessionTitle()"
