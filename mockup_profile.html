@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SELEKT — Profile Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0D0F14;
+    --surface: #13161E;
+    --surface2: #1A1E28;
+    --surface3: #222736;
+    --border: #2A2F3E;
+    --border2: #333849;
+    --text: #E8EAF0;
+    --text-sub: #7B849A;
+    --text-dim: #454C60;
+    --accent: #4A9EE0;
+    --accent2: #3BBFA5;
+    --coral: #FF6B6B;
+    --green: #4CAF7D;
+    --yellow: #F5C842;
+    --heading-font: 'Syne', sans-serif;
+    --body-font: 'Zen Kaku Gothic New', sans-serif;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--body-font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* TOPBAR */
+  .topbar {
+    height: 48px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'Syne', 'Zen Kaku Gothic New', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #fff;                    /* Upload.html 準拠 */
+    text-decoration: none;
+    white-space: nowrap;
+    text-transform: uppercase;
+    cursor: default;
+  }
+  .logo span { color: rgba(255, 255, 255, 0.5); } /* Upload.html 準拠 */
+  .hamburger-btn {
+    background: none; border: 1px solid var(--border2); border-radius: 8px;
+    padding: 6px 8px; cursor: pointer; display: flex; align-items: center; color: var(--text);
+  }
+  .topbar-avatar {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: #fff;
+    font-family: var(--heading-font); flex-shrink: 0;
+  }
+  .topbar-divider { width: 1px; height: 20px; background: var(--border2); flex-shrink: 0; }
+  .topbar-title { font-size: 15px; font-weight: 700; color: var(--text); font-family: var(--heading-font); }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .lang-select {
+    background: none; border: 1px solid var(--border2); border-radius: 6px;
+    color: var(--text-sub); font-size: 11px; padding: 3px 6px; cursor: pointer;
+    font-family: var(--body-font);
+  }
+
+  /* COVER — 改善: 高さを200pxに縮小 */
+  .cover {
+    height: 200px;
+    background: linear-gradient(135deg, #1a2a3a 0%, #0D1520 50%, #1a1a2e 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 60%, rgba(74,158,224,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 30%, rgba(59,191,165,0.1) 0%, transparent 50%);
+  }
+  .cover-edit-btn {
+    position: absolute;
+    bottom: 12px;
+    right: 16px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    color: rgba(255,255,255,0.8);
+    font-size: 11px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-family: var(--body-font);
+    backdrop-filter: blur(8px);
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  /* PROFILE HEADER */
+  .profile-header {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+  }
+  .avatar-wrap {
+    position: absolute;
+    top: -44px;
+    left: 24px;
+  }
+  .avatar {
+    width: 88px; height: 88px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 4px solid var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 700;
+    font-family: var(--heading-font);
+    color: #fff;
+    position: relative;
+  }
+  .avatar-edit {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 22px; height: 22px;
+    background: var(--surface3);
+    border: 2px solid var(--bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .profile-info-row {
+    padding-top: 52px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .profile-name {
+    font-family: var(--heading-font);
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .role-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    background: rgba(74, 158, 224, 0.15);
+    color: var(--accent);
+    font-family: var(--body-font);
+  }
+  .profile-handle { font-size: 13px; color: var(--text-sub); }
+
+  /* TABS — 改善: プロフィール / 外観設定 に分離 */
+  .profile-tabs {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0;
+  }
+  .profile-tab {
+    padding: 10px 18px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-sub);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--body-font);
+    transition: all 0.2s;
+    margin-bottom: -1px;
+  }
+  .profile-tab.active {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+  }
+  .profile-tab:hover { color: var(--text); }
+
+  /* MAIN */
+  .main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 28px 24px 80px;
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 24px;
+  }
+
+  /* SECTION CARD */
+  .section-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-size: 14px;
+    font-weight: 700;
+    font-family: var(--heading-font);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .section-save-btn {
+    padding: 5px 14px;
+    background: var(--accent);
+    border: none;
+    border-radius: 7px;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: var(--body-font);
+    transition: opacity 0.2s;
+  }
+  .section-save-btn:hover { opacity: 0.85; }
+
+  .form-group { margin-bottom: 14px; }
+  .form-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-dim);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .form-group input, .form-group textarea {
+    width: 100%;
+    padding: 10px 13px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: var(--body-font);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .form-group input:focus, .form-group textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(74,158,224,0.1);
+  }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  /* SNS LINKS */
+  .sns-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .sns-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--surface3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .sns-input {
+    flex: 1;
+    padding: 9px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 12px;
+    font-family: var(--body-font);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .sns-input:focus { border-color: var(--accent); }
+
+  /* SIDEBAR RIGHT */
+  .sidebar-right {}
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .stat-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 14px;
+  }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .stat-item { text-align: center; }
+  .stat-value {
+    font-size: 22px;
+    font-weight: 800;
+    font-family: var(--heading-font);
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label { font-size: 11px; color: var(--text-dim); }
+
+  /* PORTFOLIO */
+  .portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .portfolio-thumb {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .portfolio-thumb:hover { opacity: 0.8; }
+  .portfolio-add {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    border: 2px dashed var(--border2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text-dim);
+    font-size: 10px;
+  }
+  .portfolio-add:hover { border-color: var(--accent); color: var(--accent); }
+
+  .demo-badge {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 20px; padding: 8px 20px; font-size: 12px; color: var(--text-sub);
+    display: flex; align-items: center; gap: 8px; z-index: 10;
+  }
+  .demo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--yellow); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">SE<span>LEKT</span></div>
+  <button class="hamburger-btn">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+      <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+  <div class="topbar-avatar">K</div>
+  <div class="topbar-divider"></div>
+  <span class="topbar-title">プロフィール</span>
+  <div class="topbar-right">
+    <select class="lang-select">
+      <option>JP 日本語</option>
+      <option>EN English</option>
+    </select>
+  </div>
+</div>
+
+<!-- COVER -->
+<div class="cover">
+  <button class="cover-edit-btn">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    カバー写真を変更
+  </button>
+</div>
+
+<!-- PROFILE HEADER -->
+<div class="profile-header">
+  <div class="avatar-wrap">
+    <div class="avatar">
+      K
+      <div class="avatar-edit">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--text-sub)" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </div>
+    </div>
+  </div>
+  <div class="profile-info-row">
+    <div>
+      <div class="profile-name">
+        Kondou Kouichi
+        <span class="role-badge">カメラマン</span>
+      </div>
+      <div class="profile-handle">@kondou_photo · 東京</div>
+    </div>
+  </div>
+</div>
+
+<!-- TABS — 改善: タブ分離 -->
+<div class="profile-tabs">
+  <button class="profile-tab active">プロフィール</button>
+  <button class="profile-tab">外観設定</button>
+  <button class="profile-tab">通知</button>
+  <button class="profile-tab">セキュリティ</button>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+
+  <!-- LEFT: FORMS -->
+  <div>
+    <!-- 基本情報 -->
+    <div class="section-card">
+      <div class="section-title">
+        基本情報
+        <button class="section-save-btn">保存</button>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>名前</label>
+          <input type="text" value="Kondou Kouichi">
+        </div>
+        <div class="form-group">
+          <label>ユーザーID</label>
+          <input type="text" value="kondou_photo">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>自己紹介</label>
+        <textarea>東京を拠点に活動するフォトグラファー。ポートレート・ウェディング・商業撮影を専門としています。</textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>活動地域</label>
+          <input type="text" value="東京都">
+        </div>
+        <div class="form-group">
+          <label>ウェブサイト</label>
+          <input type="url" value="https://kondou.photo">
+        </div>
+      </div>
+    </div>
+
+    <!-- SNS -->
+    <div class="section-card">
+      <div class="section-title">
+        SNS・外部リンク
+        <button class="section-save-btn">保存</button>
+      </div>
+      <div class="sns-item">
+        <div class="sns-icon">📷</div>
+        <input class="sns-input" type="text" placeholder="Instagram ユーザー名" value="kondou_photo">
+      </div>
+      <div class="sns-item">
+        <div class="sns-icon">🐦</div>
+        <input class="sns-input" type="text" placeholder="X (Twitter) ユーザー名" value="@kondou_k">
+      </div>
+      <div class="sns-item">
+        <div class="sns-icon">🎨</div>
+        <input class="sns-input" type="text" placeholder="500px / Behance URL" value="">
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: STATS & PORTFOLIO -->
+  <div class="sidebar-right">
+
+    <!-- Stats -->
+    <div class="stat-card">
+      <div class="stat-title">実績</div>
+      <div class="stat-grid">
+        <div class="stat-item">
+          <div class="stat-value">24</div>
+          <div class="stat-label">プロジェクト</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" style="color:var(--green)">1.2k</div>
+          <div class="stat-label">セレクト枚数</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" style="color:var(--accent2)">8</div>
+          <div class="stat-label">クライアント</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" style="color:var(--yellow)">4.9</div>
+          <div class="stat-label">評価</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Portfolio -->
+    <div class="stat-card">
+      <div class="stat-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>ポートフォリオ</span>
+        <span style="font-size:10px;color:var(--text-dim);font-weight:400;text-transform:none;letter-spacing:0">最大6枚</span>
+      </div>
+      <div class="portfolio-grid">
+        <div class="portfolio-thumb">🌸</div>
+        <div class="portfolio-thumb">💍</div>
+        <div class="portfolio-thumb">🏢</div>
+        <div class="portfolio-thumb">🌿</div>
+        <div class="portfolio-add">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          追加
+        </div>
+        <div class="portfolio-add">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          追加
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="demo-badge">
+  <div class="demo-dot"></div>
+  改善モックアップ — Profile
+</div>
+
+</body>
+</html>
