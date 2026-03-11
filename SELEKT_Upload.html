@@ -2680,8 +2680,18 @@
 
                 console.log('[SELEKT] All photos uploaded to cloud');
 
-                // Save session ID
+                // Save session to local session history
                 localStorage.setItem('selekt_sessionId', sessionId);
+                const mySessions = JSON.parse(localStorage.getItem('selekt_my_sessions') || '[]');
+                mySessions.unshift({
+                    id: sessionId,
+                    title: document.getElementById('sessionTitle')?.value || '',
+                    photographer: document.getElementById('photographerName')?.value || '',
+                    photoCount: groups.reduce((a, g) => a + g.photos.length, 0),
+                    createdAt: new Date().toISOString(),
+                    _type: 'sent'
+                });
+                localStorage.setItem('selekt_my_sessions', JSON.stringify(mySessions));
 
                 if (btn) btn.textContent = 'アップロード完了！';
 

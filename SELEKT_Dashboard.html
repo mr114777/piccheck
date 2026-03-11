@@ -613,7 +613,7 @@
                     }
                     setupUI();
                     document.getElementById('tabFilter').style.display = 'flex';
-                    loadDemoProjects();
+                    await loadProjects();
                     return;
                 }
             } catch (err) {
@@ -728,33 +728,36 @@
             document.getElementById('usageBarFill').style.width = '40%';
         }
 
-        async function loadProjects(token) {
+        async function loadProjects() {
             try {
-                const res = await fetch(`${API}/api/user/${currentUser.id}/projects`, {
-                    headers: { 'Authorization': `Bearer ${token}` },
-                });
-                if (!res.ok) throw new Error('Projects fetch failed');
-                allProjects = await res.json();
-
-                // Fetch session details for each
-                const allSessionIds = [
-                    ...allProjects.received.map(id => ({ id, type: 'received' })),
-                    ...allProjects.sent.map(id => ({ id, type: 'sent' })),
-                ];
-
-                if (allSessionIds.length === 0) {
+                // Load sessions from localStorage (saved by Upload page)
+                const mySessions = JSON.parse(localStorage.getItem('selekt_my_sessions') || '[]');
+                
+                if (mySessions.length === 0) {
                     showEmptyState();
                     return;
                 }
 
+                // Fetch live session details from Worker API
                 const details = await Promise.all(
-                    allSessionIds.map(async ({ id, type }) => {
+                    mySessions.map(async (session) => {
                         try {
-                            const r = await fetch(`${API}/api/session/${id}`);
+                            const r = await fetch(`${API}/api/session/${session.id}`);
                             if (!r.ok) return null;
                             const meta = await r.json();
-                            return { ...meta, _type: type };
-                        } catch { return null; }
+                            return { ...meta, _type: session._type || 'sent' };
+                        } catch {
+                            // API failed — use cached metadata from localStorage
+                            return {
+                                id: session.id,
+                                title: session.title || '',
+                                photographer: session.photographer || '',
+                                photos: new Array(session.photoCount || 0),
+                                createdAt: session.createdAt,
+                                _type: session._type || 'sent',
+                                _offline: true
+                            };
+                        }
                     })
                 );
 
@@ -766,6 +769,7 @@
 
                 renderProjects(validProjects);
             } catch (err) {
+                console.error('loadProjects error:', err);
                 showEmptyState();
             }
         }
