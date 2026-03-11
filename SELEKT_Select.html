@@ -66,7 +66,11 @@
 
     body {
       font-family: 'Syne', 'Zen Kaku Gothic New', sans-serif;
-      background: var(--bg);
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(74, 158, 224, 0.22) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(255, 107, 107, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 60% 80%, rgba(59, 191, 165, 0.15) 0%, transparent 50%),
+        var(--bg);
       color: var(--text);
       height: 100vh;
       display: flex;
@@ -76,15 +80,21 @@
 
     /* ===== TOP BAR ===== */
     .topbar {
-      height: 56px;
+      height: 48px;
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       padding: 0 20px;
-      gap: 16px;
+      gap: 10px;
+      position: sticky;
+      top: 0;
       flex-shrink: 0;
       z-index: 100;
+    }
+
+    #selektNavMenu.open {
+      display: block !important;
     }
 
     .topbar #sessionTitle {
@@ -106,11 +116,12 @@
     }
 
     .logo {
-      font-size: 18px;
+      font-family: 'Syne', sans-serif;
       font-weight: 800;
+      font-size: 18px;
       color: var(--text);
-      letter-spacing: 2px;
-      text-transform: uppercase;
+      text-decoration: none;
+      letter-spacing: 1px;
       white-space: nowrap;
     }
 
@@ -120,7 +131,7 @@
 
     .topbar-divider {
       width: 1px;
-      height: 24px;
+      height: 20px;
       background: var(--border);
     }
 
@@ -2405,6 +2416,17 @@
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
             <circle cx="12" cy="7" r="4" />
           </svg>プロフィール</a>
+          <div style="height:1px;background:#2A2F3E;margin:4px 8px"></div>
+          <a href="#" onclick="signOut(); return false;"
+              style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#FF6B6B;font-size:12px;font-weight:500;transition:all 0.15s"
+              onmouseover="this.style.background='#2a1a1a';this.style.color='#FF8A8A'"
+              onmouseout="this.style.background='';this.style.color='#FF6B6B'"><svg width="14" height="14"
+                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>ログアウト</a>
       </div>
     </div>
     <a href="SELEKT_Profile.html" title="プロフィール" id="topbarAvatar"
@@ -2417,6 +2439,10 @@
       </svg>
     </a>
     <script>(function () { var p = localStorage.getItem('selekt_avatar_photo'); if (p) { var a = document.getElementById('topbarAvatar'); a.innerHTML = '<img src="' + p + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'; } })()</script>
+    <script>
+      function signOut() { localStorage.removeItem('selekt_user'); localStorage.removeItem('selekt_token'); window.location.href = 'SELEKT_Auth.html'; }
+      document.addEventListener('click', e => { if (!e.target.closest('#hamburgerBtn') && !e.target.closest('#selektNavMenu')) document.getElementById('selektNavMenu')?.classList.remove('open') });
+    </script>
     <div class="topbar-divider"></div>
     <div class="session-name" style="display:flex;align-items:center;gap:12px">
       <strong id="sessionTitle" onclick="editSessionTitle()"
@@ -6340,6 +6366,8 @@
     }
 
   </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 </body>
 
 </html>

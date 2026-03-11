@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SELEKT — ユーザーID設定</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0D0F14;
+            --surface: #13161E;
+            --surface2: #1A1E28;
+            --surface3: #222736;
+            --border: #2A2F3E;
+            --text: #E8EAF0;
+            --text-sub: #7B849A;
+            --text-dim: #454C60;
+            --accent: #4A9EE0;
+            --accent2: #3BBFA5;
+            --coral: #FF6B6B;
+            --heading-font: 'Syne', sans-serif;
+            --body-font: 'Zen Kaku Gothic New', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--body-font);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Decorative background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 30% 30%, rgba(74, 158, 224, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 70%, rgba(59, 191, 165, 0.06) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .setup-card {
+            position: relative;
+            z-index: 1;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 48px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .setup-logo {
+            font-family: var(--heading-font);
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .setup-logo span { opacity: 0.5; }
+
+        .setup-step {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 32px;
+        }
+
+        .setup-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .setup-desc {
+            font-size: 13px;
+            color: var(--text-sub);
+            text-align: center;
+            margin-bottom: 28px;
+            line-height: 1.6;
+        }
+
+        /* Username input group */
+        .username-group {
+            margin-bottom: 20px;
+        }
+
+        .username-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .username-input-wrap {
+            display: flex;
+            align-items: center;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+
+        .username-input-wrap:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(74, 158, 224, 0.12);
+        }
+
+        .username-prefix {
+            padding: 12px 0 12px 14px;
+            font-size: 14px;
+            color: var(--text-dim);
+            font-family: var(--body-font);
+            user-select: none;
+        }
+
+        .username-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 12px 14px 12px 2px;
+            font-size: 14px;
+            color: var(--text);
+            font-family: var(--body-font);
+            outline: none;
+        }
+
+        .username-input::placeholder {
+            color: var(--text-dim);
+        }
+
+        .username-status {
+            padding: 0 12px;
+            font-size: 16px;
+            display: none;
+        }
+
+        .username-status.checking { display: block; animation: spin 0.7s linear infinite; }
+        .username-status.available { display: block; color: var(--accent2); }
+        .username-status.taken { display: block; color: var(--coral); }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Feedback text */
+        .username-feedback {
+            font-size: 11px;
+            margin-top: 6px;
+            min-height: 16px;
+        }
+
+        .username-feedback.ok { color: var(--accent2); }
+        .username-feedback.ng { color: var(--coral); }
+        .username-feedback.info { color: var(--text-dim); }
+
+        /* Rules list */
+        .username-rules {
+            background: var(--surface2);
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-bottom: 24px;
+        }
+
+        .username-rules-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-sub);
+            margin-bottom: 8px;
+        }
+
+        .rule {
+            font-size: 12px;
+            color: var(--text-dim);
+            padding: 2px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .rule.pass { color: var(--accent2); }
+        .rule-icon { width: 14px; text-align: center; }
+
+        /* Display name input */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .form-input {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-size: 14px;
+            color: var(--text);
+            font-family: var(--body-font);
+            outline: none;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(74, 158, 224, 0.12);
+        }
+
+        .form-input::placeholder { color: var(--text-dim); }
+
+        /* Role selection */
+        .role-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .role-option {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+
+        .role-option:hover {
+            border-color: var(--text-dim);
+        }
+
+        .role-option.active {
+            border-color: var(--accent);
+            background: rgba(74, 158, 224, 0.08);
+            box-shadow: 0 0 0 2px rgba(74, 158, 224, 0.15);
+        }
+
+        .role-icon {
+            font-size: 22px;
+            margin-bottom: 6px;
+        }
+
+        .role-name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .role-desc {
+            font-size: 10px;
+            color: var(--text-dim);
+            margin-top: 2px;
+        }
+
+        /* Submit button */
+        .setup-submit {
+            width: 100%;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: var(--body-font);
+        }
+
+        .setup-submit:hover:not(:disabled) {
+            filter: brightness(1.15);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(74, 158, 224, 0.35);
+        }
+
+        .setup-submit:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            width: 18px; height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top: 2px solid #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .setup-message {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .setup-message.error {
+            display: block;
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.25);
+            color: var(--coral);
+        }
+
+        .setup-message.success {
+            display: block;
+            background: rgba(59, 191, 165, 0.1);
+            border: 1px solid rgba(59, 191, 165, 0.25);
+            color: var(--accent2);
+        }
+
+        @media (max-width: 520px) {
+            .setup-card { margin: 16px; padding: 32px 24px; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="setup-card">
+        <div class="setup-logo">SE<span>LEKT</span></div>
+        <div class="setup-step">STEP 1 OF 1</div>
+
+        <div class="setup-title">プロフィールを設定</div>
+        <div class="setup-desc">あなたのユーザーIDと表示名を設定してください。<br>ユーザーIDはプロフィール設定から後で変更できます。</div>
+
+        <div class="setup-message" id="setupMessage"></div>
+
+        <!-- Username -->
+        <div class="username-group">
+            <label class="username-label">ユーザーID</label>
+            <div class="username-input-wrap">
+                <span class="username-prefix">@</span>
+                <input class="username-input" type="text" id="usernameInput"
+                    placeholder="your_username" maxlength="20"
+                    oninput="handleUsernameInput(this.value)">
+                <span class="username-status" id="usernameStatus">⟳</span>
+            </div>
+            <div class="username-feedback info" id="usernameFeedback">3〜20文字の英数字・アンダースコア</div>
+        </div>
+
+        <div class="username-rules" id="usernameRules">
+            <div class="username-rules-title">ユーザーIDのルール</div>
+            <div class="rule" id="ruleLength"><span class="rule-icon">○</span> 3〜20文字</div>
+            <div class="rule" id="ruleChars"><span class="rule-icon">○</span> 英数字とアンダースコアのみ</div>
+            <div class="rule" id="ruleStart"><span class="rule-icon">○</span> 英字で始まる</div>
+            <div class="rule" id="ruleUnique"><span class="rule-icon">○</span> 他のユーザーと重複しない</div>
+        </div>
+
+        <!-- Display Name -->
+        <div class="form-group">
+            <label class="form-label">表示名</label>
+            <input class="form-input" type="text" id="displayNameInput"
+                placeholder="カメラマン太郎" maxlength="30">
+        </div>
+
+        <!-- Role Selection -->
+        <label class="form-label" style="margin-bottom:10px; display:block;">あなたの役割</label>
+        <div class="role-grid">
+            <div class="role-option active" onclick="selectRole(this, 'photographer')">
+                <div class="role-icon">📷</div>
+                <div class="role-name">カメラマン</div>
+                <div class="role-desc">写真を送る側</div>
+            </div>
+            <div class="role-option" onclick="selectRole(this, 'model')">
+                <div class="role-icon">👤</div>
+                <div class="role-name">モデル</div>
+                <div class="role-desc">写真を受け取る側</div>
+            </div>
+            <div class="role-option" onclick="selectRole(this, 'business')">
+                <div class="role-icon">🏢</div>
+                <div class="role-name">企業</div>
+                <div class="role-desc">ビジネス利用</div>
+            </div>
+            <div class="role-option" onclick="selectRole(this, 'private')">
+                <div class="role-icon">🔒</div>
+                <div class="role-name">プライベート</div>
+                <div class="role-desc">個人利用</div>
+            </div>
+        </div>
+
+        <button class="setup-submit" id="submitBtn" disabled onclick="handleSubmit()">
+            ユーザーIDを確定する
+        </button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script>
+        let selectedRole = 'photographer';
+        let usernameAvailable = false;
+        let checkTimer = null;
+
+        // Redirect if not logged in
+        (async function () {
+            const user = await getCurrentUser();
+            if (!user) {
+                window.location.href = 'SELEKT_Login.html';
+                return;
+            }
+            // Pre-fill display name from signup data
+            const name = user.user_metadata?.display_name || '';
+            if (name) document.getElementById('displayNameInput').value = name;
+        })();
+
+        // ===== Username Validation =====
+        function handleUsernameInput(val) {
+            const clean = val.toLowerCase().replace(/[^a-z0-9_]/g, '');
+            if (clean !== val) {
+                document.getElementById('usernameInput').value = clean;
+            }
+
+            validateRules(clean);
+
+            // Debounce availability check
+            clearTimeout(checkTimer);
+            usernameAvailable = false;
+            updateSubmitBtn();
+
+            if (clean.length >= 3 && /^[a-z][a-z0-9_]{2,19}$/.test(clean)) {
+                showStatus('checking');
+                setFeedback('確認中...', 'info');
+                checkTimer = setTimeout(() => checkAvailability(clean), 400);
+            } else {
+                showStatus('');
+                setRule('ruleUnique', false);
+            }
+        }
+
+        function validateRules(val) {
+            setRule('ruleLength', val.length >= 3 && val.length <= 20);
+            setRule('ruleChars', /^[a-z0-9_]*$/.test(val) && val.length > 0);
+            setRule('ruleStart', /^[a-z]/.test(val));
+        }
+
+        async function checkAvailability(username) {
+            try {
+                const { data, error } = await _sb.rpc('check_username_available', {
+                    desired_username: username
+                });
+
+                if (error) throw error;
+
+                if (data === true) {
+                    usernameAvailable = true;
+                    showStatus('available');
+                    setFeedback(`@${username} は使用可能です！`, 'ok');
+                    setRule('ruleUnique', true);
+                } else {
+                    usernameAvailable = false;
+                    showStatus('taken');
+                    setFeedback(`@${username} は既に使われています`, 'ng');
+                    setRule('ruleUnique', false);
+                }
+            } catch (err) {
+                console.error('Availability check failed:', err);
+                setFeedback('確認に失敗しました。再度お試しください。', 'ng');
+                showStatus('');
+            }
+            updateSubmitBtn();
+        }
+
+        function showStatus(type) {
+            const el = document.getElementById('usernameStatus');
+            el.className = 'username-status';
+            if (type === 'checking') { el.className = 'username-status checking'; el.textContent = '⟳'; }
+            else if (type === 'available') { el.className = 'username-status available'; el.textContent = '✓'; }
+            else if (type === 'taken') { el.className = 'username-status taken'; el.textContent = '✕'; }
+        }
+
+        function setFeedback(msg, type) {
+            const el = document.getElementById('usernameFeedback');
+            el.textContent = msg;
+            el.className = 'username-feedback ' + type;
+        }
+
+        function setRule(id, pass) {
+            const el = document.getElementById(id);
+            if (pass) {
+                el.classList.add('pass');
+                el.querySelector('.rule-icon').textContent = '✓';
+            } else {
+                el.classList.remove('pass');
+                el.querySelector('.rule-icon').textContent = '○';
+            }
+        }
+
+        function selectRole(el, role) {
+            document.querySelectorAll('.role-option').forEach(o => o.classList.remove('active'));
+            el.classList.add('active');
+            selectedRole = role;
+        }
+
+        function updateSubmitBtn() {
+            document.getElementById('submitBtn').disabled = !usernameAvailable;
+        }
+
+        // ===== Submit =====
+        async function handleSubmit() {
+            const btn = document.getElementById('submitBtn');
+            const username = document.getElementById('usernameInput').value.toLowerCase();
+            const displayName = document.getElementById('displayNameInput').value.trim();
+
+            if (!usernameAvailable) return;
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> 設定中...';
+
+            try {
+                const user = await getCurrentUser();
+                if (!user) throw new Error('Not logged in');
+
+                const { error } = await _sb.from('profiles').insert({
+                    id: user.id,
+                    username: username,
+                    display_name: displayName || username,
+                    role: selectedRole,
+                    plan: 'free'
+                });
+
+                if (error) {
+                    if (error.code === '23505') {
+                        showMsg('このユーザーIDは既に使われています。別のIDを試してください。', 'error');
+                    } else {
+                        showMsg(error.message, 'error');
+                    }
+                    btn.disabled = false;
+                    btn.textContent = 'ユーザーIDを確定する';
+                    return;
+                }
+
+                showMsg('プロフィールを作成しました！ダッシュボードに移動します...', 'success');
+                setTimeout(() => {
+                    window.location.href = 'SELEKT_Dashboard.html';
+                }, 1000);
+
+            } catch (err) {
+                showMsg('エラーが発生しました: ' + err.message, 'error');
+                btn.disabled = false;
+                btn.textContent = 'ユーザーIDを確定する';
+            }
+        }
+
+        function showMsg(msg, type) {
+            const el = document.getElementById('setupMessage');
+            el.textContent = msg;
+            el.className = 'setup-message ' + type;
+        }
+    </script>
+</body>
+
+</html>

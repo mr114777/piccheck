@@ -69,13 +69,13 @@
 
         /* TOPBAR */
         .topbar {
-            height: 52px;
+            height: 48px;
             background: var(--surface);
             border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
             padding: 0 20px;
-            gap: 12px;
+            gap: 10px;
             position: sticky;
             top: 0;
             z-index: 100;
@@ -111,15 +111,13 @@
         .cover-section {
             position: relative;
             width: 100%;
-            max-width: 900px;
             margin: 0 auto;
         }
 
         .cover-photo {
             width: 100%;
-            height: 320px;
-            background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 60%, #000));
-            border-radius: 0 0 20px 20px;
+            height: 200px;
+            background: linear-gradient(135deg, #1a2a3a 0%, #0D1520 50%, #1a1a2e 100%);
             object-fit: cover;
             cursor: pointer;
             position: relative;
@@ -127,10 +125,43 @@
             transition: background 0.3s;
         }
 
+        .cover-photo::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 30% 60%, rgba(74, 158, 224, 0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 30%, rgba(59, 191, 165, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
         .cover-photo img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+
+        .cover-edit-btn {
+            position: absolute;
+            bottom: 12px;
+            right: 16px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 11px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-family: var(--body-font);
+            backdrop-filter: blur(8px);
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+
+        .cover-edit-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
         }
 
         .cover-edit-hint {
@@ -152,6 +183,20 @@
             opacity: 1;
         }
 
+        /* PROFILE HEADER */
+        .profile-header {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+        }
+
+        .avatar-wrap {
+            position: absolute;
+            top: -44px;
+            left: 24px;
+        }
+
         /* AVATAR OVERLAP */
         .avatar-area {
             display: flex;
@@ -163,18 +208,18 @@
         }
 
         .avatar-large {
-            width: 140px;
-            height: 140px;
+            width: 88px;
+            height: 88px;
             border-radius: 50%;
             background: var(--accent);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 48px;
-            font-weight: 800;
+            font-size: 32px;
+            font-weight: 700;
             color: #fff;
             font-family: var(--heading-font);
-            box-shadow: 0 0 0 4px var(--bg), 0 4px 20px rgba(0, 0, 0, 0.3);
+            border: 4px solid var(--bg);
             position: relative;
             cursor: pointer;
             overflow: hidden;
@@ -189,7 +234,22 @@
             inset: 0;
             z-index: 1;
             transform-origin: center;
-            /* Default scale applied via JS for pan room */
+        }
+
+        .avatar-edit {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 22px;
+            height: 22px;
+            background: var(--surface3);
+            border: 2px solid var(--bg);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 4;
         }
 
         .avatar-edit-hint {
@@ -234,18 +294,28 @@
             }
         }
 
+        .profile-info-row {
+            padding-top: 52px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
         .profile-name {
-            font-size: 34px;
-            font-weight: 700;
-            margin-top: 14px;
             font-family: var(--heading-font);
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             transition: letter-spacing 0.3s, text-transform 0.3s;
         }
 
         .profile-id {
             font-size: 13px;
             color: var(--text-sub);
-            margin-top: 2px;
         }
 
         .badge-row {
@@ -254,6 +324,47 @@
             margin-top: 10px;
             flex-wrap: wrap;
             justify-content: center;
+        }
+
+        /* PROFILE TABS */
+        .profile-tabs {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            gap: 4px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .profile-tab {
+            padding: 10px 18px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-sub);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: var(--body-font);
+            transition: all 0.2s;
+            margin-bottom: -1px;
+        }
+
+        .profile-tab.active {
+            color: var(--text);
+            border-bottom-color: var(--accent);
+        }
+
+        .profile-tab:hover {
+            color: var(--text);
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
         }
 
         .badge {
@@ -407,11 +518,218 @@
         .main {
             max-width: 900px;
             margin: 0 auto;
-            padding: 24px 24px 80px;
+            padding: 28px 24px 80px;
+            display: grid;
+            grid-template-columns: 1fr 280px;
+            gap: 24px;
+        }
+
+        .main-left {
+            min-width: 0;
+        }
+
+        .sidebar-right {
+            min-width: 0;
+        }
+
+        /* QR CODE & SHARE */
+        .qr-card {
+            text-align: center;
+        }
+
+        .qr-canvas-wrap {
+            background: #fff;
+            border-radius: 10px;
+            padding: 12px;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        .qr-canvas-wrap canvas {
+            display: block;
+        }
+
+        .qr-url {
+            font-size: 10px;
+            color: var(--text-dim);
+            word-break: break-all;
+            margin-bottom: 14px;
+            line-height: 1.4;
+        }
+
+        .share-btn-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .share-btn {
+            flex: 1;
+            padding: 8px 0;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: var(--body-font);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+
+        .share-btn:hover {
+            background: var(--surface3);
+        }
+
+        .share-btn.primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        .share-btn.primary:hover {
+            opacity: 0.85;
+        }
+
+        /* Preview send button */
+        .pv-send-section {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .pv-send-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 36px;
+            background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 70%, #6C5CE7));
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: var(--body-font);
+            box-shadow: 0 4px 16px rgba(74, 158, 224, 0.3);
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .pv-send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(74, 158, 224, 0.4);
+        }
+
+        .pv-send-url-display {
+            margin-top: 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            display: none;
+        }
+
+        .pv-send-url-display input {
+            width: 100%;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 12px;
+            font-family: var(--body-font);
+            outline: none;
         }
 
         .section {
-            margin-bottom: 28px;
+            margin-bottom: 16px;
+        }
+
+        /* SECTION CARD (mockup style) */
+        .section-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+
+        .section-card-title {
+            font-size: 14px;
+            font-weight: 700;
+            font-family: var(--heading-font);
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-save-btn {
+            padding: 5px 14px;
+            background: var(--accent);
+            border: none;
+            border-radius: 7px;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: var(--body-font);
+            transition: opacity 0.2s;
+        }
+
+        .section-save-btn:hover {
+            opacity: 0.85;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        /* STAT CARD (sidebar) */
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 14px;
+        }
+
+        .stat-grid-2x2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .stat-grid-item {
+            text-align: center;
+        }
+
+        .stat-grid-value {
+            font-size: 22px;
+            font-weight: 800;
+            font-family: var(--heading-font);
+            color: var(--accent);
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .stat-grid-label {
+            font-size: 11px;
+            color: var(--text-dim);
         }
 
         .section-header {
@@ -1114,21 +1432,31 @@
         }
 
         .pv-close-btn {
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            border-radius: 8px;
-            padding: 6px 16px;
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
             color: #fff;
-            font-size: 12px;
+            font-size: 16px;
             font-weight: 600;
             transition: all 0.25s;
             backdrop-filter: blur(8px);
+            padding: 0;
+            line-height: 1;
         }
 
         body[data-mode="light"] .pv-close-btn {
-            background: var(--surface);
-            border-color: var(--border);
+            background: rgba(0, 0, 0, 0.06);
+            border-color: rgba(0, 0, 0, 0.1);
             color: var(--text);
         }
 
@@ -1136,7 +1464,7 @@
             background: var(--accent);
             color: #fff;
             border-color: var(--accent);
-            transform: scale(1.04);
+            transform: scale(1.08);
         }
 
         /* ── Hero Cover Section (Background Header) ── */
@@ -1457,10 +1785,14 @@
         }
 
         /* RESPONSIVE */
-        @media(max-width:600px) {
+        @media(max-width:768px) {
+            .main {
+                grid-template-columns: 1fr;
+                padding: 20px 16px 80px;
+            }
+
             .cover-photo {
-                height: 160px;
-                border-radius: 0 0 16px 16px;
+                height: 140px;
             }
 
             .portfolio-grid {
@@ -1482,6 +1814,10 @@
                 border-radius: 14px;
             }
 
+            .section-card {
+                padding: 20px 16px;
+            }
+
             .role-grid {
                 gap: 6px;
             }
@@ -1490,19 +1826,92 @@
                 padding: 14px 16px 0;
             }
 
-            .main {
-                padding: 20px 16px 80px;
+            .form-row {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 
 <body data-mode="dark" data-font="modern">
-    <!-- TOPBAR -->
+    <!-- TOPBAR (Unified) -->
     <div class="topbar">
-        <a class="logo" href="SELEKT_Dashboard.html">SE<span>LEKT</span></a>
+        <div class="logo" style="cursor:default">SE<span>LEKT</span></div>
+        <div style="position:relative">
+            <button id="hamburgerBtn" onclick="document.getElementById('selektNavMenu').classList.toggle('open')"
+                style="background:none;border:1px solid var(--border2);border-radius:8px;padding:6px 8px;cursor:pointer;display:flex;align-items:center;color:var(--text)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round">
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <line x1="3" y1="12" x2="21" y2="12" />
+                    <line x1="3" y1="18" x2="21" y2="18" />
+                </svg>
+            </button>
+            <div id="selektNavMenu"
+                style="display:none;position:absolute;top:calc(100% + 6px);left:0;background:#1A1E28;border:1px solid #333849;border-radius:10px;padding:6px;min-width:180px;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,0.4)">
+                <a href="SELEKT_Dashboard.html"
+                    style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#7B849A;font-size:12px;font-weight:500;transition:all 0.15s"
+                    onmouseover="this.style.background='#222736';this.style.color='#E8EAF0'"
+                    onmouseout="this.style.background='';this.style.color='#7B849A'"><svg width="14" height="14"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7" />
+                        <rect x="14" y="3" width="7" height="7" />
+                        <rect x="14" y="14" width="7" height="7" />
+                        <rect x="3" y="14" width="7" height="7" />
+                    </svg>ダッシュボード</a>
+                <a href="SELEKT_Upload.html"
+                    style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#7B849A;font-size:12px;font-weight:500;transition:all 0.15s"
+                    onmouseover="this.style.background='#222736';this.style.color='#E8EAF0'"
+                    onmouseout="this.style.background='';this.style.color='#7B849A'"><svg width="14" height="14"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>アップロード</a>
+                <a href="SELEKT_Pricing.html"
+                    style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#7B849A;font-size:12px;font-weight:500;transition:all 0.15s"
+                    onmouseover="this.style.background='#222736';this.style.color='#E8EAF0'"
+                    onmouseout="this.style.background='';this.style.color='#7B849A'"><svg width="14" height="14"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                        <line x1="7" y1="7" x2="7.01" y2="7" />
+                    </svg>プラン</a>
+                <div style="height:1px;background:#2A2F3E;margin:4px 8px"></div>
+                <a href="SELEKT_Profile.html"
+                    style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#4A9EE0;font-size:12px;font-weight:600;background:rgba(74,158,224,0.08)"><svg
+                        width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>プロフィール</a>
+                <div style="height:1px;background:#2A2F3E;margin:4px 8px"></div>
+                <a href="#" onclick="signOut(); return false;"
+                    style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#FF6B6B;font-size:12px;font-weight:500;transition:all 0.15s"
+                    onmouseover="this.style.background='#2a1a1a';this.style.color='#FF8A8A'"
+                    onmouseout="this.style.background='';this.style.color='#FF6B6B'"><svg width="14" height="14"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>ログアウト</a>
+            </div>
+        </div>
+        <a href="SELEKT_Profile.html" title="プロフィール" id="topbarAvatar"
+            style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:var(--surface3);border:2px solid var(--border2);color:var(--text-sub);transition:all 0.2s;text-decoration:none;overflow:hidden;flex-shrink:0">
+            <svg class="avatar-fallback" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+            </svg>
+        </a>
+        <script>(function () { var p = localStorage.getItem('selekt_avatar_photo'); if (p) { var a = document.getElementById('topbarAvatar'); a.innerHTML = '<img src="' + p + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'; } })()</script>
         <div class="topbar-divider"></div>
-        <div style="font-size:13px;font-weight:500;color:var(--text-sub)" data-i18n="navProfile">プロフィール</div>
+        <span style="font-size:15px;font-weight:700;color:var(--text);font-family:var(--heading-font)"
+            data-i18n="navProfile">プロフィール</span>
         <div class="topbar-right">
             <div style="display:flex;gap:4px">
                 <button class="lang-btn" onclick="setLang('ja')" id="langJa"
@@ -1512,294 +1921,178 @@
                 <button class="lang-btn" onclick="setLang('zh')" id="langZh"
                     style="background:none;border:1px solid var(--border2);color:var(--text-sub);padding:2px 6px;border-radius:4px;font-size:10px;cursor:pointer">中</button>
             </div>
-            <div style="position:relative;margin-left:4px">
-                <button id="hamburgerBtn" onclick="document.getElementById('selektNavMenu').classList.toggle('open')"
-                    style="background:none;border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:5px 7px;cursor:pointer;display:flex;align-items:center;color:rgba(255,255,255,0.6);transition:border-color 0.2s"
-                    onmouseover="this.style.borderColor='rgba(255,255,255,0.3)'"
-                    onmouseout="this.style.borderColor='rgba(255,255,255,0.12)'">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round">
-                        <line x1="3" y1="6" x2="21" y2="6" />
-                        <line x1="3" y1="12" x2="21" y2="12" />
-                        <line x1="3" y1="18" x2="21" y2="18" />
-                    </svg>
-                </button>
-                <div id="selektNavMenu"
-                    style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:#1A1E28;border:1px solid #333849;border-radius:10px;padding:6px;min-width:180px;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,0.4)">
-                    <a href="SELEKT_Dashboard.html"
-                        style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#7B849A;font-size:12px;font-weight:500;transition:all 0.15s"
-                        onmouseover="this.style.background='#222736';this.style.color='#E8EAF0'"
-                        onmouseout="this.style.background='';this.style.color='#7B849A'"><svg width="14" height="14"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="3" width="7" height="7" />
-                            <rect x="14" y="3" width="7" height="7" />
-                            <rect x="14" y="14" width="7" height="7" />
-                            <rect x="3" y="14" width="7" height="7" />
-                        </svg>ダッシュボード</a>
-                    <a href="SELEKT_Upload.html"
-                        style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#7B849A;font-size:12px;font-weight:500;transition:all 0.15s"
-                        onmouseover="this.style.background='#222736';this.style.color='#E8EAF0'"
-                        onmouseout="this.style.background='';this.style.color='#7B849A'"><svg width="14" height="14"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                            <polyline points="17 8 12 3 7 8" />
-                            <line x1="12" y1="3" x2="12" y2="15" />
-                        </svg>アップロード</a>
-                    <a href="SELEKT_Pricing.html"
-                        style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#7B849A;font-size:12px;font-weight:500;transition:all 0.15s"
-                        onmouseover="this.style.background='#222736';this.style.color='#E8EAF0'"
-                        onmouseout="this.style.background='';this.style.color='#7B849A'"><svg width="14" height="14"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
-                            <line x1="7" y1="7" x2="7.01" y2="7" />
-                        </svg>プラン</a>
-                    <div style="height:1px;background:#2A2F3E;margin:4px 8px"></div>
-                    <a href="SELEKT_Profile.html"
-                        style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#4A9EE0;font-size:12px;font-weight:600;background:rgba(74,158,224,0.08)"><svg
-                            width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                            <circle cx="12" cy="7" r="4" />
-                        </svg>プロフィール</a>
-                </div>
-            </div>
-            <script>document.addEventListener('click', e => { if (!e.target.closest('#hamburgerBtn') && !e.target.closest('#selektNavMenu')) document.getElementById('selektNavMenu')?.classList.remove('open') });</script>
         </div>
+        <script>document.addEventListener('click', e => { if (!e.target.closest('#hamburgerBtn') && !e.target.closest('#selektNavMenu')) document.getElementById('selektNavMenu')?.classList.remove('open') });</script>
     </div>
 
-    <!-- COVER PHOTO -->
+    <!-- COVER -->
     <div class="cover-section">
         <div class="cover-photo" id="coverPhoto" onclick="document.getElementById('coverInput').click()">
-            <div class="cover-edit-hint">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-                    <circle cx="12" cy="13" r="4" />
+            <button class="cover-edit-btn"
+                onclick="event.stopPropagation();document.getElementById('coverInput').click()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                 </svg>
                 <span data-i18n="changeCover">カバー写真を変更</span>
-            </div>
+            </button>
         </div>
     </div>
     <input type="file" id="coverInput" class="hidden-input" accept="image/*" onchange="handleCoverUpload(event)">
     <input type="file" id="avatarInput" class="hidden-input" accept="image/*" onchange="handleAvatarUpload(event)">
+    <input type="file" id="portfolioInput" class="hidden-input" accept="image/*"
+        onchange="handlePortfolioUpload(event)">
 
-    <!-- AVATAR + INFO -->
-    <div class="avatar-area">
-        <div class="avatar-large" id="avatarLarge" onclick="onAvatarClick()">
-            <div class="avatar-ring"></div>
-            <span style="position:relative;z-index:1" id="avatarInitial">?</span>
-            <div class="avatar-edit-hint">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-                    <circle cx="12" cy="13" r="4" />
-                </svg>
-            </div>
-            <button class="avatar-confirm-btn" id="avatarConfirmBtn"
-                onclick="event.stopPropagation(); confirmAvatarPosition()">✓ 完了</button>
-        </div>
-        <div class="profile-name" id="profileName">---</div>
-        <div class="profile-id" id="profileId">@---</div>
-        <div class="badge-row">
-            <span class="badge badge-role" id="roleBadge">---</span>
-            <span class="badge badge-plan" id="planBadge">FREE</span>
-        </div>
-    </div>
-
-    <!-- Bio -->
-    <div class="bio-section">
-        <div class="bio-text" id="bioDisplay"></div>
-        <div class="social-row" id="socialRow" style="display:none"></div>
-        <button class="preview-btn" onclick="openPreview()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                <circle cx="12" cy="12" r="3" />
-            </svg>
-            <span data-i18n="previewProfile">外部からの見え方を確認</span>
-        </button>
-    </div>
-
-    <!-- SNS CARDS -->
-    <div class="sns-cards" id="snsCards" style="display:none"></div>
-
-    <!-- MAIN -->
-    <div class="main">
-        <!-- Portfolio -->
-        <div class="section">
-            <div class="section-header">
-                <div class="section-title">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="18" height="18" rx="2" />
-                        <circle cx="8.5" cy="8.5" r="1.5" />
-                        <polyline points="21 15 16 10 5 21" />
+    <!-- PROFILE HEADER -->
+    <div class="profile-header">
+        <div class="avatar-wrap">
+            <div class="avatar-large" id="avatarLarge" onclick="onAvatarClick()">
+                <div class="avatar-ring"></div>
+                <span style="position:relative;z-index:1" id="avatarInitial">?</span>
+                <div class="avatar-edit-hint">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                        <circle cx="12" cy="13" r="4" />
                     </svg>
-                    <span data-i18n="portfolio">ポートフォリオ</span>
                 </div>
-            </div>
-            <div class="portfolio-grid" id="portfolioGrid"></div>
-        </div>
-
-        <!-- Style Customizer -->
-        <div class="section">
-            <div class="card style-section">
-                <div class="card-title">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="5" />
-                        <line x1="12" y1="1" x2="12" y2="3" />
-                        <line x1="12" y1="21" x2="12" y2="23" />
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                        <line x1="1" y1="12" x2="3" y2="12" />
-                        <line x1="21" y1="12" x2="23" y2="12" />
-                    </svg>
-                    <span data-i18n="styleTitle">スタイル設定</span>
-                </div>
-                <div class="style-row">
-                    <div class="style-label" data-i18n="accentColor">アクセントカラー</div>
-                    <div class="color-presets" id="colorPresets">
-                        <div class="color-dot selected" data-color="#4A9EE0"
-                            style="background:color-mix(in srgb, #4A9EE0 40%, var(--bg))"
-                            onclick="setAccentColor('#4A9EE0',this)"></div>
-                        <div class="color-dot" data-color="#A78BFA"
-                            style="background:color-mix(in srgb, #A78BFA 40%, var(--bg))"
-                            onclick="setAccentColor('#A78BFA',this)"></div>
-                        <div class="color-dot" data-color="#F472B6"
-                            style="background:color-mix(in srgb, #F472B6 40%, var(--bg))"
-                            onclick="setAccentColor('#F472B6',this)"></div>
-                        <div class="color-dot" data-color="#E63946"
-                            style="background:color-mix(in srgb, #E63946 40%, var(--bg))"
-                            onclick="setAccentColor('#E63946',this)"></div>
-                        <div class="color-dot" data-color="#FB923C"
-                            style="background:color-mix(in srgb, #FB923C 40%, var(--bg))"
-                            onclick="setAccentColor('#FB923C',this)"></div>
-                        <div class="color-dot" data-color="#4CAF7D"
-                            style="background:color-mix(in srgb, #4CAF7D 40%, var(--bg))"
-                            onclick="setAccentColor('#4CAF7D',this)"></div>
-                        <div class="color-dot" data-color="#B8860B"
-                            style="background:color-mix(in srgb, #B8860B 40%, var(--bg))"
-                            onclick="setAccentColor('#B8860B',this)"></div>
-                        <div class="color-dot" data-color="#E8EAF0"
-                            style="background:color-mix(in srgb, #E8EAF0 40%, var(--bg))"
-                            onclick="setAccentColor('#E8EAF0',this)"></div>
-                        <div class="color-dot" data-color="#000000"
-                            style="background:color-mix(in srgb, #000000 40%, var(--bg)); border: 1px solid var(--border)"
-                            onclick="setAccentColor('#000000',this)"></div>
-                        <div class="color-picker-wrap"><input type="color" id="customColorPicker" value="#4A9EE0"
-                                oninput="setAccentColor(this.value,null)"></div>
-                    </div>
-                </div>
-                <div class="style-row">
-                    <div class="style-label" data-i18n="bgMode">背景モード</div>
-                    <div class="mode-toggle">
-                        <button class="mode-btn active" data-mode="dark" onclick="setMode('dark')">🌙 <span
-                                data-i18n="modeDark">ダーク</span></button>
-                        <button class="mode-btn" data-mode="light" onclick="setMode('light')">☀️ <span
-                                data-i18n="modeLight">ライト</span></button>
-                    </div>
-                </div>
-                <div class="style-row" style="margin-bottom:0">
-                    <div class="style-label" data-i18n="fontStyle">フォントスタイル</div>
-                    <div class="font-options">
-                        <button class="font-btn active" data-font="modern"
-                            onclick="setFontStyle('modern')">Modern</button>
-                        <button class="font-btn" data-font="elegant" onclick="setFontStyle('elegant')">Elegant</button>
-                        <button class="font-btn" data-font="bold" onclick="setFontStyle('bold')">BOLD</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Edit Profile -->
-        <div class="section">
-            <div class="card">
-                <div class="card-title">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
+                <div class="avatar-edit">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--text-sub)"
+                        stroke-width="2">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                     </svg>
-                    <span data-i18n="editProfile">プロフィール編集</span>
                 </div>
-                <div class="form-group"><label class="form-label" data-i18n="displayName">表示名</label><input
-                        class="form-input" type="text" id="editName" placeholder="表示名を入力"></div>
-                <div class="form-group"><label class="form-label" data-i18n="bio">自己紹介</label><textarea
-                        class="form-textarea" id="editBio" maxlength="250" placeholder="自己紹介を入力（250文字以内）"
-                        oninput="updateCharCount()"></textarea>
-                    <div class="char-count" id="charCount">0 / 250</div>
+                <button class="avatar-confirm-btn" id="avatarConfirmBtn"
+                    onclick="event.stopPropagation(); confirmAvatarPosition()">✓ 完了</button>
+            </div>
+        </div>
+        <div class="profile-info-row">
+            <div>
+                <div class="profile-name" id="profileName">
+                    ---
+                    <span class="badge badge-role" id="roleBadge"
+                        style="display:inline-block;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;background:rgba(74,158,224,0.15);color:var(--accent);font-family:var(--body-font)">---</span>
                 </div>
-                <div class="form-group"><label class="form-label" data-i18n="userId">ユーザーID</label><input
-                        class="form-input" type="text" id="editId" disabled></div>
-                <div class="form-group">
-                    <label class="form-label" data-i18n="yourRole">あなたの役割</label>
-                    <div class="role-grid" id="roleGrid">
-                        <div class="role-card" data-role="photographer" onclick="selectRole(this)">
-                            <div class="role-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <path
-                                        d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-                                    <circle cx="12" cy="13" r="4" />
-                                </svg></div>
-                            <div class="role-name" data-i18n="rolePhotographer">カメラマン</div>
-                            <div class="role-desc" data-i18n="rolePhotographerDesc">写真を送る側</div>
-                        </div>
-                        <div class="role-card" data-role="model" onclick="selectRole(this)">
-                            <div class="role-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                                    <circle cx="12" cy="7" r="4" />
-                                </svg></div>
-                            <div class="role-name" data-i18n="roleModel">モデル</div>
-                            <div class="role-desc" data-i18n="roleModelDesc">写真を受け取る側</div>
-                        </div>
-                        <div class="role-card" data-role="company" onclick="selectRole(this)">
-                            <div class="role-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <rect x="4" y="2" width="16" height="20" rx="2" />
-                                    <line x1="9" y1="6" x2="9" y2="6.01" />
-                                    <line x1="15" y1="6" x2="15" y2="6.01" />
-                                    <line x1="9" y1="10" x2="9" y2="10.01" />
-                                    <line x1="15" y1="10" x2="15" y2="10.01" />
-                                    <line x1="9" y1="14" x2="15" y2="14" />
-                                </svg></div>
-                            <div class="role-name" data-i18n="roleCompany">企業</div>
-                            <div class="role-desc" data-i18n="roleCompanyDesc">ビジネス利用</div>
-                        </div>
-                        <div class="role-card" data-role="private" onclick="selectRole(this)">
-                            <div class="role-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <rect x="3" y="11" width="18" height="11" rx="2" />
-                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                                    <circle cx="12" cy="16" r="1" />
-                                </svg></div>
-                            <div class="role-name" data-i18n="rolePrivate">プライベート</div>
-                            <div class="role-desc" data-i18n="rolePrivateDesc">個人利用</div>
+                <div class="profile-id" id="profileId">@---</div>
+            </div>
+            <button class="preview-btn" onclick="openPreview()" style="margin-top:0">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                </svg>
+                <span data-i18n="previewProfile">プレビュー</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="profile-tabs">
+        <button class="profile-tab active" onclick="switchTab('profile')" data-tab="profile"
+            data-i18n="navProfile">プロフィール</button>
+        <button class="profile-tab" onclick="switchTab('appearance')" data-tab="appearance"
+            data-i18n="styleTitle">外観設定</button>
+        <button class="profile-tab" onclick="switchTab('account')" data-tab="account"
+            data-i18n="accountInfo">アカウント</button>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main">
+        <!-- ====== TAB: PROFILE ====== -->
+        <div class="main-left">
+            <div class="tab-panel active" id="tab-profile">
+
+                <!-- 基本情報 -->
+                <div class="section-card">
+                    <div class="section-card-title">
+                        <span data-i18n="editProfile">基本情報</span>
+                        <button class="section-save-btn" onclick="saveProfile()" id="saveBtn"
+                            data-i18n="saveChanges">保存</button>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label class="form-label" data-i18n="displayName">名前</label><input
+                                class="form-input" type="text" id="editName" placeholder="表示名を入力"></div>
+                        <div class="form-group"><label class="form-label" data-i18n="userId">ユーザーID</label><input
+                                class="form-input" type="text" id="editId" disabled></div>
+                    </div>
+                    <div class="form-group"><label class="form-label" data-i18n="bio">自己紹介</label><textarea
+                            class="form-textarea" id="editBio" maxlength="250" placeholder="自己紹介を入力（250文字以内）"
+                            oninput="updateCharCount()"></textarea>
+                        <div class="char-count" id="charCount">0 / 250</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="yourRole">あなたの役割</label>
+                        <div class="role-grid" id="roleGrid">
+                            <div class="role-card" data-role="photographer" onclick="selectRole(this)">
+                                <div class="role-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path
+                                            d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                                        <circle cx="12" cy="13" r="4" />
+                                    </svg></div>
+                                <div class="role-name" data-i18n="rolePhotographer">カメラマン</div>
+                                <div class="role-desc" data-i18n="rolePhotographerDesc">写真を送る側</div>
+                            </div>
+                            <div class="role-card" data-role="model" onclick="selectRole(this)">
+                                <div class="role-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                        <circle cx="12" cy="7" r="4" />
+                                    </svg></div>
+                                <div class="role-name" data-i18n="roleModel">モデル</div>
+                                <div class="role-desc" data-i18n="roleModelDesc">写真を受け取る側</div>
+                            </div>
+                            <div class="role-card" data-role="company" onclick="selectRole(this)">
+                                <div class="role-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <rect x="4" y="2" width="16" height="20" rx="2" />
+                                        <line x1="9" y1="6" x2="9" y2="6.01" />
+                                        <line x1="15" y1="6" x2="15" y2="6.01" />
+                                        <line x1="9" y1="10" x2="9" y2="10.01" />
+                                        <line x1="15" y1="10" x2="15" y2="10.01" />
+                                        <line x1="9" y1="14" x2="15" y2="14" />
+                                    </svg></div>
+                                <div class="role-name" data-i18n="roleCompany">企業</div>
+                                <div class="role-desc" data-i18n="roleCompanyDesc">ビジネス利用</div>
+                            </div>
+                            <div class="role-card" data-role="private" onclick="selectRole(this)">
+                                <div class="role-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" />
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                        <circle cx="12" cy="16" r="1" />
+                                    </svg></div>
+                                <div class="role-name" data-i18n="rolePrivate">プライベート</div>
+                                <div class="role-desc" data-i18n="rolePrivateDesc">個人利用</div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label" data-i18n="socialLinks">SNSリンク</label>
+
+                <!-- SNS -->
+                <div class="section-card">
+                    <div class="section-card-title">
+                        <span data-i18n="socialLinks">SNS・外部リンク</span>
+                    </div>
                     <div class="social-input-group">
                         <div class="social-input-icon"><svg width="14" height="14" viewBox="0 0 24 24"
                                 fill="currentColor">
                                 <path
                                     d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                            </svg></div><input class="form-input" type="url" id="editX"
-                            placeholder="https://x.com/username">
+                            </svg></div>
+                        <input class="form-input" type="url" id="editX" placeholder="https://x.com/username">
                     </div>
                     <div class="social-input-group">
                         <div class="social-input-icon"><svg width="14" height="14" viewBox="0 0 24 24"
                                 fill="currentColor">
                                 <path
                                     d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
-                            </svg></div><input class="form-input" type="url" id="editInstagram"
+                            </svg></div>
+                        <input class="form-input" type="url" id="editInstagram"
                             placeholder="https://instagram.com/username">
                     </div>
                     <div class="social-input-group">
@@ -1807,71 +2100,194 @@
                                 fill="currentColor">
                                 <path
                                     d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-                            </svg></div><input class="form-input" type="url" id="editYoutube"
+                            </svg></div>
+                        <input class="form-input" type="url" id="editYoutube"
                             placeholder="https://youtube.com/@channel">
                     </div>
                 </div>
-                <button class="btn-primary" onclick="saveProfile()" id="saveBtn" data-i18n="saveChanges">変更を保存</button>
+
+            </div>
+
+            <!-- ====== TAB: APPEARANCE ====== -->
+            <div class="tab-panel" id="tab-appearance">
+                <div class="section-card">
+                    <div class="section-card-title"><span data-i18n="styleTitle">外観設定</span></div>
+                    <div class="style-row">
+                        <div class="style-label" data-i18n="accentColor">アクセントカラー</div>
+                        <div class="color-presets" id="colorPresets">
+                            <div class="color-dot selected" data-color="#4A9EE0"
+                                style="background:color-mix(in srgb, #4A9EE0 40%, var(--bg))"
+                                onclick="setAccentColor('#4A9EE0',this)"></div>
+                            <div class="color-dot" data-color="#A78BFA"
+                                style="background:color-mix(in srgb, #A78BFA 40%, var(--bg))"
+                                onclick="setAccentColor('#A78BFA',this)"></div>
+                            <div class="color-dot" data-color="#F472B6"
+                                style="background:color-mix(in srgb, #F472B6 40%, var(--bg))"
+                                onclick="setAccentColor('#F472B6',this)"></div>
+                            <div class="color-dot" data-color="#E63946"
+                                style="background:color-mix(in srgb, #E63946 40%, var(--bg))"
+                                onclick="setAccentColor('#E63946',this)"></div>
+                            <div class="color-dot" data-color="#FB923C"
+                                style="background:color-mix(in srgb, #FB923C 40%, var(--bg))"
+                                onclick="setAccentColor('#FB923C',this)"></div>
+                            <div class="color-dot" data-color="#4CAF7D"
+                                style="background:color-mix(in srgb, #4CAF7D 40%, var(--bg))"
+                                onclick="setAccentColor('#4CAF7D',this)"></div>
+                            <div class="color-dot" data-color="#B8860B"
+                                style="background:color-mix(in srgb, #B8860B 40%, var(--bg))"
+                                onclick="setAccentColor('#B8860B',this)"></div>
+                            <div class="color-dot" data-color="#E8EAF0"
+                                style="background:color-mix(in srgb, #E8EAF0 40%, var(--bg))"
+                                onclick="setAccentColor('#E8EAF0',this)"></div>
+                            <div class="color-dot" data-color="#000000"
+                                style="background:color-mix(in srgb, #000000 40%, var(--bg)); border: 1px solid var(--border)"
+                                onclick="setAccentColor('#000000',this)"></div>
+                            <div class="color-picker-wrap"><input type="color" id="customColorPicker" value="#4A9EE0"
+                                    oninput="setAccentColor(this.value,null)"></div>
+                        </div>
+                    </div>
+                    <div class="style-row">
+                        <div class="style-label" data-i18n="bgMode">背景モード</div>
+                        <div class="mode-toggle">
+                            <button class="mode-btn active" data-mode="dark" onclick="setMode('dark')">🌙 <span
+                                    data-i18n="modeDark">ダーク</span></button>
+                            <button class="mode-btn" data-mode="light" onclick="setMode('light')">☀️ <span
+                                    data-i18n="modeLight">ライト</span></button>
+                        </div>
+                    </div>
+                    <div class="style-row" style="margin-bottom:0">
+                        <div class="style-label" data-i18n="fontStyle">フォントスタイル</div>
+                        <div class="font-options">
+                            <button class="font-btn active" data-font="modern"
+                                onclick="setFontStyle('modern')">Modern</button>
+                            <button class="font-btn" data-font="elegant"
+                                onclick="setFontStyle('elegant')">Elegant</button>
+                            <button class="font-btn" data-font="bold" onclick="setFontStyle('bold')">BOLD</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====== TAB: ACCOUNT ====== -->
+            <div class="tab-panel" id="tab-account">
+                <div class="section-card">
+                    <div class="section-card-title"><span data-i18n="accountInfo">アカウント情報</span></div>
+                    <div class="stat-row"><span class="stat-label" data-i18n="currentPlan">現在のプラン</span><span
+                            class="stat-value" id="statPlan">FREE</span></div>
+                    <div class="stat-row"><span class="stat-label" data-i18n="storageUsage">ストレージ</span><span
+                            class="stat-value"><span id="statStorage">0.8 / 2 GB</span><span class="usage-bar-sm"><span
+                                    class="fill" id="storageBar" style="width:40%"></span></span></span></div>
+                    <div class="stat-row"><span class="stat-label" data-i18n="totalProjects">プロジェクト数</span><span
+                            class="stat-value" id="statProjects">—</span></div>
+                    <a href="SELEKT_Pricing.html" class="upgrade-link" id="upgradeBanner"><svg width="20" height="20"
+                            viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                        <div>
+                            <div class="upgrade-title" data-i18n="upgradePlan">プランをアップグレード</div>
+                            <div class="upgrade-desc" data-i18n="upgradeDesc">より多くのストレージと機能をアンロック</div>
+                        </div><span class="arrow">→</span>
+                    </a>
+                </div>
+                <div class="section-card" style="border-color:rgba(255,107,107,0.15)">
+                    <div class="section-card-title"><span data-i18n="dangerZone">危険ゾーン</span></div>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                        <button class="btn-outline" onclick="changePassword()"
+                            data-i18n="changePassword">パスワードを変更</button>
+                        <button class="btn-danger" onclick="logout()" data-i18n="logoutBtn">ログアウト</button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Account Info -->
-        <div class="section">
-            <div class="card">
-                <div class="card-title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="3" />
-                        <path
-                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                    </svg><span data-i18n="accountInfo">アカウント情報</span></div>
-                <div class="stat-row"><span class="stat-label" data-i18n="currentPlan">現在のプラン</span><span
-                        class="stat-value" id="statPlan">FREE</span></div>
-                <div class="stat-row"><span class="stat-label" data-i18n="storageUsage">ストレージ</span><span
-                        class="stat-value"><span id="statStorage">0.8 / 2 GB</span><span class="usage-bar-sm"><span
-                                class="fill" id="storageBar" style="width:40%"></span></span></span></div>
-                <div class="stat-row"><span class="stat-label" data-i18n="totalProjects">プロジェクト数</span><span
-                        class="stat-value" id="statProjects">—</span></div>
-                <a href="SELEKT_Pricing.html" class="upgrade-link" id="upgradeBanner"><svg width="20" height="20"
-                        viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <polygon
-                            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                    </svg>
-                    <div>
-                        <div class="upgrade-title" data-i18n="upgradePlan">プランをアップグレード</div>
-                        <div class="upgrade-desc" data-i18n="upgradeDesc">より多くのストレージと機能をアンロック</div>
-                    </div><span class="arrow">→</span>
-                </a>
+        <!-- ====== SIDEBAR RIGHT ====== -->
+        <div class="sidebar-right">
+            <!-- Stats -->
+            <div class="stat-card">
+                <div class="stat-card-title" data-i18n="stats">実績</div>
+                <div class="stat-grid-2x2">
+                    <div class="stat-grid-item">
+                        <div class="stat-grid-value" id="statSidebarProjects">—</div>
+                        <div class="stat-grid-label">プロジェクト</div>
+                    </div>
+                    <div class="stat-grid-item">
+                        <div class="stat-grid-value" style="color:var(--green)" id="statSidebarSelects">—</div>
+                        <div class="stat-grid-label">セレクト枚数</div>
+                    </div>
+                    <div class="stat-grid-item">
+                        <div class="stat-grid-value" style="color:var(--accent2)" id="statSidebarClients">—</div>
+                        <div class="stat-grid-label">クライアント</div>
+                    </div>
+                    <div class="stat-grid-item">
+                        <div class="stat-grid-value" style="color:var(--yellow)" id="statSidebarRating">—</div>
+                        <div class="stat-grid-label">評価</div>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <!-- Danger Zone -->
-        <div class="section">
-            <div class="card danger-section">
-                <div class="card-title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path
-                            d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                        <line x1="12" y1="9" x2="12" y2="13" />
-                        <line x1="12" y1="17" x2="12.01" y2="17" />
-                    </svg><span data-i18n="dangerZone">危険ゾーン</span></div>
-                <div style="display:flex;flex-direction:column;gap:8px">
-                    <button class="btn-outline" onclick="changePassword()" data-i18n="changePassword">パスワードを変更</button>
-                    <button class="btn-danger" onclick="logout()" data-i18n="logoutBtn">ログアウト</button>
+            <!-- Portfolio -->
+            <div class="stat-card">
+                <div class="stat-card-title" style="display:flex;justify-content:space-between;align-items:center">
+                    <span data-i18n="portfolio">ポートフォリオ</span>
+                    <span
+                        style="font-size:10px;color:var(--text-dim);font-weight:400;text-transform:none;letter-spacing:0">最大5枚</span>
+                </div>
+                <div class="portfolio-grid" id="portfolioGrid"></div>
+            </div>
+
+            <!-- Plan info -->
+            <div class="stat-card">
+                <div class="stat-card-title" data-i18n="currentPlan">プラン</div>
+                <div style="text-align:center;padding:8px 0">
+                    <span class="badge badge-plan" id="planBadge" style="font-size:14px;padding:6px 16px">FREE</span>
+                </div>
+            </div>
+
+            <!-- QR Code & Share -->
+            <div class="stat-card qr-card">
+                <div class="stat-card-title">プロフィール共有</div>
+                <div class="qr-canvas-wrap" id="qrCodeWrap">
+                    <canvas id="qrCanvas" width="140" height="140"></canvas>
+                </div>
+                <div class="qr-url" id="qrUrlText">—</div>
+                <div class="share-btn-row">
+                    <button class="share-btn" onclick="copyProfileUrl()">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" />
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                        </svg>
+                        URLをコピー
+                    </button>
+                    <button class="share-btn primary" onclick="shareProfile()">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="18" cy="5" r="3" />
+                            <circle cx="6" cy="12" r="3" />
+                            <circle cx="18" cy="19" r="3" />
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                        </svg>
+                        共有
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <input type="file" id="portfolioInput" class="hidden-input" accept="image/*"
-        onchange="handlePortfolioUpload(event)">
+    <!-- Hidden elements -->
+    <div class="bio-section" style="display:none">
+        <div class="bio-text" id="bioDisplay"></div>
+        <div class="social-row" id="socialRow" style="display:none"></div>
+    </div>
+    <div class="sns-cards" id="snsCards" style="display:none"></div>
 
-    <!-- PREMIUM PUBLIC PROFILE PREVIEW (LIT.LINK / APP CARD STYLE) -->
+    <!-- PREMIUM PUBLIC PROFILE PREVIEW -->
     <div class="preview-overlay" id="previewOverlay">
-        <!-- Top bar -->
         <div class="pv-topbar">
             <span class="pv-topbar-label" data-i18n="previewLabel">外部からの見え方</span>
-            <button class="pv-close-btn" onclick="closePreview()">✕ 閉じる</button>
         </div>
 
         <!-- Hero Section: Background Header -->
@@ -1882,6 +2298,7 @@
 
         <!-- Main Card Section (Overlaps Hero) -->
         <div class="pv-card">
+            <button class="pv-close-btn" onclick="closePreview()">✕</button>
             <div class="pv-profile-info">
                 <div class="pv-avatar-outer">
                     <div class="pv-avatar" id="pvAvatar">
@@ -1910,6 +2327,24 @@
                     <div class="pv-portfolio-grid" id="pvPortfolio"></div>
                 </div>
 
+                <!-- Send Select Photos CTA -->
+                <div class="pv-send-section">
+                    <button class="pv-send-btn" onclick="handleSendSelect()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                        セレクト写真を送る
+                    </button>
+                    <div class="pv-send-url-display" id="pvSendUrlDisplay">
+                        <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:6px">セレクトURLを以下に貼り付け</div>
+                        <input type="url" id="pvSelectUrlInput" placeholder="https://selekt.app/s/xxxxx"
+                            oninput="handleSelectUrlInput(this.value)">
+                    </div>
+                </div>
+
                 <!-- Footer -->
                 <div class="pv-footer">
                     <div class="pv-divider"></div>
@@ -1922,12 +2357,91 @@
     <div class="toast" id="toast"></div>
     <script>
         const API = 'https://selekt-server.onrender.com';
+
+        // ===== QR CODE (lightweight generator) =====
+        function generateQR(canvas, text, size) {
+            // Use img element approach for best CORS compatibility
+            const wrap = canvas.parentElement;
+            canvas.style.display = 'none';
+            // Remove any previous QR image
+            const oldImg = wrap.querySelector('img.qr-img');
+            if (oldImg) oldImg.remove();
+            const img = document.createElement('img');
+            img.className = 'qr-img';
+            img.width = size; img.height = size;
+            img.style.display = 'block';
+            img.style.borderRadius = '4px';
+            img.alt = 'QR Code';
+            img.src = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(text)}&margin=8`;
+            wrap.appendChild(img);
+        }
+
+        function getProfileUrl() {
+            const uid = currentUser?.id || 'demo_user';
+            return `https://selekt.app/u/${uid}`;
+        }
+
+        function updateQRCode() {
+            const url = getProfileUrl();
+            const canvas = document.getElementById('qrCanvas');
+            if (canvas) generateQR(canvas, url, 140);
+            const urlText = document.getElementById('qrUrlText');
+            if (urlText) urlText.textContent = url;
+        }
+
+        function copyProfileUrl() {
+            const url = getProfileUrl();
+            navigator.clipboard.writeText(url).then(() => {
+                showToast('📋 URLをコピーしました', 'success');
+            }).catch(() => {
+                // Fallback
+                const ta = document.createElement('textarea');
+                ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+                showToast('📋 URLをコピーしました', 'success');
+            });
+        }
+
+        function shareProfile() {
+            const url = getProfileUrl();
+            const name = currentUser?.displayName || 'User';
+            if (navigator.share) {
+                navigator.share({ title: `${name} — SELEKT`, text: `${name}のSELEKTプロフィール`, url }).catch(() => { });
+            } else {
+                copyProfileUrl();
+            }
+        }
+
+        function handleSendSelect() {
+            const display = document.getElementById('pvSendUrlDisplay');
+            if (display.style.display === 'block') {
+                display.style.display = 'none';
+            } else {
+                display.style.display = 'block';
+                document.getElementById('pvSelectUrlInput').focus();
+            }
+        }
+
+        function handleSelectUrlInput(url) {
+            if (url && (url.includes('selekt') || url.includes('localhost'))) {
+                // Valid SELEKT URL entered — navigate to it
+                if (url.startsWith('http')) {
+                    showToast('✓ セレクトURLを受け取りました', 'success');
+                    setTimeout(() => { window.open(url, '_blank'); }, 800);
+                }
+            }
+        }
         let currentUser = null;
         let _lang = localStorage.getItem('selekt_lang') || 'ja';
         let selectedRole = '';
         let portfolioPhotos = [];
         const MAX_PORTFOLIO = 5;
         let _uploadSlotIdx = -1;
+
+        // ===== TAB SWITCHING =====
+        function switchTab(tabName) {
+            document.querySelectorAll('.profile-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tabName));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tabName));
+        }
 
         const ROLE_LABELS = { ja: { photographer: 'カメラマン', model: 'モデル', company: '企業', private: 'プライベート' }, en: { photographer: 'Photographer', model: 'Model', company: 'Company', private: 'Private' }, zh: { photographer: '摄影师', model: '模特', company: '企业', private: '个人' } };
 
@@ -2218,15 +2732,22 @@
                 document.getElementById('avatarInitial').textContent = currentUser.displayName.charAt(0).toUpperCase();
                 document.getElementById('avatarInitial').style.display = '';
             }
-            document.getElementById('profileName').textContent = currentUser.displayName;
+            // Update profile name (preserve inline roleBadge span)
+            const pnEl = document.getElementById('profileName');
+            const rbEl = document.getElementById('roleBadge');
+            if (pnEl) {
+                // Set just the first text node, keeping the badge span intact
+                const textNode = pnEl.firstChild;
+                if (textNode && textNode.nodeType === 3) { textNode.textContent = currentUser.displayName + ' '; }
+                else { pnEl.insertBefore(document.createTextNode(currentUser.displayName + ' '), pnEl.firstChild); }
+            }
             document.getElementById('profileId').textContent = '@' + (currentUser.id || currentUser.displayName.toLowerCase().replace(/\s/g, '_'));
 
             const roleLabel = (ROLE_LABELS[_lang] || ROLE_LABELS.ja)[currentUser.role] || currentUser.role || '---';
-            document.getElementById('roleBadge').textContent = roleLabel;
+            if (rbEl) rbEl.textContent = roleLabel;
             const planBadge = document.getElementById('planBadge');
             const planLabel = { pro: 'PRO', basic: 'BASIC' }[currentUser.plan] || 'FREE';
-            planBadge.textContent = planLabel;
-            planBadge.className = 'badge badge-plan ' + (currentUser.plan || 'free');
+            if (planBadge) { planBadge.textContent = planLabel; planBadge.className = 'badge badge-plan ' + (currentUser.plan || 'free'); }
 
             // Bio display
             const bio = currentUser.bio || '';
@@ -2442,17 +2963,22 @@
                 if (token) {
                     const controller = new AbortController(); setTimeout(() => controller.abort(), 3000);
                     const res = await fetch(`${API}/api/auth/me`, { headers: { 'Authorization': `Bearer ${token}` }, signal: controller.signal });
-                    if (res.ok) { const data = await res.json(); currentUser = data.user; updateUI(); return; }
+                    if (res.ok) { const data = await res.json(); currentUser = data.user; }
                 }
             } catch (e) { console.log('API unavailable, using local data'); }
-            const stored = localStorage.getItem('selekt_user');
-            if (stored) { currentUser = JSON.parse(stored); updateUI(); return; }
-            currentUser = { id: 'demo_user', displayName: 'Demo User', role: 'photographer', plan: 'free', bio: '' };
-            updateUI(); document.getElementById('statProjects').textContent = '5';
+            if (!currentUser) {
+                const stored = localStorage.getItem('selekt_user');
+                if (stored) { currentUser = JSON.parse(stored); }
+                else { currentUser = { id: 'demo_user', displayName: 'Demo User', role: 'photographer', plan: 'free', bio: '' }; document.getElementById('statProjects').textContent = '5'; }
+            }
+            updateUI();
+            updateQRCode();
         }
 
         setLang(_lang); init();
     </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 </body>
 
 </html>
