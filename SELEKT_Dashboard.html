@@ -619,11 +619,11 @@
             } catch (err) {
                 console.log('Auth check failed, loading demo mode', err);
             }
-            // Not logged in — show demo mode
+            // Not logged in — check localStorage for real sessions, then fallback to demo
             loadDemoMode();
         }
 
-        function loadDemoMode() {
+        async function loadDemoMode() {
             currentUser = {
                 id: 'demo_user',
                 displayName: 'Demo User',
@@ -633,6 +633,14 @@
             setupUI();
             document.getElementById('tabFilter').style.display = 'flex';
 
+            // Check if user has real sessions in localStorage
+            const mySessions = JSON.parse(localStorage.getItem('selekt_my_sessions') || '[]');
+            if (mySessions.length > 0) {
+                await loadProjects();
+                return;
+            }
+
+            // No real sessions — show demo data
             const demoProjects = [
                 {
                     id: 'BKCS9vx9',
