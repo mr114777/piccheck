@@ -746,25 +746,34 @@
                     return;
                 }
 
-                // Fetch live session details from Worker API
+                // Helper: fetch with timeout
+                function fetchWithTimeout(url, ms = 5000) {
+                    return Promise.race([
+                        fetch(url),
+                        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))
+                    ]);
+                }
+
+                // Fetch live session details from Worker API, fallback to cache
                 const details = await Promise.all(
                     mySessions.map(async (session) => {
+                        // Always prepare cached fallback
+                        const cached = {
+                            id: session.id,
+                            title: session.title || '',
+                            photographer: session.photographer || '',
+                            photos: new Array(session.photoCount || 0),
+                            createdAt: session.createdAt,
+                            _type: session._type || 'sent',
+                            _offline: true
+                        };
                         try {
-                            const r = await fetch(`${API}/api/session/${session.id}`);
-                            if (!r.ok) return null;
+                            const r = await fetchWithTimeout(`${API}/api/session/${session.id}`);
+                            if (!r.ok) return cached; // API error (410/404) → use cache
                             const meta = await r.json();
                             return { ...meta, _type: session._type || 'sent' };
                         } catch {
-                            // API failed — use cached metadata from localStorage
-                            return {
-                                id: session.id,
-                                title: session.title || '',
-                                photographer: session.photographer || '',
-                                photos: new Array(session.photoCount || 0),
-                                createdAt: session.createdAt,
-                                _type: session._type || 'sent',
-                                _offline: true
-                            };
+                            return cached; // Network error or timeout → use cache
                         }
                     })
                 );
