@@ -248,6 +248,26 @@
             flex: 1;
         }
 
+        .delete-session-btn {
+            background: none;
+            border: 1px solid transparent;
+            color: var(--text-sub);
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.4;
+            transition: all 0.2s;
+        }
+        .delete-session-btn:hover {
+            opacity: 1;
+            color: #e53e3e;
+            border-color: rgba(229, 62, 62, 0.3);
+            background: rgba(229, 62, 62, 0.1);
+        }
+
         .status-badge {
             padding: 4px 10px;
             border-radius: 20px;
@@ -853,7 +873,12 @@
         <a class="project-card" href="${selectUrl}">
           <div class="project-header">
             <div class="project-title">${p.title || dt('project') + ' ' + p.id}</div>
-            <span class="status-badge ${statusClass}">${status}</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              ${p._type === 'sent' ? `<button class="delete-session-btn" onclick="event.preventDefault();event.stopPropagation();deleteSession('${p.id}','${(p.title || p.id).replace(/'/g, "\\'")}');" title="削除">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              </button>` : ''}
+              <span class="status-badge ${statusClass}">${status}</span>
+            </div>
           </div>
           <div class="project-meta">
             <span>${typeLabel}</span>
@@ -875,6 +900,58 @@
 
             // Store for filtering
             window._allProjects = projects;
+        }
+
+        function deleteSession(sessionId, sessionTitle) {
+            // Show confirmation overlay
+            const overlay = document.createElement('div');
+            overlay.id = 'deleteConfirmOverlay';
+            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(4px);';
+            overlay.innerHTML = `
+                <div style="background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:32px;max-width:420px;width:90%;text-align:center;">
+                    <div style="font-size:32px;margin-bottom:12px;">⚠️</div>
+                    <div style="font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text);">セッションを削除しますか？</div>
+                    <div style="font-size:14px;color:var(--coral);margin-bottom:6px;font-weight:600;">「${sessionTitle}」</div>
+                    <div style="font-size:13px;color:var(--text-sub);margin-bottom:24px;line-height:1.6;">
+                        この操作は取り消せません。<br>
+                        共有リンクも無効になり、<br>相手もアクセスできなくなります。
+                    </div>
+                    <div style="display:flex;gap:12px;justify-content:center;">
+                        <button onclick="document.getElementById('deleteConfirmOverlay').remove();"
+                            style="padding:10px 24px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;font-size:14px;">
+                            キャンセル
+                        </button>
+                        <button onclick="confirmDeleteSession('${sessionId}');"
+                            style="padding:10px 24px;border-radius:8px;border:none;background:#e53e3e;color:#fff;cursor:pointer;font-size:14px;font-weight:600;">
+                            削除する
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+        }
+
+        async function confirmDeleteSession(sessionId) {
+            // Remove overlay
+            document.getElementById('deleteConfirmOverlay')?.remove();
+
+            // Remove from localStorage
+            const mySessions = JSON.parse(localStorage.getItem('selekt_my_sessions') || '[]');
+            const updated = mySessions.filter(s => s.id !== sessionId);
+            localStorage.setItem('selekt_my_sessions', JSON.stringify(updated));
+
+            // Try to delete from API (best effort)
+            try {
+                await fetch(`${API}/api/session/${sessionId}`, { method: 'DELETE' });
+            } catch (e) { /* ignore */ }
+
+            // Re-render
+            if (updated.length > 0) {
+                await loadProjects();
+            } else {
+                showEmptyState();
+            }
         }
 
         function filterProjects(filter) {
