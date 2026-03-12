@@ -723,20 +723,29 @@
         }
 
         function setupUI() {
-            document.getElementById('welcomeMsg').innerHTML =
-                `${currentUser.displayName} ${dt('suffix')}` +
-                `<span class="role-badge">${roleLabels[currentUser.role] || currentUser.role}</span>`;
-            document.getElementById('welcomeSub').textContent = `@${currentUser.id}`;
-            document.getElementById('userAvatar').textContent = currentUser.displayName.charAt(0).toUpperCase();
-            document.getElementById('menuName').textContent = currentUser.displayName;
+            const welcomeMsg = document.getElementById('welcomeMsg');
+            if (welcomeMsg) {
+                welcomeMsg.innerHTML =
+                    `${currentUser.displayName} ${dt('suffix')}` +
+                    `<span class="role-badge">${roleLabels[currentUser.role] || currentUser.role}</span>`;
+            }
+            const welcomeSub = document.getElementById('welcomeSub');
+            if (welcomeSub) welcomeSub.textContent = `@${currentUser.id}`;
+            const userAvatar = document.getElementById('userAvatar');
+            if (userAvatar) userAvatar.textContent = currentUser.displayName.charAt(0).toUpperCase();
+            const menuName = document.getElementById('menuName');
+            if (menuName) menuName.textContent = currentUser.displayName;
             const planLabel = { pro: 'PRO', basic: 'BASIC' }[currentUser.plan] || 'FREE';
-            document.getElementById('menuId').textContent = `@${currentUser.id}  \u00b7  ${planLabel}`;
+            const menuId = document.getElementById('menuId');
+            if (menuId) menuId.textContent = `@${currentUser.id}  \u00b7  ${planLabel}`;
 
-            // Usage badge (demo)
+            // Usage badge
             const badge = document.getElementById('usageBadge');
-            badge.style.display = 'flex';
-            document.getElementById('usageText').textContent = '0.8 / 2 GB';
-            document.getElementById('usageBarFill').style.width = '40%';
+            if (badge) badge.style.display = 'flex';
+            const usageText = document.getElementById('usageText');
+            if (usageText) usageText.textContent = '0.8 / 2 GB';
+            const usageBarFill = document.getElementById('usageBarFill');
+            if (usageBarFill) usageBarFill.style.width = '40%';
         }
 
         async function loadProjects() {
