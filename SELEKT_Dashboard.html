@@ -588,10 +588,14 @@
             if (currentUser) setupUI();
         }
 
-        // Check auth via Supabase
+        // Check auth via Supabase (with timeout)
         async function init() {
             try {
-                const user = await getCurrentUser();
+                // Timeout Supabase auth check after 3 seconds
+                const user = await Promise.race([
+                    getCurrentUser(),
+                    new Promise(resolve => setTimeout(() => resolve(null), 3000))
+                ]);
                 if (user) {
                     // Try to load profile from Supabase
                     const { data: profile } = await _sb.from('profiles').select('*').eq('id', user.id).single();
@@ -603,7 +607,6 @@
                             plan: profile.plan || 'free'
                         };
                     } else {
-                        // Profile not yet created — redirect to setup
                         currentUser = {
                             id: user.email.split('@')[0],
                             displayName: user.user_metadata?.display_name || user.email.split('@')[0],
@@ -620,7 +623,7 @@
                 console.log('Auth check failed, loading demo mode', err);
             }
             // Not logged in — check localStorage for real sessions, then fallback to demo
-            loadDemoMode();
+            await loadDemoMode();
         }
 
         async function loadDemoMode() {
