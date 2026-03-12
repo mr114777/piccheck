@@ -1323,6 +1323,9 @@
                     <input type="text" id="photographerName" data-i18n-placeholder="photographerPh"
                         placeholder="カメラマン名（任意）" maxlength="30"
                         style="width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;font-family:inherit;box-sizing:border-box;">
+                    <input type="text" id="recipientName" data-i18n-placeholder="recipientPh"
+                        placeholder="共有先（モデル名・クライアント名など）" maxlength="50"
+                        style="width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;font-family:inherit;box-sizing:border-box;">
                 </div>
             </div>
 
@@ -2636,6 +2639,7 @@
                     body: JSON.stringify({
                         title: document.getElementById('sessionTitle')?.value || '',
                         photographer: document.getElementById('photographerName')?.value || '',
+                        recipient: document.getElementById('recipientName')?.value || '',
                         groups: data.map(g => ({
                             id: g.id, label: g.label, name: g.name,
                             color: g.color, limit: g.limit,
@@ -2687,6 +2691,7 @@
                     id: sessionId,
                     title: document.getElementById('sessionTitle')?.value || '',
                     photographer: document.getElementById('photographerName')?.value || '',
+                    recipient: document.getElementById('recipientName')?.value || '',
                     photoCount: groups.reduce((a, g) => a + g.photos.length, 0),
                     createdAt: new Date().toISOString(),
                     _type: 'sent'
