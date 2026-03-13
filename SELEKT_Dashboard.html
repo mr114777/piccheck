@@ -849,24 +849,26 @@
             filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
             container.innerHTML = filtered.map(p => {
-                // Determine status
-                const total = p.photos?.length || 0;
-                const selected = p._selected || 0;
+                // Determine status from real API data
+                const total = p.photoCount || p.photos?.length || 0;
+                const okCount = p.selectionsOk || 0;
+                const ngCount = p.selectionsNg || 0;
+                const judged = okCount + ngCount;
                 let status, statusClass;
-                if (total === 0) {
-                    status = dt('statusEmpty'); statusClass = 'status-pending';
-                } else if (selected === 0) {
-                    status = dt('statusPending'); statusClass = 'status-pending';
-                } else if (selected < total) {
-                    status = dt('statusProgress'); statusClass = 'status-progress';
-                } else {
+                if (p.isCompleted) {
                     status = dt('statusDone'); statusClass = 'status-done';
+                } else if (total === 0) {
+                    status = dt('statusEmpty'); statusClass = 'status-pending';
+                } else if (judged === 0) {
+                    status = dt('statusPending'); statusClass = 'status-pending';
+                } else {
+                    status = dt('statusProgress'); statusClass = 'status-progress';
                 }
 
                 const date = new Date(p.createdAt);
                 const dateStr = `${date.getMonth() + 1}/${date.getDate()}`;
                 const typeLabel = p._type === 'sent' ? dt('typeSent') : dt('typeReceived');
-                const progressPct = total > 0 ? Math.round((selected / total) * 100) : 0;
+                const progressPct = total > 0 ? Math.round((judged / total) * 100) : 0;
                 const selectUrl = `SELEKT_Select.html?session=${p.id}`;
 
                 return `
@@ -884,6 +886,7 @@
             <span>${typeLabel}</span>
             <span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> ${dateStr}</span>
             <span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg> ${total}${dt('photos')}</span>
+            ${judged > 0 ? `<span style="color:var(--green)">✓ ${okCount}/${total}</span>` : ''}
             ${p._type === 'sent' && p.recipient ? `<span style="color:var(--accent)">→ ${p.recipient}</span>` : ''}
             ${p._type === 'received' && p.photographer ? `<span style="color:var(--coral)">← ${p.photographer}</span>` : ''}
             ${p._type === 'sent' && !p.recipient && p.photographer ? `<span>by ${p.photographer}</span>` : ''}

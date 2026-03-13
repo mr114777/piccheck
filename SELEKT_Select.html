@@ -9,6 +9,8 @@
     href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap"
     rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <!-- Google Identity Services SDK for Drive export -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     *,
     *::before,
@@ -2519,6 +2521,23 @@
             <span class="dl-row-label">✕ NGのみ</span>
             <button class="dl-row-btn" onclick="downloadPhotos('ng','sns')">📱 DL</button>
           </div>
+          <hr class="dl-sep">
+          <div class="dl-menu-label" style="display:flex;align-items:center;gap:6px">
+            <svg width="16" height="16" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg"><path d="M6.6 66.85L3.6 61.35l29.1-50.4h6L6.6 66.85z" fill="#0066DA"/><path d="M43.65 78L26.5 78 -2.5 28.35 6 12.8 43.65 78z" fill="#00AC47" transform="translate(2.5)"/><path d="M73.55 78H47.4l14.6-25.25 13.1 22.7z" fill="#EA4335" transform="translate(2.5)"/><path d="M38.7 10.95L26.8 31.65 18.3 16.6l8.45-14.65h12z" fill="#00832D" transform="translate(2.5)"/><path d="M73.55 78H60L43.65 49.5l13.1-22.7L73.55 78z" fill="#2684FC" transform="translate(2.5)"/><path d="M82.35 49.5H55.2l14.6-25.25 12.55 21.75z" fill="#FFBA00" transform="translate(2.5)"/></svg>
+            Google Drive
+          </div>
+          <div class="dl-row">
+            <span class="dl-row-label">全部</span>
+            <button class="dl-row-btn" onclick="exportToDrive('all')" style="color:#4285f4;border-color:rgba(66,133,244,0.4)">📁 Export</button>
+          </div>
+          <div class="dl-row">
+            <span class="dl-row-label">✓ OKのみ</span>
+            <button class="dl-row-btn" onclick="exportToDrive('ok')" style="color:#4285f4;border-color:rgba(66,133,244,0.4)">📁 Export</button>
+          </div>
+          <div class="dl-row">
+            <span class="dl-row-label">△ OK+保留</span>
+            <button class="dl-row-btn" onclick="exportToDrive('ok+nearok')" style="color:#4285f4;border-color:rgba(66,133,244,0.4)">📁 Export</button>
+          </div>
         </div>
       </div>
       <button class="btn-complete" onclick="openConfirm()">
@@ -2815,6 +2834,20 @@
         <button class="bulk-btn"
           style="background:var(--surface3);color:var(--text);padding:12px;border-radius:10px;font-size:13px;border:1px solid var(--border2);cursor:pointer"
           onclick="downloadPhotos('all','sns');closeBottomSheet('dlSheet')">全てをZIP</button>
+        <hr style="border:none;border-top:1px solid var(--border);margin:8px 0">
+        <p style="font-size:12px;color:var(--text-sub);margin:0 0 4px;font-weight:700;display:flex;align-items:center;gap:6px">
+          <svg width="14" height="14" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg"><path d="M6.6 66.85L3.6 61.35l29.1-50.4h6L6.6 66.85z" fill="#0066DA"/><path d="M43.65 78L26.5 78 -2.5 28.35 6 12.8 43.65 78z" fill="#00AC47" transform="translate(2.5)"/><path d="M73.55 78H47.4l14.6-25.25 13.1 22.7z" fill="#EA4335" transform="translate(2.5)"/><path d="M38.7 10.95L26.8 31.65 18.3 16.6l8.45-14.65h12z" fill="#00832D" transform="translate(2.5)"/><path d="M73.55 78H60L43.65 49.5l13.1-22.7L73.55 78z" fill="#2684FC" transform="translate(2.5)"/><path d="M82.35 49.5H55.2l14.6-25.25 12.55 21.75z" fill="#FFBA00" transform="translate(2.5)"/></svg>
+          Google Drive
+        </p>
+        <button class="bulk-btn"
+          style="background:linear-gradient(135deg,#4285f4,#34a853);color:white;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
+          onclick="exportToDrive('ok');closeBottomSheet('dlSheet')">✓ OK写真をDriveへ</button>
+        <button class="bulk-btn"
+          style="background:linear-gradient(135deg,#4285f4,#fbbc04);color:white;padding:12px;border-radius:10px;font-size:13px;border:none;cursor:pointer"
+          onclick="exportToDrive('ok+nearok');closeBottomSheet('dlSheet')">△ OK+保留をDriveへ</button>
+        <button class="bulk-btn"
+          style="background:var(--surface3);color:var(--text);padding:12px;border-radius:10px;font-size:13px;border:1px solid rgba(66,133,244,0.4);cursor:pointer"
+          onclick="exportToDrive('all');closeBottomSheet('dlSheet')">全てをDriveへ</button>
       </div>
     </div>
   </div>
@@ -3123,6 +3156,39 @@
           }
 
           window.setGroupData(cloudGroups);
+
+          // Load existing selections from API
+          try {
+            const selRes = await fetch(`${SELEKT_API}/api/session/${sessionId}/selections?t=${Date.now()}`);
+            if (selRes.ok) {
+              const selData = await selRes.json();
+              if (selData.selections && Object.keys(selData.selections).length > 0) {
+                for (const [photoId, status] of Object.entries(selData.selections)) {
+                  state.status.set(photoId, status);
+                }
+                // Re-render groups with loaded statuses
+                if (typeof GROUPS !== 'undefined') {
+                  GROUPS.forEach(g => { if (typeof renderGroup === 'function') renderGroup(g); });
+                }
+                if (typeof updateSelectBar === 'function') updateSelectBar();
+                console.log(`[SELEKT] Loaded ${Object.keys(selData.selections).length} existing selections`);
+              }
+            }
+          } catch (e) {
+            // Try localStorage fallback
+            const cached = localStorage.getItem(`selekt_selections_${sessionId}`);
+            if (cached) {
+              const selections = JSON.parse(cached);
+              for (const [photoId, status] of Object.entries(selections)) {
+                state.status.set(photoId, status);
+              }
+              if (typeof GROUPS !== 'undefined') {
+                GROUPS.forEach(g => { if (typeof renderGroup === 'function') renderGroup(g); });
+              }
+              if (typeof updateSelectBar === 'function') updateSelectBar();
+              console.log('[SELEKT] Loaded selections from localStorage fallback');
+            }
+          }
         } else if (res.status === 410) {
           document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:white;font-size:18px;text-align:center;padding:20px;">⏰ このセッションは有効期限が切れています</div>';
         }
@@ -5117,9 +5183,44 @@
       document.getElementById('confirmModal').classList.remove('open');
     }
 
-    function doSend() {
+    async function doSend() {
       closeConfirm();
-      showToast('セレクト完了！カメラマンに送信しました 🎉', 'green');
+      const sessionId = window._selektSessionId;
+
+      // Build selections object: { "photoId": "ok" | "ng" | "nearok", ... }
+      const selections = {};
+      state.status.forEach((status, photoId) => {
+        selections[photoId] = status;
+      });
+
+      const okTotal = okCount();
+      const ngTotal = ngCount();
+
+      if (sessionId) {
+        try {
+          const res = await fetch(`${SELEKT_API}/api/session/${sessionId}/selections`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              selections,
+              completedAt: new Date().toISOString()
+            })
+          });
+          if (res.ok) {
+            console.log('[SELEKT] Selections saved to API');
+          } else {
+            console.warn('[SELEKT] Selections save failed:', await res.text());
+          }
+        } catch (e) {
+          console.warn('[SELEKT] Selections API error:', e);
+        }
+      }
+
+      // Also save to localStorage as backup
+      localStorage.setItem(`selekt_selections_${sessionId || 'local'}`, JSON.stringify(selections));
+
+      showToast(`セレクト完了！${okTotal}枚をカメラマンに送信しました 🎉`, 'green');
+      launchConfetti();
     }
 
     // ===== CONFETTI =====
@@ -6364,6 +6465,317 @@
         }
       });
     }
+
+    // ===== GOOGLE DRIVE EXPORT =====
+    // ⚠️ Replace this with your actual Google Cloud Console OAuth 2.0 Client ID
+    const GOOGLE_DRIVE_CLIENT_ID = 'YOUR_CLIENT_ID.apps.googleusercontent.com';
+    const GOOGLE_DRIVE_SCOPES = 'https://www.googleapis.com/auth/drive.file';
+
+    let _gdriveToken = null;
+    let _gdriveExporting = false;
+
+    // Create progress modal dynamically
+    function _createDriveModal() {
+      if (document.getElementById('driveExportModal')) return;
+      const overlay = document.createElement('div');
+      overlay.id = 'driveExportModal';
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:700;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s;backdrop-filter:blur(4px)';
+      overlay.innerHTML = `
+        <div style="background:var(--surface2,#1A1E28);border:1px solid var(--border2,#333849);border-radius:20px;padding:36px 40px;width:420px;max-width:90vw;box-shadow:0 32px 80px rgba(0,0,0,0.6);text-align:center">
+          <div id="driveExportIcon" style="font-size:48px;margin-bottom:16px">
+            <svg width="48" height="48" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg"><path d="M6.6 66.85L3.6 61.35l29.1-50.4h6L6.6 66.85z" fill="#0066DA"/><path d="M43.65 78L26.5 78 -2.5 28.35 6 12.8 43.65 78z" fill="#00AC47" transform="translate(2.5)"/><path d="M73.55 78H47.4l14.6-25.25 13.1 22.7z" fill="#EA4335" transform="translate(2.5)"/><path d="M38.7 10.95L26.8 31.65 18.3 16.6l8.45-14.65h12z" fill="#00832D" transform="translate(2.5)"/><path d="M73.55 78H60L43.65 49.5l13.1-22.7L73.55 78z" fill="#2684FC" transform="translate(2.5)"/><path d="M82.35 49.5H55.2l14.6-25.25 12.55 21.75z" fill="#FFBA00" transform="translate(2.5)"/></svg>
+          </div>
+          <div id="driveExportTitle" style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text,#E8EAF0)">Google Driveへエクスポート</div>
+          <div id="driveExportDesc" style="font-size:13px;color:var(--text-sub,#7B849A);margin-bottom:20px;line-height:1.6">写真をアップロード中...</div>
+          <div style="width:100%;height:6px;background:var(--surface3,#222736);border-radius:4px;overflow:hidden;margin-bottom:8px">
+            <div id="driveExportProgress" style="height:100%;background:linear-gradient(90deg,#4285f4,#34a853);border-radius:4px;width:0%;transition:width 0.3s ease"></div>
+          </div>
+          <div id="driveExportCount" style="font-family:'Space Mono',monospace;font-size:12px;color:var(--text-dim,#454C60);margin-bottom:20px">0 / 0</div>
+          <div id="driveExportBtns" style="display:flex;gap:10px;justify-content:center">
+            <button id="driveExportCancelBtn" onclick="cancelDriveExport()" style="padding:12px 28px;border-radius:10px;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;background:var(--surface3,#222736);color:var(--text,#E8EAF0);transition:opacity 0.15s">キャンセル</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+    }
+
+    function _showDriveModal() {
+      _createDriveModal();
+      const m = document.getElementById('driveExportModal');
+      if (m) { m.style.opacity = '1'; m.style.pointerEvents = 'all'; }
+    }
+
+    function _hideDriveModal() {
+      const m = document.getElementById('driveExportModal');
+      if (m) { m.style.opacity = '0'; m.style.pointerEvents = 'none'; }
+    }
+
+    function _updateDriveProgress(current, total, fname) {
+      const pct = total > 0 ? Math.round((current / total) * 100) : 0;
+      const bar = document.getElementById('driveExportProgress');
+      const count = document.getElementById('driveExportCount');
+      const desc = document.getElementById('driveExportDesc');
+      if (bar) bar.style.width = pct + '%';
+      if (count) count.textContent = `${current} / ${total}`;
+      if (desc) desc.textContent = fname ? `アップロード中: ${fname}` : '写真をアップロード中...';
+    }
+
+    function cancelDriveExport() {
+      _gdriveExporting = false;
+      _hideDriveModal();
+    }
+
+    // Collect photos by filter
+    function _collectPhotosByFilter(filter) {
+      const photos = [];
+      GROUPS.forEach(g => {
+        g.photos.forEach(p => {
+          const st = getStatus(p.id);
+          if (filter === 'all') {
+            photos.push(p);
+          } else if (filter === 'ok' && st === 'ok') {
+            photos.push(p);
+          } else if (filter === 'ok+nearok' && (st === 'ok' || st === 'nearok')) {
+            photos.push(p);
+          } else if (filter === 'ng' && st === 'ng') {
+            photos.push(p);
+          }
+        });
+      });
+      return photos;
+    }
+
+    // Get photo blob (from fullUrl, url, or IndexedDB)
+    async function _getPhotoBlob(photo) {
+      // Try full-size URL first (cloud mode)
+      if (photo.fullUrl) {
+        try {
+          const res = await fetch(photo.fullUrl);
+          if (res.ok) return await res.blob();
+        } catch (e) { console.warn('fullUrl fetch failed:', e); }
+      }
+      // Try thumbnail URL (cloud mode fallback)
+      if (photo.url && photo.url.startsWith('http')) {
+        try {
+          const res = await fetch(photo.url);
+          if (res.ok) return await res.blob();
+        } catch (e) { console.warn('url fetch failed:', e); }
+      }
+      // Try IndexedDB (local mode)
+      if (typeof getOriginalFile === 'function') {
+        try {
+          const blob = await getOriginalFile(photo.fname);
+          if (blob) return blob;
+        } catch (e) { console.warn('IndexedDB fetch failed:', e); }
+      }
+      // Try data URL or blob URL
+      if (photo.url && (photo.url.startsWith('data:') || photo.url.startsWith('blob:'))) {
+        try {
+          const res = await fetch(photo.url);
+          return await res.blob();
+        } catch (e) { console.warn('data/blob URL fetch failed:', e); }
+      }
+      return null;
+    }
+
+    // Create folder on Google Drive
+    async function _createDriveFolder(name, token) {
+      const metadata = {
+        name: name,
+        mimeType: 'application/vnd.google-apps.folder'
+      };
+      const res = await fetch('https://www.googleapis.com/drive/v3/files', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(metadata)
+      });
+      if (!res.ok) throw new Error('Failed to create Drive folder: ' + res.status);
+      const data = await res.json();
+      return data.id;
+    }
+
+    // Upload a single file to Google Drive using multipart upload
+    async function _uploadFileToDrive(blob, filename, folderId, token) {
+      const metadata = {
+        name: filename,
+        parents: [folderId]
+      };
+
+      // Use multipart upload
+      const boundary = '===SELEKT_BOUNDARY_' + Date.now() + '===';
+      const metaString = JSON.stringify(metadata);
+      
+      // Build multipart body
+      const bodyParts = [
+        `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${metaString}\r\n`,
+        `--${boundary}\r\nContent-Type: ${blob.type || 'image/jpeg'}\r\nContent-Transfer-Encoding: binary\r\n\r\n`
+      ];
+      
+      const bodyEnd = `\r\n--${boundary}--`;
+      
+      const bodyBlob = new Blob([
+        bodyParts[0],
+        bodyParts[1],
+        blob,
+        bodyEnd
+      ]);
+
+      const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'multipart/related; boundary=' + boundary
+        },
+        body: bodyBlob
+      });
+
+      if (!res.ok) {
+        const errText = await res.text().catch(() => '');
+        throw new Error(`Upload failed (${res.status}): ${errText}`);
+      }
+      return await res.json();
+    }
+
+    // Main export function
+    async function exportToDrive(filter) {
+      // Check if GIS is loaded
+      if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
+        showToast('⚠️ Google SDK の読み込みに失敗しました。ページを再読み込みしてください。', 'coral');
+        return;
+      }
+
+      // Check Client ID
+      if (!GOOGLE_DRIVE_CLIENT_ID || GOOGLE_DRIVE_CLIENT_ID === 'YOUR_CLIENT_ID.apps.googleusercontent.com') {
+        showToast('⚠️ Google Drive Client IDが未設定です。管理者に連絡してください。', 'coral');
+        console.error('[Google Drive Export] GOOGLE_DRIVE_CLIENT_ID is not configured. Set it in SELEKT_Select.html.');
+        return;
+      }
+
+      // Collect photos
+      const photos = _collectPhotosByFilter(filter);
+      if (photos.length === 0) {
+        const filterLabel = filter === 'all' ? '写真' : filter === 'ok' ? 'OK写真' : filter === 'ok+nearok' ? 'OK+保留写真' : 'NG写真';
+        showToast(`⚠️ ${filterLabel}がありません`, 'coral');
+        return;
+      }
+
+      // Close DL menu
+      const dlMenu = document.getElementById('dlMenu');
+      if (dlMenu) dlMenu.classList.remove('open');
+
+      // Request OAuth token
+      try {
+        const token = await new Promise((resolve, reject) => {
+          const client = google.accounts.oauth2.initTokenClient({
+            client_id: GOOGLE_DRIVE_CLIENT_ID,
+            scope: GOOGLE_DRIVE_SCOPES,
+            callback: (response) => {
+              if (response.error) {
+                reject(new Error(response.error));
+              } else {
+                resolve(response.access_token);
+              }
+            },
+            error_callback: (err) => {
+              reject(err);
+            }
+          });
+          client.requestAccessToken();
+        });
+
+        _gdriveToken = token;
+      } catch (err) {
+        console.error('[Google Drive] Auth failed:', err);
+        showToast('⚠️ Google認証がキャンセルされました', 'coral');
+        return;
+      }
+
+      // Show progress modal
+      _showDriveModal();
+      _gdriveExporting = true;
+      _updateDriveProgress(0, photos.length, '');
+
+      // Create folder
+      const sessionTitle = document.getElementById('sessionTitle')?.textContent?.trim() || 'SELEKT';
+      const folderName = `SELEKT_${sessionTitle}_${new Date().toISOString().slice(0,10)}`;
+      
+      let folderId;
+      try {
+        const desc = document.getElementById('driveExportDesc');
+        if (desc) desc.textContent = 'フォルダを作成中...';
+        folderId = await _createDriveFolder(folderName, _gdriveToken);
+      } catch (err) {
+        console.error('[Google Drive] Folder creation failed:', err);
+        _hideDriveModal();
+        showToast('⚠️ Driveフォルダの作成に失敗しました', 'coral');
+        return;
+      }
+
+      // Upload photos one by one
+      let uploaded = 0;
+      let errors = 0;
+
+      for (let i = 0; i < photos.length; i++) {
+        if (!_gdriveExporting) break; // Cancelled
+
+        const photo = photos[i];
+        _updateDriveProgress(i, photos.length, photo.fname || `photo_${i+1}`);
+
+        try {
+          const blob = await _getPhotoBlob(photo);
+          if (!blob) {
+            console.warn('[Google Drive] No blob for:', photo.fname);
+            errors++;
+            continue;
+          }
+
+          await _uploadFileToDrive(blob, photo.fname || `photo_${i+1}.jpg`, folderId, _gdriveToken);
+          uploaded++;
+        } catch (err) {
+          console.error('[Google Drive] Upload failed:', photo.fname, err);
+          errors++;
+        }
+      }
+
+      // Done
+      _updateDriveProgress(photos.length, photos.length, '');
+      
+      const title = document.getElementById('driveExportTitle');
+      const desc = document.getElementById('driveExportDesc');
+      const icon = document.getElementById('driveExportIcon');
+      const btns = document.getElementById('driveExportBtns');
+      
+      if (_gdriveExporting) {
+        if (title) title.textContent = 'エクスポート完了！';
+        if (icon) icon.textContent = '✅';
+        if (desc) desc.innerHTML = `${uploaded}枚をGoogle Driveにアップロードしました。` + 
+          (errors > 0 ? `<br><span style="color:#FF6B6B">${errors}枚がエラーでスキップされました</span>` : '') +
+          `<br><span style="font-size:11px;color:var(--text-dim)">フォルダ: ${folderName}</span>`;
+        if (btns) btns.innerHTML = `
+          <a href="https://drive.google.com" target="_blank" rel="noopener" 
+            style="padding:12px 28px;border-radius:10px;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#4285f4,#34a853);color:white;text-decoration:none;display:inline-block;transition:opacity 0.15s">Google Driveを開く</a>
+          <button onclick="cancelDriveExport()" style="padding:12px 28px;border-radius:10px;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;background:var(--surface3,#222736);color:var(--text,#E8EAF0);transition:opacity 0.15s">閉じる</button>
+        `;
+        showToast(`✓ ${uploaded}枚をGoogle Driveにエクスポートしました`, 'green');
+      } else {
+        // Cancelled
+        if (title) title.textContent = 'エクスポートがキャンセルされました';
+        if (icon) icon.textContent = '⚠️';
+        if (desc) desc.textContent = `${uploaded}枚がアップロード済みです`;
+        if (btns) btns.innerHTML = `
+          <button onclick="cancelDriveExport()" style="padding:12px 28px;border-radius:10px;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;background:var(--surface3,#222736);color:var(--text,#E8EAF0)">閉じる</button>
+        `;
+      }
+
+      _gdriveExporting = false;
+    }
+
+    // Make exportToDrive available globally
+    window.exportToDrive = exportToDrive;
+    window.cancelDriveExport = cancelDriveExport;
 
   </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

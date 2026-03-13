@@ -344,11 +344,17 @@ export default {
           id: sessionId,
           title: body.title || '',
           photographer: body.photographer || '',
+          recipient: body.recipient || '',
+          creatorId: creator ? creator.id : (body.creatorId || ''),
+          notifyEmail: body.notifyEmail || '',
           groups: body.groups || [],
           createdAt: now,
           expiresAt,
           photoCount: 0,
           photos: [],
+          selectionsOk: 0,
+          selectionsNg: 0,
+          isCompleted: false,
           plan: creatorPlan,
         };
 
@@ -571,6 +577,62 @@ export default {
             ...corsHeaders,
           },
         });
+      }
+
+      // === POST /api/session/:id/selections — Save selection results ===
+      const selPostMatch = path.match(/^\/api\/session\/([a-zA-Z0-9]+)\/selections$/);
+      if (selPostMatch && request.method === 'POST') {
+        const sessionId = selPostMatch[1];
+        const metaKey = `sessions/${sessionId}/meta.json`;
+        const metaObj = await env.PHOTOS.get(metaKey);
+        if (!metaObj) return errorResponse('Session not found', 404);
+
+        const meta = JSON.parse(await metaObj.text());
+        if (new Date(meta.expiresAt) < new Date()) {
+          return errorResponse('Session expired', 410);
+        }
+
+        const body = await request.json();
+        const { selections, completedAt } = body;
+        // selections = { "photo1.jpg": "ok", "photo2.jpg": "ng", ... }
+
+        if (!selections || typeof selections !== 'object') {
+          return errorResponse('selections object required');
+        }
+
+        // Save selections to R2
+        await env.PHOTOS.put(
+          `sessions/${sessionId}/selections.json`,
+          JSON.stringify({ selections, completedAt: completedAt || new Date().toISOString(), savedAt: new Date().toISOString() }),
+          { httpMetadata: { contentType: 'application/json' } }
+        );
+
+        // Update meta with counts
+        let okCount = 0, ngCount = 0;
+        for (const [, status] of Object.entries(selections)) {
+          if (status === 'ok') okCount++;
+          else if (status === 'ng') ngCount++;
+        }
+        meta.selectionsOk = okCount;
+        meta.selectionsNg = ngCount;
+        meta.isCompleted = !!completedAt;
+        meta.completedAt = completedAt || null;
+
+        await env.PHOTOS.put(metaKey, JSON.stringify(meta), {
+          httpMetadata: { contentType: 'application/json' },
+        });
+
+        return jsonResponse({ ok: true, selectionsOk: okCount, selectionsNg: ngCount, isCompleted: meta.isCompleted });
+      }
+
+      // === GET /api/session/:id/selections — Get selection results ===
+      if (selPostMatch && request.method === 'GET') {
+        const sessionId = selPostMatch[1];
+        const obj = await env.PHOTOS.get(`sessions/${sessionId}/selections.json`);
+        if (!obj) return jsonResponse({ selections: {}, completedAt: null });
+
+        const data = JSON.parse(await obj.text());
+        return jsonResponse(data);
       }
 
       // === 404 ===
