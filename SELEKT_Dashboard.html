@@ -949,8 +949,15 @@
                 await fetch(`${API}/api/session/${sessionId}`, { method: 'DELETE' });
             } catch (e) { /* ignore */ }
 
-            // Re-render
-            if (updated.length > 0) {
+            // Remove from in-memory projects and re-render directly
+            if (window._allProjects) {
+                window._allProjects = window._allProjects.filter(p => p.id !== sessionId);
+                if (window._allProjects.length > 0) {
+                    renderProjects(window._allProjects);
+                } else {
+                    showEmptyState();
+                }
+            } else if (updated.length > 0) {
                 await loadProjects();
             } else {
                 showEmptyState();
