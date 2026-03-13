@@ -101,6 +101,10 @@
 
     .topbar #sessionTitle {
       color: #fff;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 220px;
     }
 
     .topbar #expiryBanner {
@@ -2446,9 +2450,9 @@
       document.addEventListener('click', e => { if (!e.target.closest('#hamburgerBtn') && !e.target.closest('#selektNavMenu')) document.getElementById('selektNavMenu')?.classList.remove('open') });
     </script>
     <div class="topbar-divider"></div>
-    <div class="session-name" style="display:flex;align-items:center;gap:12px">
+    <div class="session-name" style="display:flex;align-items:center;gap:12px;overflow:hidden;min-width:0;flex-shrink:1">
       <strong id="sessionTitle" onclick="editSessionTitle()"
-        style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:19px;font-weight:800;color:#fff"
+        style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:16px;font-weight:800;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px"
         title="クリックで編集">プロジェクト名未設定
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round"
