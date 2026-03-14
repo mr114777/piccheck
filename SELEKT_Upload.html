@@ -2650,6 +2650,7 @@
                 });
                 const sessionData = await sessionRes.json();
                 sessionId = sessionData.sessionId;
+                const viewToken = sessionData.viewToken || '';
                 console.log('[SELEKT] Session created:', sessionId);
 
                 // Upload photos
@@ -2690,6 +2691,7 @@
                 const mySessions = JSON.parse(localStorage.getItem('selekt_my_sessions') || '[]');
                 mySessions.unshift({
                     id: sessionId,
+                    viewToken: viewToken,
                     title: document.getElementById('sessionTitle')?.value || '',
                     photographer: document.getElementById('photographerName')?.value || '',
                     recipient: document.getElementById('recipientName')?.value || '',

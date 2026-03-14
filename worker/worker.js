@@ -4,7 +4,7 @@
  */
 
 // Simple nanoid-like ID generator
-function generateId(len = 8) {
+function generateId(len = 16) {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
   let id = '';
   const arr = new Uint8Array(len);
@@ -15,22 +15,60 @@ function generateId(len = 8) {
   return id;
 }
 
-// CORS headers
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
+// Allowed origins for CORS
+const ALLOWED_ORIGINS = [
+  'http://127.0.0.1:5500',
+  'http://localhost:5500',
+  'https://mr114777.github.io',
+  'https://selekt.app',
+];
 
-function jsonResponse(data, status = 200) {
+function getCorsHeaders(request) {
+  const origin = request.headers.get('Origin') || '';
+  const allowed = ALLOWED_ORIGINS.some(o => origin.startsWith(o));
+  return {
+    'Access-Control-Allow-Origin': allowed ? origin : ALLOWED_ORIGINS[0],
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Vary': 'Origin',
+  };
+}
+
+function jsonResponse(data, status = 200, request = null) {
+  const cors = request ? getCorsHeaders(request) : { 'Access-Control-Allow-Origin': '*' };
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache, no-store, must-revalidate', ...corsHeaders },
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache, no-store, must-revalidate', ...cors },
   });
 }
 
-function errorResponse(message, status = 400) {
-  return jsonResponse({ error: message }, status);
+function errorResponse(message, status = 400, request = null) {
+  return jsonResponse({ error: message }, status, request);
+}
+
+// Rate limiter helper: returns true if rate exceeded
+async function checkRateLimit(env, key, maxHits, windowSec) {
+  const data = await env.USERS.get(key, 'json') || { count: 0, resetAt: 0 };
+  const now = Date.now();
+  if (now >= data.resetAt) { data.count = 0; data.resetAt = now + windowSec * 1000; }
+  data.count++;
+  await env.USERS.put(key, JSON.stringify(data), { expirationTtl: windowSec + 10 });
+  return data.count > maxHits;
+}
+
+// Validate image file type by magic bytes
+function isValidImageType(arrayBuffer) {
+  const bytes = new Uint8Array(arrayBuffer.slice(0, 12));
+  // JPEG: FF D8 FF
+  if (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) return true;
+  // PNG: 89 50 4E 47
+  if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) return true;
+  // WebP: RIFF....WEBP
+  if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
+      bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) return true;
+  // HEIC/HEIF: ftyp at offset 4
+  if (bytes[4] === 0x66 && bytes[5] === 0x74 && bytes[6] === 0x79 && bytes[7] === 0x70) return true;
+  return false;
 }
 
 // --- Auth helpers ---
@@ -106,7 +144,7 @@ export default {
   async fetch(request, env) {
     // Handle CORS preflight
     if (request.method === 'OPTIONS') {
-      return new Response(null, { headers: corsHeaders });
+      return new Response(null, { headers: getCorsHeaders(request) });
     }
 
     const url = new URL(request.url);
@@ -316,8 +354,15 @@ export default {
 
       // === POST /api/session — Create new session ===
       if (path === '/api/session' && request.method === 'POST') {
+        // Rate limit: 10 sessions per IP per hour
+        const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
+        if (await checkRateLimit(env, `rl/session-create/${clientIP}`, 10, 3600)) {
+          return errorResponse('Rate limit exceeded. Try again later.', 429, request);
+        }
+
         const body = await request.json();
-        const sessionId = generateId(8);
+        const sessionId = generateId(16);
+        const viewToken = generateId(24); // Token for read-only access
         const now = new Date().toISOString();
 
         // Get plan limits (use creator's plan if authenticated)
@@ -332,7 +377,7 @@ export default {
           const sessionCountKey = `users/${creator.id}/sessions-count/${monthKey}`;
           const count = await env.USERS.get(sessionCountKey, 'json') || { count: 0 };
           if (count.count >= limits.maxSessions) {
-            return errorResponse(`Monthly session limit reached (${limits.maxSessions} sessions). Please upgrade your plan.`, 429);
+            return errorResponse(`Monthly session limit reached (${limits.maxSessions} sessions). Please upgrade your plan.`, 429, request);
           }
           count.count++;
           await env.USERS.put(sessionCountKey, JSON.stringify(count), { expirationTtl: 86400 * 35 });
@@ -342,6 +387,7 @@ export default {
 
         const meta = {
           id: sessionId,
+          viewToken,
           title: body.title || '',
           photographer: body.photographer || '',
           recipient: body.recipient || '',
@@ -364,7 +410,7 @@ export default {
           { httpMetadata: { contentType: 'application/json' } }
         );
 
-        return jsonResponse({ sessionId, expiresAt });
+        return jsonResponse({ sessionId, viewToken, expiresAt }, 200, request);
       }
 
       // === GET /api/session/:id — Get session info ===
@@ -417,15 +463,21 @@ export default {
       if (uploadMatch && request.method === 'POST') {
         const sessionId = uploadMatch[1];
 
+        // Rate limit: 100 uploads per IP per hour
+        const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
+        if (await checkRateLimit(env, `rl/upload/${clientIP}`, 100, 3600)) {
+          return errorResponse('Upload rate limit exceeded.', 429, request);
+        }
+
         // Get session meta
         const metaObj = await env.PHOTOS.get(`sessions/${sessionId}/meta.json`);
-        if (!metaObj) return errorResponse('Session not found', 404);
+        if (!metaObj) return errorResponse('Session not found', 404, request);
         const meta = JSON.parse(await metaObj.text());
 
         // Check photo limit (use session's plan)
         const planLimits = getPlanLimits(meta.plan || 'free', env);
         if (meta.photoCount >= planLimits.maxPhotos) {
-          return errorResponse(`Maximum ${planLimits.maxPhotos} photos per session`, 429);
+          return errorResponse(`Maximum ${planLimits.maxPhotos} photos per session`, 429, request);
         }
 
         // Parse multipart form
@@ -435,18 +487,24 @@ export default {
         const groupId = formData.get('groupId') || '';
         const thumbData = formData.get('thumb'); // base64 or blob
 
-        if (!file) return errorResponse('No file provided');
+        if (!file) return errorResponse('No file provided', 400, request);
 
         // Check file size
         const maxSize = parseInt(env.MAX_FILE_SIZE_MB || '30') * 1024 * 1024;
         if (file.size > maxSize) {
-          return errorResponse(`File too large (max ${env.MAX_FILE_SIZE_MB}MB)`);
+          return errorResponse(`File too large (max ${env.MAX_FILE_SIZE_MB}MB)`, 400, request);
+        }
+
+        // Validate file type by magic bytes
+        const fileBuffer = await file.arrayBuffer();
+        if (!isValidImageType(fileBuffer)) {
+          return errorResponse('Invalid file type. Only JPEG, PNG, WebP, and HEIC are allowed.', 400, request);
         }
 
         // Save original photo to R2
         await env.PHOTOS.put(
           `sessions/${sessionId}/photos/${fname}`,
-          file.stream(),
+          fileBuffer,
           {
             httpMetadata: { contentType: file.type || 'image/jpeg' },
             customMetadata: { groupId, originalName: fname },
@@ -544,7 +602,7 @@ export default {
           headers: {
             'Content-Type': obj.httpMetadata?.contentType || 'image/jpeg',
             'Cache-Control': 'public, max-age=86400',
-            ...corsHeaders,
+            ...getCorsHeaders(request),
           },
         });
       }
@@ -565,7 +623,7 @@ export default {
             headers: {
               'Content-Type': fullObj.httpMetadata?.contentType || 'image/jpeg',
               'Cache-Control': 'public, max-age=86400',
-              ...corsHeaders,
+              ...getCorsHeaders(request),
             },
           });
         }
@@ -574,7 +632,7 @@ export default {
           headers: {
             'Content-Type': 'image/jpeg',
             'Cache-Control': 'public, max-age=86400',
-            ...corsHeaders,
+            ...getCorsHeaders(request),
           },
         });
       }
@@ -635,12 +693,33 @@ export default {
         return jsonResponse(data);
       }
 
+      // === DELETE /api/session/:id — Delete entire session ===
+      if (sessionMatch && request.method === 'DELETE') {
+        const sessionId = sessionMatch[1];
+        const metaKey = `sessions/${sessionId}/meta.json`;
+        const metaObj = await env.PHOTOS.get(metaKey);
+        if (!metaObj) return errorResponse('Session not found', 404, request);
+
+        const meta = JSON.parse(await metaObj.text());
+
+        // Delete all photos and thumbs
+        for (const photo of (meta.photos || [])) {
+          try { await env.PHOTOS.delete(`sessions/${sessionId}/photos/${photo.fname}`); } catch (e) { }
+          try { await env.PHOTOS.delete(`sessions/${sessionId}/thumbs/${photo.fname}`); } catch (e) { }
+        }
+        // Delete selections and meta
+        try { await env.PHOTOS.delete(`sessions/${sessionId}/selections.json`); } catch (e) { }
+        await env.PHOTOS.delete(metaKey);
+
+        return jsonResponse({ ok: true, deleted: sessionId }, 200, request);
+      }
+
       // === 404 ===
-      return errorResponse('Not found', 404);
+      return errorResponse('Not found', 404, request);
 
     } catch (err) {
       console.error('Worker error:', err);
-      return errorResponse('Internal server error: ' + err.message, 500);
+      return errorResponse('Internal server error', 500, request);
     }
   },
 };
