@@ -590,11 +590,15 @@ export default {
         return jsonResponse({ ok: true, deleted });
       }
 
-      // === GET /api/session/:id/photo/:fname — Get full photo ===
-      const photoMatch = path.match(/^\/api\/session\/([a-zA-Z0-9]+)\/photo\/(.+)$/);
-      if (photoMatch && request.method === 'GET') {
-        const [, sessionId, fname] = photoMatch;
-        const key = `sessions/${sessionId}/photos/${decodeURIComponent(fname)}`;
+      // === GET /api/session/:id/photo — Get full photo (query or path) ===
+      const photoPathMatch = path.match(/^\/api\/session\/([a-zA-Z0-9]+)\/photo(?:\/(.+))?$/);
+      if (photoPathMatch && request.method === 'GET') {
+        const sessionId = photoPathMatch[1];
+        // Prefer ?fname= query param, fallback to path segment
+        const fname = url.searchParams.get('fname') || (photoPathMatch[2] ? decodeURIComponent(photoPathMatch[2]) : null);
+        if (!fname) return errorResponse('fname required', 400);
+
+        const key = `sessions/${sessionId}/photos/${fname}`;
         const obj = await env.PHOTOS.get(key);
         if (!obj) return errorResponse('Photo not found', 404);
 
@@ -607,16 +611,20 @@ export default {
         });
       }
 
-      // === GET /api/session/:id/thumb/:fname — Get thumbnail ===
-      const thumbMatch = path.match(/^\/api\/session\/([a-zA-Z0-9]+)\/thumb\/(.+)$/);
-      if (thumbMatch && request.method === 'GET') {
-        const [, sessionId, fname] = thumbMatch;
-        const key = `sessions/${sessionId}/thumbs/${decodeURIComponent(fname)}`;
+      // === GET /api/session/:id/thumb — Get thumbnail (query or path) ===
+      const thumbPathMatch = path.match(/^\/api\/session\/([a-zA-Z0-9]+)\/thumb(?:\/(.+))?$/);
+      if (thumbPathMatch && request.method === 'GET') {
+        const sessionId = thumbPathMatch[1];
+        // Prefer ?fname= query param, fallback to path segment
+        const fname = url.searchParams.get('fname') || (thumbPathMatch[2] ? decodeURIComponent(thumbPathMatch[2]) : null);
+        if (!fname) return errorResponse('fname required', 400);
+
+        const key = `sessions/${sessionId}/thumbs/${fname}`;
         const obj = await env.PHOTOS.get(key);
 
         if (!obj) {
           // Fallback to full photo if no thumb
-          const fullKey = `sessions/${sessionId}/photos/${decodeURIComponent(fname)}`;
+          const fullKey = `sessions/${sessionId}/photos/${fname}`;
           const fullObj = await env.PHOTOS.get(fullKey);
           if (!fullObj) return errorResponse('Photo not found', 404);
           return new Response(fullObj.body, {

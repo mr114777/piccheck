@@ -3185,8 +3185,8 @@
               .map((p, idx) => ({
                 id: `${g.id}_${idx}`,
                 fname: p.fname,
-                url: `${SELEKT_API}/api/session/${sessionId}/thumb/${encodeURIComponent(p.fname)}`,
-                fullUrl: `${SELEKT_API}/api/session/${sessionId}/photo/${encodeURIComponent(p.fname)}`,
+                url: `${SELEKT_API}/api/session/${sessionId}/thumb?fname=${encodeURIComponent(p.fname)}`,
+                fullUrl: `${SELEKT_API}/api/session/${sessionId}/photo?fname=${encodeURIComponent(p.fname)}`,
                 ai: []
               }))
           }));
