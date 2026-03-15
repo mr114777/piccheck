@@ -1554,14 +1554,15 @@
             font-size: 28px;
             font-weight: 800;
             font-family: var(--heading-font);
-            color: var(--text);
+            color: var(--pv-text, #fff);
             letter-spacing: -0.5px;
             line-height: 1.2;
         }
 
         .pv-id {
             font-size: 13px;
-            color: var(--text-sub);
+            color: var(--pv-text, #fff);
+            opacity: 0.65;
             margin-top: 4px;
             font-weight: 500;
             letter-spacing: 0.5px;
@@ -1577,7 +1578,7 @@
         .pv-badges .badge {
             background: var(--surface);
             border: 1px solid var(--border);
-            color: var(--text);
+            color: var(--pv-text, #fff);
             font-size: 11px;
             font-weight: 600;
             padding: 5px 12px;
@@ -1597,7 +1598,8 @@
 
         .pv-bio {
             font-size: 15px;
-            color: var(--text-sub);
+            color: var(--pv-text, #fff);
+            opacity: 0.7;
             line-height: 1.8;
             max-width: 500px;
             margin: 0 auto;
@@ -1624,7 +1626,7 @@
             background: color-mix(in srgb, var(--accent) 20%, rgba(255,255,255,0.08));
             border: 1px solid color-mix(in srgb, var(--accent) 30%, rgba(255,255,255,0.1));
             border-radius: 40px;
-            color: rgba(255,255,255,0.9);
+            color: var(--pv-text, rgba(255,255,255,0.9));
             text-decoration: none;
             font-size: 14px;
             font-weight: 600;
@@ -2278,6 +2280,37 @@
                         </div>
                     </div>
                     <div class="style-row">
+                        <div class="style-label" data-i18n="textColor">テキストカラー</div>
+                        <div class="color-presets" id="textColorPresets">
+                            <div class="color-dot selected" data-tcolor="#FFFFFF" style="background:#FFFFFF;border:1px solid var(--border)" onclick="setTextColor('#FFFFFF',this)"></div>
+                            <div class="color-dot" data-tcolor="#D1D5DB" style="background:#D1D5DB" onclick="setTextColor('#D1D5DB',this)"></div>
+                            <div class="color-dot" data-tcolor="#FEF3C7" style="background:#FEF3C7" onclick="setTextColor('#FEF3C7',this)"></div>
+                            <div class="color-dot" data-tcolor="#DBEAFE" style="background:#DBEAFE" onclick="setTextColor('#DBEAFE',this)"></div>
+                            <div class="color-dot" data-tcolor="#FCE7F3" style="background:#FCE7F3" onclick="setTextColor('#FCE7F3',this)"></div>
+                            <div class="color-dot" data-tcolor="#4B5563" style="background:#4B5563" onclick="setTextColor('#4B5563',this)"></div>
+                            <div class="color-dot" data-tcolor="#1F2937" style="background:#1F2937" onclick="setTextColor('#1F2937',this)"></div>
+                            <div class="color-dot" data-tcolor="#000000" style="background:#000000" onclick="setTextColor('#000000',this)"></div>
+                            <div class="color-picker-wrap"><input type="color" id="customTextColorPicker" value="#FFFFFF" oninput="setTextColor(this.value,null)"></div>
+                        </div>
+                        <div id="textHslSliders" style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+                            <div style="display:flex;align-items:center;gap:10px">
+                                <span style="font-size:11px;color:var(--text-sub);min-width:24px">H</span>
+                                <input type="range" id="txtHue" min="0" max="360" value="0" style="flex:1;accent-color:var(--accent);height:6px" oninput="updateTextFromHSL()">
+                                <span id="txtHueVal" style="font-size:10px;color:var(--text-dim);min-width:28px;text-align:right">0°</span>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:10px">
+                                <span style="font-size:11px;color:var(--text-sub);min-width:24px">S</span>
+                                <input type="range" id="txtSat" min="0" max="100" value="0" style="flex:1;accent-color:var(--accent);height:6px" oninput="updateTextFromHSL()">
+                                <span id="txtSatVal" style="font-size:10px;color:var(--text-dim);min-width:28px;text-align:right">0%</span>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:10px">
+                                <span style="font-size:11px;color:var(--text-sub);min-width:24px">L</span>
+                                <input type="range" id="txtLit" min="0" max="100" value="100" style="flex:1;accent-color:var(--accent);height:6px" oninput="updateTextFromHSL()">
+                                <span id="txtLitVal" style="font-size:10px;color:var(--text-dim);min-width:28px;text-align:right">100%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="style-row">
                         <div class="style-label" data-i18n="bgMode">背景モード</div>
                         <div class="mode-toggle">
                             <button class="mode-btn active" data-mode="dark" onclick="setMode('dark')">
@@ -2569,7 +2602,7 @@
                 saved: '✓ 保存しました', passwordNotReady: 'パスワード変更は準備中です',
                 noBio: '自己紹介が未設定です', previewProfile: 'プロフィール確認', previewLabel: 'プロフィール確認',
                 portfolio: 'ポートフォリオ', changeCover: 'カバー写真を変更',
-                styleTitle: 'スタイル設定', accentColor: 'アクセントカラー', bgMode: '背景モード', fontStyle: 'フォントスタイル',
+                styleTitle: 'スタイル設定', accentColor: 'アクセントカラー', textColor: 'テキストカラー', bgMode: '背景モード', fontStyle: 'フォントスタイル',
                 modeDark: 'ダーク', modeLight: 'ライト',
                 rolePhotographer: 'カメラマン', roleModel: 'モデル', roleCompany: '企業', rolePrivate: 'プライベート',
                 rolePhotographerDesc: '写真を送る側', roleModelDesc: '写真を受け取る側', roleCompanyDesc: 'ビジネス利用', rolePrivateDesc: '個人利用',
@@ -2584,7 +2617,7 @@
                 saved: '✓ Saved', passwordNotReady: 'Password change coming soon',
                 noBio: 'No bio set', previewProfile: 'Preview profile', previewLabel: 'Profile preview',
                 portfolio: 'Portfolio', changeCover: 'Change cover photo',
-                styleTitle: 'Style Settings', accentColor: 'Accent Color', bgMode: 'Background', fontStyle: 'Font Style',
+                styleTitle: 'Style Settings', accentColor: 'Accent Color', textColor: 'Text Color', bgMode: 'Background', fontStyle: 'Font Style',
                 modeDark: 'Dark', modeLight: 'Light',
                 rolePhotographer: 'Photographer', roleModel: 'Model', roleCompany: 'Company', rolePrivate: 'Private',
                 rolePhotographerDesc: 'Send photos', roleModelDesc: 'Receive photos', roleCompanyDesc: 'Business', rolePrivateDesc: 'Personal',
@@ -2599,7 +2632,7 @@
                 saved: '✓ 已保存', passwordNotReady: '密码更改功能即将推出',
                 noBio: '未设置自我介绍', previewProfile: '查看外部视图', previewLabel: '外部视图',
                 portfolio: '作品集', changeCover: '更改封面照片',
-                styleTitle: '样式设置', accentColor: '强调色', bgMode: '背景模式', fontStyle: '字体风格',
+                styleTitle: '样式设置', accentColor: '强调色', textColor: '文字颜色', bgMode: '背景模式', fontStyle: '字体风格',
                 modeDark: '深色', modeLight: '浅色',
                 rolePhotographer: '摄影师', roleModel: '模特', roleCompany: '企业', rolePrivate: '个人',
                 rolePhotographerDesc: '发送照片', roleModelDesc: '接收照片', roleCompanyDesc: '商业使用', rolePrivateDesc: '个人使用',
@@ -2687,6 +2720,40 @@
             document.getElementById('hslLitVal').textContent = l + '%';
         }
 
+        // Text color functions
+        function setTextColor(hex, dotEl) {
+            document.documentElement.style.setProperty('--pv-text', hex);
+            document.querySelectorAll('#textColorPresets .color-dot').forEach(d => d.classList.remove('selected'));
+            if (dotEl) dotEl.classList.add('selected');
+            document.getElementById('customTextColorPicker').value = hex;
+            updateTextHSLSliders(hex);
+            saveStyle({ textColor: hex });
+        }
+
+        function updateTextFromHSL() {
+            const h = +document.getElementById('txtHue').value;
+            const s = +document.getElementById('txtSat').value;
+            const l = +document.getElementById('txtLit').value;
+            document.getElementById('txtHueVal').textContent = h + '°';
+            document.getElementById('txtSatVal').textContent = s + '%';
+            document.getElementById('txtLitVal').textContent = l + '%';
+            const hex = hslToHex(h, s, l);
+            document.documentElement.style.setProperty('--pv-text', hex);
+            document.querySelectorAll('#textColorPresets .color-dot').forEach(d => d.classList.remove('selected'));
+            document.getElementById('customTextColorPicker').value = hex;
+            saveStyle({ textColor: hex });
+        }
+
+        function updateTextHSLSliders(hex) {
+            const [h, s, l] = hexToHSL(hex);
+            document.getElementById('txtHue').value = h;
+            document.getElementById('txtSat').value = s;
+            document.getElementById('txtLit').value = l;
+            document.getElementById('txtHueVal').textContent = h + '°';
+            document.getElementById('txtSatVal').textContent = s + '%';
+            document.getElementById('txtLitVal').textContent = l + '%';
+        }
+
         function setMode(mode) {
             document.body.dataset.mode = mode;
             document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
@@ -2702,6 +2769,7 @@
         function restoreStyle() {
             const s = getStyle();
             if (s.accent) { setAccentColor(s.accent, document.querySelector(`.color-dot[data-color="${s.accent}"]`)); }
+            if (s.textColor) { setTextColor(s.textColor, document.querySelector(`#textColorPresets .color-dot[data-tcolor="${s.textColor}"]`)); }
             if (s.mode) setMode(s.mode);
             if (s.font) setFontStyle(s.font);
             // Cover photo
