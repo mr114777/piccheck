@@ -412,6 +412,51 @@
         #selektNavMenu.open {
             display: block !important;
         }
+
+        /* ===== MOBILE ===== */
+        @media (max-width: 600px) {
+            body { overflow-x: hidden; }
+
+            .topbar {
+                padding: 0 10px;
+                gap: 6px;
+            }
+
+            .topbar-title {
+                font-size: 11px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                min-width: 0;
+                flex: 1;
+            }
+
+            .topbar-divider { display: none; }
+
+            .logo {
+                font-size: 16px;
+                flex-shrink: 0;
+            }
+
+            .project-card {
+                padding: 14px 16px;
+                border-radius: 12px;
+            }
+
+            .project-title {
+                font-size: 14px;
+            }
+
+            .project-meta {
+                font-size: 11px;
+                gap: 6px;
+            }
+
+            .delete-session-btn {
+                width: 28px;
+                height: 28px;
+            }
+        }
     </style>
 </head>
 
@@ -493,7 +538,7 @@
         </a>
         <script>(function () { var p = localStorage.getItem('selekt_avatar_photo'); if (p) { var a = document.getElementById('topbarAvatar'); a.innerHTML = '<img src="' + p + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'; } })()</script>
         <div class="topbar-divider"></div>
-        <span style="font-size:15px;font-weight:700;color:var(--text);font-family:var(--heading-font)"
+        <span class="topbar-title" style="font-size:15px;font-weight:700;color:var(--text);font-family:var(--heading-font)"
             data-i18n="navDashboard">ダッシュボード</span>
         <div class="topbar-right">
             <div style="display:flex;gap:4px">

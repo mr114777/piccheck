@@ -1786,6 +1786,29 @@
 
         /* RESPONSIVE */
         @media(max-width:768px) {
+            .topbar {
+                padding: 0 10px;
+                gap: 6px;
+            }
+
+            .topbar-title {
+                font-size: 11px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                min-width: 0;
+                flex: 1;
+            }
+
+            .topbar-divider {
+                display: none;
+            }
+
+            .logo {
+                font-size: 16px;
+                flex-shrink: 0;
+            }
+
             .main {
                 grid-template-columns: 1fr;
                 padding: 20px 16px 80px;
@@ -1828,6 +1851,42 @@
 
             .form-row {
                 grid-template-columns: 1fr;
+            }
+
+            .profile-tabs {
+                padding: 0 12px;
+                gap: 0;
+            }
+
+            .profile-tab {
+                padding: 8px 10px;
+                font-size: 11px;
+                white-space: nowrap;
+            }
+
+            .profile-info-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .profile-name {
+                font-size: 22px;
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .badge-role {
+                white-space: nowrap;
+                font-size: 10px !important;
+            }
+
+            .preview-btn {
+                font-size: 11px;
+                padding: 6px 12px;
+                white-space: nowrap;
             }
         }
     </style>
@@ -1910,7 +1969,7 @@
         </a>
         <script>(function () { var p = localStorage.getItem('selekt_avatar_photo'); if (p) { var a = document.getElementById('topbarAvatar'); a.innerHTML = '<img src="' + p + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'; } })()</script>
         <div class="topbar-divider"></div>
-        <span style="font-size:15px;font-weight:700;color:var(--text);font-family:var(--heading-font)"
+        <span class="topbar-title" style="font-size:15px;font-weight:700;color:var(--text);font-family:var(--heading-font)"
             data-i18n="navProfile">プロフィール</span>
         <div class="topbar-right">
             <div style="display:flex;gap:4px">
