@@ -1415,9 +1415,7 @@
             -webkit-backdrop-filter: blur(20px) saturate(1.4);
         }
 
-        body[data-mode="light"] .pv-topbar {
-            background: rgba(255, 255, 255, 0.7);
-        }
+
 
         .pv-topbar-label {
             font-size: 11px;
@@ -1427,9 +1425,7 @@
             text-transform: uppercase;
         }
 
-        body[data-mode="light"] .pv-topbar-label {
-            color: var(--text-sub);
-        }
+
 
         .pv-close-btn {
             position: absolute;
@@ -1454,11 +1450,7 @@
             line-height: 1;
         }
 
-        body[data-mode="light"] .pv-close-btn {
-            background: rgba(0, 0, 0, 0.06);
-            border-color: rgba(0, 0, 0, 0.1);
-            color: var(--text);
-        }
+
 
         .pv-close-btn:hover {
             background: var(--accent);
@@ -1493,15 +1485,14 @@
             pointer-events: none;
         }
 
-        body[data-mode="light"] .pv-hero-gradient {
-            background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.15) 100%);
-        }
+
+
 
         /* ── Main Content Card (Overlaps Hero) ── */
         .pv-card {
             position: relative;
             z-index: 2;
-            background: color-mix(in srgb, var(--accent) 40%, var(--bg));
+            background: color-mix(in srgb, var(--accent) 40%, #0d1117);
             border-radius: 40px 40px 0 0;
             margin-top: -60px;
             padding: 0 28px 40px;
@@ -1511,12 +1502,6 @@
             margin-left: auto;
             margin-right: auto;
             border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        body[data-mode="light"] .pv-card {
-            background: color-mix(in srgb, var(--accent) 25%, var(--bg));
-            box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.08);
-            border-top: 1px solid rgba(255, 255, 255, 0.5);
         }
 
         /* ── Avatar (Overlaps Card Border) ── */
@@ -1533,15 +1518,13 @@
             width: 140px;
             height: 140px;
             border-radius: 50%;
-            background: color-mix(in srgb, var(--accent) 40%, var(--bg));
+            background: color-mix(in srgb, var(--accent) 40%, #0d1117);
             padding: 8px;
             margin-bottom: 16px;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
         }
 
-        body[data-mode="light"] .pv-avatar-outer {
-            background: color-mix(in srgb, var(--accent) 25%, var(--bg));
-        }
+
 
         .pv-avatar {
             width: 100%;
@@ -1697,9 +1680,7 @@
             color: #fff;
         }
 
-        body[data-mode="light"] .pv-sns-icon.x {
-            background: #000;
-        }
+
 
         .pv-sns-text {
             flex-grow: 1;
