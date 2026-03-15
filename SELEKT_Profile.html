@@ -1492,7 +1492,7 @@
         .pv-card {
             position: relative;
             z-index: 2;
-            background: color-mix(in srgb, var(--accent) 40%, #0d1117);
+            background: color-mix(in srgb, var(--accent) 75%, #0d1117);
             border-radius: 40px 40px 0 0;
             margin-top: -60px;
             padding: 0 28px 40px;
@@ -1518,7 +1518,7 @@
             width: 140px;
             height: 140px;
             border-radius: 50%;
-            background: color-mix(in srgb, var(--accent) 40%, #0d1117);
+            background: color-mix(in srgb, var(--accent) 70%, #0d1117);
             padding: 8px;
             margin-bottom: 16px;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
@@ -1621,11 +1621,10 @@
             display: flex;
             align-items: center;
             padding: 12px 20px;
-            background: var(--surface);
-            border: 1px solid var(--border);
+            background: color-mix(in srgb, var(--accent) 20%, rgba(255,255,255,0.08));
+            border: 1px solid color-mix(in srgb, var(--accent) 30%, rgba(255,255,255,0.1));
             border-radius: 40px;
-            /* Pill shape */
-            color: var(--text);
+            color: rgba(255,255,255,0.9);
             text-decoration: none;
             font-size: 14px;
             font-weight: 600;
