@@ -986,6 +986,7 @@
 
             .steps {
                 padding: 0 8px;
+                margin-top: 8px;
                 gap: 0;
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
@@ -997,14 +998,19 @@
                 white-space: nowrap;
             }
 
+            .step {
+                gap: 4px;
+            }
+
             .step-num {
-                width: 22px;
-                height: 22px;
-                font-size: 11px;
+                width: 20px;
+                height: 20px;
+                font-size: 10px;
             }
 
             .step-line {
-                min-width: 20px;
+                min-width: 12px;
+                max-width: 40px;
                 flex: 1;
             }
 
