@@ -2669,7 +2669,7 @@
           NG
           <span class="filter-count" id="cnt-ng">0</span>
         </button>
-        <button class="filter-btn" onclick="setFilter('ai', this)">
+        <button class="filter-btn" onclick="setFilter('ai', this)" style="display:none">
           <span class="filter-dot" style="background:var(--lavender)"></span>
           AIセンシティブ判定（要確認）
           <span class="filter-count" id="cnt-ai">0</span>
@@ -2739,7 +2739,7 @@
           <button class="tb-btn" onclick="document.getElementById('addPhotoInput').click()">
             ＋ 写真追加
           </button>
-          <button class="tb-btn" id="aiSensitiveBtn" onclick="runSensitiveDetection()">
+          <button class="tb-btn" id="aiSensitiveBtn" onclick="runSensitiveDetection()" style="display:none">
             🛡️ センシティブ判定
           </button>
           <button class="tb-btn" onclick="toggleGridSize()">
@@ -2925,7 +2925,7 @@
       <div class="bs-content">
         <div class="filter-chips" style="margin-bottom:12px">
           <button class="filter-chip" data-filter="ai"
-            onclick="mobileSetFilter('ai', this);closeBottomSheet('groupSheet')">
+            onclick="mobileSetFilter('ai', this);closeBottomSheet('groupSheet')" style="display:none">
             <span class="filter-chip-dot" style="background:var(--lavender)"></span>AIセンシティブ
           </button>
           <button class="filter-chip" data-filter="none"
