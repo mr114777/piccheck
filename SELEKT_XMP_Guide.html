@@ -649,6 +649,47 @@
       </div>
     </div>
 
+    <!-- Warning: Development settings -->
+    <div class="warning-box" style="background:rgba(245,200,66,0.06);border-color:rgba(245,200,66,0.25)">
+      <div class="warning-header">
+        <div class="warning-icon" style="background:var(--yellow);color:#000">⚠</div>
+        <div class="warning-title" style="color:var(--yellow)">現像設定の上書きにご注意ください</div>
+      </div>
+      <div class="warning-body">
+        SELEKTのXMPファイルには<strong style="color:var(--yellow)">カラーラベル情報のみ</strong>が含まれています。
+        すでに現像ソフトで編集済みの写真に対してXMPを読み込むと、
+        <strong style="color:var(--yellow)">既存の現像設定（露出、ホワイトバランス、トーンカーブなど）が失われる</strong>可能性があります。
+        <ul>
+          <li>XMPは<strong style="color:var(--yellow)">必ず現像を始める前に</strong>写真と同じフォルダに配置してください</li>
+          <li>既に現像設定がある場合は、<strong style="color:var(--yellow)">XMPの配置前にバックアップ</strong>を取ってください</li>
+          <li>Lightroom の場合、カタログに現像設定がある状態で「メタデータをファイルから読み込み」を行うと設定が上書きされます</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Recommended Workflow -->
+    <div class="info-box">
+      <div class="info-header">
+        <div class="info-icon">✓</div>
+        <div class="info-title">推奨ワークフロー</div>
+      </div>
+      <div class="info-body" style="font-family:'Space Mono',monospace;font-size:12px;line-height:2.2">
+        📷 撮影<br>
+        &nbsp;&nbsp;↓<br>
+        📤 SELEKTに写真をアップロード<br>
+        &nbsp;&nbsp;↓<br>
+        👤 クライアントが OK / 保留 / NG を判定<br>
+        &nbsp;&nbsp;↓<br>
+        📁 XMP書き出し・ダウンロード<br>
+        &nbsp;&nbsp;↓<br>
+        📂 撮影フォルダにXMPファイルを配置 <strong style="color:var(--accent)">← ★ 現像前にここで配置</strong><br>
+        &nbsp;&nbsp;↓<br>
+        💻 Lightroom / Capture One にインポート<br>
+        &nbsp;&nbsp;↓<br>
+        🎨 カラーラベル付きの状態で現像開始
+      </div>
+    </div>
+
     <hr class="section-divider">
 
     <!-- Lightroom -->
