@@ -3141,23 +3141,28 @@
   <!-- Confirm Modal -->
   <div class="confirm-overlay" id="confirmModal">
     <div class="confirm-box">
-      <div class="confirm-icon">📤</div>
-      <div class="confirm-title">セレクトを送信しますか？</div>
-      <div class="confirm-desc" id="confirmDesc">選択内容をカメラマンに送信します。<br>送信後は変更できません。</div>
+      <div class="confirm-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+      <div class="confirm-title">XMP書き出し</div>
+      <div class="confirm-desc" id="confirmDesc">各写真のカラーラベルをXMPファイルとして書き出します。<br>Lightroom ・ Capture One で読み込めます。</div>
       <div class="confirm-stats">
         <div class="confirm-stat">
           <div class="confirm-stat-val" id="confirmSelCount" style="color:var(--green)">0</div>
-          <div class="confirm-stat-key">選択済み</div>
+          <div class="confirm-stat-key">🟢 OK → Green</div>
+        </div>
+        <div class="confirm-stat">
+          <div class="confirm-stat-val" id="confirmHoldCount" style="color:var(--yellow)">0</div>
+          <div class="confirm-stat-key">🟡 保留 → Yellow</div>
         </div>
         <div class="confirm-stat">
           <div class="confirm-stat-val" id="confirmNgCount" style="color:var(--coral)">0</div>
-          <div class="confirm-stat-key">NG フラグ</div>
+          <div class="confirm-stat-key">🔴 NG → Red</div>
         </div>
       </div>
+      <div style="font-size:11px;color:var(--text-dim);margin:8px 0 4px;text-align:center">* 未判定の写真にはXMPを生成しません</div>
       <div class="confirm-btns">
         <button class="confirm-btn" style="background:var(--surface3);color:var(--text)"
           onclick="closeConfirm()">キャンセル</button>
-        <button class="confirm-btn" style="background:var(--coral);color:white" onclick="doSend()">送信する →</button>
+        <button class="confirm-btn" style="background:var(--accent);color:white" onclick="doExportXMP()">📁 XMPをダウンロード</button>
       </div>
     </div>
   </div>
@@ -5274,15 +5279,14 @@
     function openConfirm() {
       const ok = okCount(), nearok = nearokCount(), ng = ngCount();
       const total = GROUPS.reduce((a, g) => a + g.photos.length, 0);
-      const el = document.getElementById('confirmSelCount');
-      const el2 = document.getElementById('confirmNgCount');
-      if (el) el.textContent = ok;
-      if (el2) el2.textContent = ng;
-      const remaining = total - ok - nearok - ng;
-      document.getElementById('confirmDesc').innerHTML =
-        remaining > 0
-          ? `まだ <strong style="color:var(--yellow)">${remaining}枚</strong> 未判定です。このまま送信しますか？`
-          : '全写真の判定が完了しています。<br>カメラマンに送信します。';
+      document.getElementById('confirmSelCount').textContent = ok;
+      document.getElementById('confirmHoldCount').textContent = nearok;
+      document.getElementById('confirmNgCount').textContent = ng;
+      const judged = ok + nearok + ng;
+      const remaining = total - judged;
+      document.getElementById('confirmDesc').innerHTML = remaining > 0
+        ? `<span style="color:var(--yellow)">${remaining}枚未判定</span>。判定済み ${judged}枚のXMPを書き出します。<br>Lightroom ・ Capture One で読み込めます。`
+        : `全 ${total}枚の判定が完了。XMPを書き出します。<br>Lightroom ・ Capture One で読み込めます。`;
       document.getElementById('confirmModal').classList.add('open');
     }
 
@@ -5290,45 +5294,114 @@
       document.getElementById('confirmModal').classList.remove('open');
     }
 
-    async function doSend() {
-      closeConfirm();
-      const sessionId = window._selektSessionId;
+    // ===== XMP EXPORT =====
+    function generateXMP(filename, label) {
+      return `<?xpacket begin="\uFEFF" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/">
+ <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <rdf:Description rdf:about=""
+    xmlns:xmp="http://ns.adobe.com/xap/1.0/"
+    xmp:Label="${label}"
+    xmp:CreatorTool="SELEKT Photo Selection"/>
+ </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="w"?>`;
+    }
 
-      // Build selections object: { "photoId": "ok" | "ng" | "nearok", ... }
-      const selections = {};
-      state.status.forEach((status, photoId) => {
-        selections[photoId] = status;
+    async function doExportXMP() {
+      closeConfirm();
+
+      const statusToLabel = { 'ok': 'Green', 'nearok': 'Yellow', 'ng': 'Red' };
+      const xmpFiles = [];
+
+      GROUPS.forEach(g => {
+        g.photos.forEach(p => {
+          const status = getStatus(p.id);
+          if (status && statusToLabel[status]) {
+            const baseName = p.fname.replace(/\.[^.]+$/, '');
+            const xmpContent = generateXMP(p.fname, statusToLabel[status]);
+            xmpFiles.push({ name: baseName + '.xmp', content: xmpContent });
+          }
+        });
       });
 
-      const okTotal = okCount();
-      const ngTotal = ngCount();
-
-      if (sessionId) {
-        try {
-          const res = await fetch(`${SELEKT_API}/api/session/${sessionId}/selections`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              selections,
-              completedAt: new Date().toISOString()
-            })
-          });
-          if (res.ok) {
-            console.log('[SELEKT] Selections saved to API');
-          } else {
-            console.warn('[SELEKT] Selections save failed:', await res.text());
-          }
-        } catch (e) {
-          console.warn('[SELEKT] Selections API error:', e);
-        }
+      if (xmpFiles.length === 0) {
+        showToast('判定済みの写真がありません', 'coral');
+        return;
       }
 
-      // Also save to localStorage as backup
-      localStorage.setItem(`selekt_selections_${sessionId || 'local'}`, JSON.stringify(selections));
+      // If only 1 file, download directly
+      if (xmpFiles.length === 1) {
+        const blob = new Blob([xmpFiles[0].content], { type: 'application/rdf+xml' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = xmpFiles[0].name; a.click();
+        URL.revokeObjectURL(url);
+        showToast(`✅ ${xmpFiles[0].name} をダウンロードしました`, 'green');
+        return;
+      }
 
-      showToast(`セレクト完了！${okTotal}枚をカメラマンに送信しました 🎉`, 'green');
-      launchConfetti();
+      // Multiple files: create ZIP using JSZip
+      showToast(`📦 ${xmpFiles.length}個のXMPをZIPにまとめています...`, 'blue');
+
+      try {
+        // Load JSZip dynamically
+        if (typeof JSZip === 'undefined') {
+          await new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/jszip@3/dist/jszip.min.js';
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+          });
+        }
+
+        const zip = new JSZip();
+        xmpFiles.forEach(f => zip.file(f.name, f.content));
+
+        const sessionTitle = document.getElementById('sessionTitle')?.textContent?.trim() || 'selekt';
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        const url = URL.createObjectURL(zipBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${sessionTitle}_xmp.zip`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        showToast(`✅ ${xmpFiles.length}個のXMPファイルをダウンロードしました`, 'green');
+      } catch (e) {
+        console.error('ZIP creation failed:', e);
+        // Fallback: download files individually
+        xmpFiles.forEach((f, i) => {
+          setTimeout(() => {
+            const blob = new Blob([f.content], { type: 'application/rdf+xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = f.name; a.click();
+            URL.revokeObjectURL(url);
+          }, i * 200);
+        });
+        showToast(`✅ ${xmpFiles.length}個のXMPファイルをダウンロードしました`, 'green');
+      }
+
+      // Also save selections to API
+      const sessionId = window._selektSessionId;
+      if (sessionId) {
+        const selections = {};
+        state.status.forEach((status, photoId) => { selections[photoId] = status; });
+        try {
+          await fetch(`${SELEKT_API}/api/session/${sessionId}/selections`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ selections, completedAt: new Date().toISOString() })
+          });
+        } catch (e) { console.warn('[SELEKT] Selections API error:', e); }
+        localStorage.setItem(`selekt_selections_${sessionId}`, JSON.stringify(selections));
+      }
     }
+
+    // Keep doSend as alias for backward compatibility
+    async function doSend() { await doExportXMP(); }
 
     // ===== CONFETTI =====
     let confettiDone = false;
