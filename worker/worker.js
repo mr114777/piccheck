@@ -463,9 +463,9 @@ export default {
       if (uploadMatch && request.method === 'POST') {
         const sessionId = uploadMatch[1];
 
-        // Rate limit: 100 uploads per IP per hour
+        // Rate limit: 1500 uploads per IP per hour
         const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
-        if (await checkRateLimit(env, `rl/upload/${clientIP}`, 100, 3600)) {
+        if (await checkRateLimit(env, `rl/upload/${clientIP}`, 1500, 3600)) {
           return errorResponse('Upload rate limit exceeded.', 429, request);
         }
 
