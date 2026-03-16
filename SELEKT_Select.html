@@ -2521,6 +2521,11 @@
       </svg>
     </a>
     <script>(function () { var p = localStorage.getItem('selekt_avatar_photo'); if (p) { var a = document.getElementById('topbarAvatar'); a.innerHTML = '<img src="' + p + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'; } })()</script>
+    <div id="topbarLangBtns" style="display:flex;gap:2px;margin-left:4px;flex-shrink:0">
+      <button class="lang-tab-btn active" data-lang="ja" onclick="setLang('ja')" style="padding:4px 8px;font-size:10px;font-weight:700;border-radius:5px;border:1px solid var(--border2);background:var(--surface3);color:var(--text);cursor:pointer;font-family:inherit;transition:all 0.15s">JP</button>
+      <button class="lang-tab-btn" data-lang="en" onclick="setLang('en')" style="padding:4px 8px;font-size:10px;font-weight:700;border-radius:5px;border:1px solid var(--border2);background:transparent;color:var(--text-dim);cursor:pointer;font-family:inherit;transition:all 0.15s">EN</button>
+      <button class="lang-tab-btn" data-lang="zh" onclick="setLang('zh')" style="padding:4px 8px;font-size:10px;font-weight:700;border-radius:5px;border:1px solid var(--border2);background:transparent;color:var(--text-dim);cursor:pointer;font-family:inherit;transition:all 0.15s">中</button>
+    </div>
     <script>
       function signOut() { localStorage.removeItem('selekt_user'); localStorage.removeItem('selekt_token'); window.location.href = 'SELEKT_Auth.html'; }
       document.addEventListener('click', e => { if (!e.target.closest('#hamburgerBtn') && !e.target.closest('#selektNavMenu')) document.getElementById('selektNavMenu')?.classList.remove('open') });
@@ -2621,15 +2626,9 @@
         </div>
       </div>
       <button class="btn-complete" onclick="openConfirm()">
-        セレクト結果を書き出す →
+        XMP書き出し →
       </button>
       <button class="btn-complete" onclick="confirmComplete()">✓ セレクト完了</button>
-      <select id="langSelect" onchange="setLang(this.value)"
-        style="background:var(--surface3);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:3px 8px;font-size:11px;cursor:pointer;font-family:inherit">
-        <option value="ja">JP 日本語</option>
-        <option value="en">EN English</option>
-        <option value="zh">ZH 中文</option>
-      </select>
 
     </div>
   </div>
@@ -2874,7 +2873,7 @@
         <span>DL</span>
       </button>
     </div>
-    <button class="bn-complete" onclick="openConfirm()">セレクト結果を書き出す →</button>
+    <button class="bn-complete" onclick="openConfirm()">XMP書き出し →</button>
   </div>
 
   <!-- ===== BOTTOM SHEET: Download ===== -->
@@ -5995,6 +5994,19 @@
       localStorage.setItem('selekt-lang', lang);
       document.title = t('title');
 
+      // Update topbar lang buttons
+      document.querySelectorAll('.lang-tab-btn').forEach(b => {
+        if (b.dataset.lang === lang) {
+          b.style.background = 'var(--surface3)';
+          b.style.color = 'var(--text)';
+          b.classList.add('active');
+        } else {
+          b.style.background = 'transparent';
+          b.style.color = 'var(--text-dim)';
+          b.classList.remove('active');
+        }
+      });
+
       // Toolbar
       const tt = document.querySelector('.toolbar-title');
       const ts = document.querySelector('.toolbar-sub');
@@ -6172,8 +6184,20 @@
     // Init language
     (function () {
       const saved = localStorage.getItem('selekt-lang');
-      if (saved && saved !== 'ja') {
-        setTimeout(() => setLang(saved), 200);
+      if (saved) {
+        // Update topbar lang buttons for initial state
+        document.querySelectorAll('.lang-tab-btn').forEach(b => {
+          if (b.dataset.lang === saved) {
+            b.style.background = 'var(--surface3)';
+            b.style.color = 'var(--text)';
+          } else {
+            b.style.background = 'transparent';
+            b.style.color = 'var(--text-dim)';
+          }
+        });
+        if (saved !== 'ja') {
+          setTimeout(() => setLang(saved), 200);
+        }
       }
     })();
 
