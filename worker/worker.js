@@ -270,6 +270,26 @@ export default {
         });
       }
 
+      // === PUT /api/auth/update-profile ===
+      if (path === '/api/auth/update-profile' && request.method === 'PUT') {
+        const user = await getUserFromToken(request, env);
+        if (!user) return errorResponse('Unauthorized', 401);
+
+        const body = await request.json();
+        const allowedFields = ['displayName', 'role', 'bio', 'socialX', 'socialInstagram', 'socialYoutube', 'avatarPhoto', 'coverPhoto', 'avatarPos', 'profileStyle', 'portfolio'];
+
+        for (const field of allowedFields) {
+          if (body[field] !== undefined) {
+            user[field] = body[field];
+          }
+        }
+
+        await env.USERS.put(`users/${user.id}`, JSON.stringify(user));
+
+        const { salt, passwordHash, ...safeUser } = user;
+        return jsonResponse({ ok: true, user: safeUser });
+      }
+
       // === GET /api/user/:userId ===
       const userMatch = path.match(/^\/api\/user\/([a-zA-Z0-9_]+)$/);
       if (userMatch && request.method === 'GET') {

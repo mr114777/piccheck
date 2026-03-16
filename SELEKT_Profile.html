@@ -3096,10 +3096,23 @@
             try {
                 const token = localStorage.getItem('selekt_token');
                 if (token) {
-                    const res = await fetch(`${API}/api/auth/update-profile`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ displayName: newName, role: selectedRole, bio: newBio, socialX: currentUser.socialX, socialInstagram: currentUser.socialInstagram, socialYoutube: currentUser.socialYoutube }) });
+                    const profileData = {
+                        displayName: newName,
+                        role: selectedRole,
+                        bio: newBio,
+                        socialX: currentUser.socialX,
+                        socialInstagram: currentUser.socialInstagram,
+                        socialYoutube: currentUser.socialYoutube,
+                        avatarPhoto: localStorage.getItem('selekt_avatar_photo') || '',
+                        coverPhoto: localStorage.getItem('selekt_cover_photo') || '',
+                        avatarPos: localStorage.getItem('selekt_avatar_pos') || '',
+                        profileStyle: localStorage.getItem('selekt_profile_style') || '',
+                        portfolio: localStorage.getItem('selekt_portfolio') || ''
+                    };
+                    const res = await fetch(`${API}/api/auth/update-profile`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(profileData) });
                     if (res.ok) { const data = await res.json(); if (data.user) currentUser = data.user; }
                 }
-            } catch (e) { }
+            } catch (e) { console.warn('Profile save to server failed:', e); }
             localStorage.setItem('selekt_user', JSON.stringify(currentUser));
             updateUI(); showToast(pt('saved'), 'success'); setTimeout(() => btn.disabled = false, 500);
         }
@@ -3189,7 +3202,28 @@
                 if (token) {
                     const controller = new AbortController(); setTimeout(() => controller.abort(), 3000);
                     const res = await fetch(`${API}/api/auth/me`, { headers: { 'Authorization': `Bearer ${token}` }, signal: controller.signal });
-                    if (res.ok) { const data = await res.json(); currentUser = data.user; }
+                    if (res.ok) {
+                        const data = await res.json();
+                        currentUser = data.user;
+                        // Restore profile data from server to localStorage
+                        if (currentUser.avatarPhoto && !localStorage.getItem('selekt_avatar_photo')) {
+                            localStorage.setItem('selekt_avatar_photo', currentUser.avatarPhoto);
+                        }
+                        if (currentUser.coverPhoto && !localStorage.getItem('selekt_cover_photo')) {
+                            localStorage.setItem('selekt_cover_photo', currentUser.coverPhoto);
+                        }
+                        if (currentUser.avatarPos && !localStorage.getItem('selekt_avatar_pos')) {
+                            localStorage.setItem('selekt_avatar_pos', currentUser.avatarPos);
+                        }
+                        if (currentUser.profileStyle && !localStorage.getItem('selekt_profile_style')) {
+                            localStorage.setItem('selekt_profile_style', currentUser.profileStyle);
+                            restoreStyle();
+                        }
+                        if (currentUser.portfolio && !localStorage.getItem('selekt_portfolio')) {
+                            localStorage.setItem('selekt_portfolio', currentUser.portfolio);
+                            loadPortfolio();
+                        }
+                    }
                 }
             } catch (e) { console.log('API unavailable, using local data'); }
             if (!currentUser) {
