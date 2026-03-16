@@ -83,6 +83,8 @@
     /* ===== TOP BAR ===== */
     .topbar {
       height: 48px;
+      min-height: 48px;
+      max-height: 48px;
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       display: flex;
@@ -93,6 +95,7 @@
       top: 0;
       flex-shrink: 0;
       z-index: 100;
+      white-space: nowrap;
     }
 
     #selektNavMenu.open {
@@ -219,6 +222,8 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      flex-shrink: 0;
+      white-space: nowrap;
     }
 
     .progress-wrap {
@@ -289,6 +294,8 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      flex-shrink: 0;
+      white-space: nowrap;
     }
 
     .btn-download svg {
@@ -2785,7 +2792,7 @@
             <span id="gridIcon">⊞</span> 表示サイズ
           </button>
           <button class="tb-btn" onclick="toggleTheme()" id="themeToggleBtn" title="ライト/ダーク切替">
-            🌙 テーマ
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> テーマ
           </button>
 
         </div>
@@ -3551,7 +3558,7 @@
                 <button class="group-bulk-btn gbtn-ng" onclick="bulkSetGroup('${g.id}','ng')">全NG</button>
                 <button class="group-bulk-btn gbtn-reset" onclick="confirmGroupReset('${g.id}')">リセット</button>
               </div>
-              <span class="group-desired" id="desired-${g.id}" style="font-size:11px;color:var(--text-sub);cursor:pointer;margin-left:8px" onclick="event.stopPropagation();editGroupDesired('${g.id}')" title="${t('clickToChange')}">${t('desiredCountLabel')}: ${g.limit ? g.limit + t('photos') : t('desiredUnset')}</span>
+              <span class="group-desired" id="desired-${g.id}" style="font-size:11px;color:var(--text-sub);cursor:pointer;margin-left:8px;display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border:1px dashed var(--border2);border-radius:6px;transition:all 0.2s;white-space:nowrap;flex-shrink:0" onclick="event.stopPropagation();editGroupDesired('${g.id}')" title="${t('clickToChange')}" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text-sub)'">${t('desiredCountLabel')}: <strong style="color:var(--accent);font-weight:800">${g.limit ? g.limit + t('photos') : t('desiredUnset')}</strong> <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.5"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></span>
               <div class="group-limit-badge" id="limit-${g.id}">0 OK</div>
             </div>
             <div class="photo-grid" id="grid-${g.id}"></div>
@@ -6229,7 +6236,9 @@
       html.setAttribute('data-theme', isLight ? 'dark' : 'light');
       localStorage.setItem('selekt-theme', isLight ? 'dark' : 'light');
       const btn = document.getElementById('themeToggleBtn');
-      if (btn) btn.innerHTML = isLight ? '🌙 テーマ' : '☀️ テーマ';
+      if (btn) btn.innerHTML = isLight
+        ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> テーマ'
+        : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> テーマ';
     }
     // Init theme from localStorage
     (function () {
@@ -6238,7 +6247,7 @@
         document.documentElement.setAttribute('data-theme', 'light');
         setTimeout(() => {
           const btn = document.getElementById('themeToggleBtn');
-          if (btn) btn.innerHTML = '☀️ テーマ';
+          if (btn) btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> テーマ';
         }, 100);
       }
     })();
