@@ -578,7 +578,15 @@
       align-items: center;
       gap: 12px;
       margin-bottom: 24px;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .toolbar::-webkit-scrollbar {
+      display: none;
     }
 
     .toolbar-title {
@@ -597,6 +605,7 @@
       margin-left: auto;
       display: flex;
       gap: 8px;
+      flex-shrink: 0;
     }
 
     .tb-btn {
@@ -612,6 +621,8 @@
       cursor: pointer;
       font-family: inherit;
       transition: all 0.15s;
+      flex-shrink: 0;
+      white-space: nowrap;
     }
 
     .tb-btn:hover {
@@ -1099,7 +1110,13 @@
       align-items: center;
       gap: 10px;
       flex-shrink: 0;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .bulk-bar::-webkit-scrollbar {
+      display: none;
     }
 
     .bulk-label {
@@ -1120,6 +1137,8 @@
       cursor: pointer;
       font-family: inherit;
       transition: opacity 0.15s, transform 0.1s;
+      flex-shrink: 0;
+      white-space: nowrap;
     }
 
     .bulk-btn:hover {
@@ -1972,12 +1991,12 @@
       .toolbar {
         margin-bottom: 14px;
         gap: 6px;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
       }
 
       .toolbar-right {
         display: flex;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         gap: 4px;
       }
 
