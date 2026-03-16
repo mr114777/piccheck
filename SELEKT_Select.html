@@ -3999,6 +3999,7 @@
         showToast(msgs[newStatus], colors[newStatus]);
       }
       refreshUI(group);
+      saveState();
     }
 
     function movePhotoToGroup(photoId, fromGroupId, toGroupId) {
@@ -4218,6 +4219,7 @@
         });
       });
       GROUPS.forEach(g => refreshUI(g));
+      saveState();
       const msgs = { ok: '全写真を OK に設定しました', nearok: '全写真を保留 に設定しました', ng: '全写真を NG に設定しました', null: 'すべてリセットしました' };
       showToast(msgs[newStatus] || 'すべてリセットしました', newStatus === 'ng' ? 'coral' : newStatus === 'ok' ? 'green' : '');
     }
@@ -4230,6 +4232,7 @@
         else state.status.set(p.id, newStatus);
       });
       refreshUI(group);
+      saveState();
       const label = { ok: 'OK', nearok: '保留', ng: 'NG' }[newStatus];
       showToast(`${group.name} を全て ${label} にしました`, newStatus === 'ng' ? 'coral' : newStatus === 'ok' ? 'green' : '');
     }
@@ -4393,6 +4396,7 @@
       }
       document.getElementById('groupResetModal').classList.remove('open');
       _pendingResetGroupId = null;
+      saveState();
     }
 
     // ===== REFRESH =====
