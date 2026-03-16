@@ -3620,6 +3620,7 @@
         const pencilSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.35;flex-shrink:0"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>';
         title.innerHTML = (newName ? `${group.label}: ${newName}` : `グループ ${group.label}`) + pencilSvg;
       }
+      saveState();
     }
 
     function editGroupName(groupId) {
@@ -4022,6 +4023,7 @@
       renderGroupProgress();
       // Update sidebar counts
       updateSidebarCounts();
+      saveState();
       showToast(`${photo.fname} \u2192 ${toGroup.name || toGroup.label} \u306b\u79fb\u52d5`, 'green');
     }
 
@@ -4303,7 +4305,8 @@
         const data = {
           status: Object.fromEntries(state.status),
           comments: Object.fromEntries(state.comments),
-          limits: GROUPS.map(g => ({ id: g.id, limit: g.limit || 0 }))
+          limits: GROUPS.map(g => ({ id: g.id, limit: g.limit || 0 })),
+          groupNames: GROUPS.map(g => ({ id: g.id, name: g.name || '' }))
         };
         const key = window._selektSessionId ? 'selekt_state_' + window._selektSessionId : 'selekt_state_local';
         localStorage.setItem(key, JSON.stringify(data));
@@ -4330,6 +4333,12 @@
           data.limits.forEach(l => {
             const g = GROUPS.find(g => g.id === l.id);
             if (g) g.limit = l.limit;
+          });
+        }
+        if (data.groupNames && GROUPS.length > 0) {
+          data.groupNames.forEach(n => {
+            const g = GROUPS.find(g => g.id === n.id);
+            if (g && n.name) g.name = n.name;
           });
         }
       } catch (e) {
@@ -5275,6 +5284,7 @@
       else state.comments.delete(modalPhoto.id);
       // Refresh the card to show/hide comment icon
       renderGroup(modalGroup);
+      saveState();
     }
 
     // ===== FILTER =====
