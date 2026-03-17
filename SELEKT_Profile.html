@@ -3191,8 +3191,14 @@
             document.body.style.overflow = 'hidden';
             document.getElementById('previewOverlay').scrollTop = 0;
         }
-        function closePreview() { document.getElementById('previewOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+        function closePreview() {
+            document.getElementById('previewOverlay').classList.remove('open');
+            document.body.style.overflow = '';
+            document.body.style.overflowY = '';
+        }
         document.addEventListener('keydown', e => { if (e.key === 'Escape') closePreview(); });
+        // Safety: if page unloads while preview is open, clear overflow lock
+        window.addEventListener('beforeunload', () => { document.body.style.overflow = ''; });
 
         // ===== INIT =====
         async function init() {
@@ -3235,6 +3241,9 @@
             updateQRCode();
         }
 
+        // Ensure body is scrollable on load (fix stuck overflow:hidden from preview)
+        document.body.style.overflow = '';
+        document.body.style.overflowY = '';
         setLang(_lang); init();
     </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
