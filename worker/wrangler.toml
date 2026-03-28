@@ -5,20 +5,20 @@ compatibility_date = "2024-01-01"
 [vars]
 MAX_FILE_SIZE_MB = "30"
 
-# Storage (MB/month)
+# Storage (MB/month) — Pricing.html準拠
 FREE_MONTHLY_STORAGE_MB = "10240"
 BASIC_MONTHLY_STORAGE_MB = "51200"
-PRO_MONTHLY_STORAGE_MB = "409600"
+PRO_MONTHLY_STORAGE_MB = "307200"
 
-# Photos per session
-FREE_MAX_PHOTOS = "300"
-BASIC_MAX_PHOTOS = "800"
-PRO_MAX_PHOTOS = "1500"
+# Photos per session (unlimited)
+FREE_MAX_PHOTOS = "99999"
+BASIC_MAX_PHOTOS = "99999"
+PRO_MAX_PHOTOS = "99999"
 
-# Session TTL (days)
-FREE_SESSION_TTL = "15"
-BASIC_SESSION_TTL = "60"
-PRO_SESSION_TTL = "120"
+# Session TTL (days) — Pricing.html準拠
+FREE_SESSION_TTL = "10"
+BASIC_SESSION_TTL = "30"
+PRO_SESSION_TTL = "90"
 
 # Sessions per month
 FREE_MAX_SESSIONS = "3"

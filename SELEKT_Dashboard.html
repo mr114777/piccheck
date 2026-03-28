@@ -548,7 +548,7 @@
                 <circle cx="12" cy="7" r="4" />
             </svg>
         </a>
-        <script>(function () { var p = localStorage.getItem('selekt_avatar_photo'); if (p) { var a = document.getElementById('topbarAvatar'); a.innerHTML = '<img src="' + p + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'; } })()</script>
+        <script>(function () { var p = localStorage.getItem('selekt_avatar_photo'); if (p) { var a = document.getElementById('topbarAvatar'); var img = document.createElement('img'); img.src = p; img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%'; a.innerHTML = ''; a.appendChild(img); } })()</script>
         <div class="topbar-divider"></div>
         <span class="topbar-title" style="font-size:15px;font-weight:700;color:var(--text);font-family:var(--heading-font)"
             data-i18n="navDashboard">ダッシュボード</span>
@@ -574,9 +574,9 @@
 
         <!-- Tab filter -->
         <div class="tab-filter" id="tabFilter" style="display:none">
-            <button class="filter-btn active" onclick="filterProjects('all')" data-i18n="filterAll">すべて</button>
-            <button class="filter-btn" onclick="filterProjects('received')" data-i18n="filterReceived">受信</button>
-            <button class="filter-btn" onclick="filterProjects('sent')" data-i18n="filterSent">送信</button>
+            <button class="filter-btn active" onclick="filterProjects('all', event)" data-i18n="filterAll">すべて</button>
+            <button class="filter-btn" onclick="filterProjects('received', event)" data-i18n="filterReceived">受信</button>
+            <button class="filter-btn" onclick="filterProjects('sent', event)" data-i18n="filterSent">送信</button>
         </div>
 
         <div id="projectList" class="project-list">
@@ -697,9 +697,26 @@
                     return;
                 }
             } catch (err) {
-                console.log('Auth check failed, loading demo mode', err);
+                console.log('Supabase auth check failed', err);
             }
-            // Not logged in — check localStorage for real sessions, then fallback to demo
+            // Fallback: try custom API token
+            const token = localStorage.getItem('selekt_token');
+            if (token) {
+                try {
+                    const res = await fetch(API + '/api/auth/me', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    if (res.ok) {
+                        const meData = await res.json();
+                        currentUser = meData.user;
+                        setupUI();
+                        document.getElementById('tabFilter').style.display = 'flex';
+                        await loadProjects();
+                        return;
+                    }
+                } catch (e) { /* token invalid */ }
+            }
+            // Not logged in — fallback to demo
             await loadDemoMode();
         }
 
@@ -844,7 +861,7 @@
                 // Helper: fetch with timeout
                 function fetchWithTimeout(url, ms = 5000) {
                     return Promise.race([
-                        fetch(url),
+                        fetch(url, { headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('selekt_token') || '') } }),
                         new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))
                     ]);
                 }
@@ -977,7 +994,7 @@
                 <div style="background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:32px;max-width:420px;width:90%;text-align:center;">
                     <div style="font-size:32px;margin-bottom:12px;">⚠️</div>
                     <div style="font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text);">セッションを削除しますか？</div>
-                    <div style="font-size:14px;color:var(--coral);margin-bottom:6px;font-weight:600;">「${sessionTitle}」</div>
+                    <div style="font-size:14px;color:var(--coral);margin-bottom:6px;font-weight:600;">「${escHtml(sessionTitle)}」</div>
                     <div style="font-size:13px;color:var(--text-sub);margin-bottom:24px;line-height:1.6;">
                         この操作は取り消せません。<br>
                         共有リンクも無効になり、<br>相手もアクセスできなくなります。
@@ -1009,7 +1026,7 @@
 
             // Try to delete from API (best effort)
             try {
-                await fetch(`${API}/api/session/${sessionId}`, { method: 'DELETE' });
+                await fetch(`${API}/api/session/${sessionId}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('selekt_token') || '') } });
             } catch (e) { /* ignore */ }
 
             // Remove from in-memory projects and re-render directly
@@ -1027,16 +1044,17 @@
             }
         }
 
-        function filterProjects(filter) {
+        function filterProjects(filter, event) {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+            if (event && event.currentTarget) event.currentTarget.classList.add('active');
             if (window._allProjects) {
                 renderProjects(window._allProjects, filter);
             }
         }
 
         function toggleMenu() {
-            document.getElementById('userMenu').classList.toggle('show');
+            var m = document.getElementById('userMenu');
+            if (m) m.classList.toggle('show');
         }
 
         function logout() {
@@ -1046,7 +1064,8 @@
         // Close menu on outside click
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.user-avatar') && !e.target.closest('.user-menu')) {
-                document.getElementById('userMenu').classList.remove('show');
+                var m = document.getElementById('userMenu');
+                if (m) m.classList.remove('show');
             }
         });
 

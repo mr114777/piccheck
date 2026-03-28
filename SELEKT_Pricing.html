@@ -411,7 +411,7 @@
                     <button class="lang-btn" onclick="setLang('zh')" style="background:none;border:1px solid #333849;color:#7B849A;padding:3px 8px;border-radius:5px;font-size:11px;cursor:pointer">中</button>
                 </div>
                 <div style="height:1px;background:#2A2F3E;margin:4px 8px"></div>
-                <a href="#" onclick="signOut(); return false;"
+                <a href="#" onclick="logout(); return false;"
                     style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#FF6B6B;font-size:12px;font-weight:500;transition:all 0.15s"
                     onmouseover="this.style.background='#2a1a1a';this.style.color='#FF8A8A'"
                     onmouseout="this.style.background='';this.style.color='#FF6B6B'"><svg width="14" height="14"
@@ -493,6 +493,7 @@
                     <li><span class="feat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span> <span data-i18n="pwProtect">パスワード保護</span> <span class="feat-val" style="color:var(--text-dim)">—</span></li>
                     <li style="border-top:1px solid var(--border2);padding-top:8px;margin-top:4px"><span class="feat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span> <span data-i18n="recvComment">コメント・リアクション</span> <span class="feat-val" style="color:var(--green)">✓</span></li>
                     <li><span class="feat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span> <span data-i18n="recvNotify">新着通知</span> <span class="feat-val" style="color:var(--green)">✓</span></li>
+                </ul>
                 <a class="plan-btn basic" href="#" data-i18n="btnBasic">BASICにアップグレード</a>
                 <div class="current-badge" id="badgeBasic" data-i18n="currentPlan">現在のプラン</div>
             </div>
@@ -525,9 +526,9 @@
         <div style="margin-top:48px;padding:28px 0;text-align:center">
             <div style="display:inline-flex;align-items:center;gap:12px;padding:16px 32px;border-radius:100px;background:linear-gradient(135deg, rgba(78,205,196,0.12), rgba(155,111,232,0.12));border:1px solid rgba(155,111,232,0.2)">
                 <span style="font-size:22px">🔗</span>
-                <span style="font-weight:700;font-size:16px;color:var(--text1)" data-i18n="bonusTitle">双方がBASIC以上で有効期限 +30日</span>
+                <span style="font-weight:700;font-size:16px;color:#fff" data-i18n="bonusTitle">双方がBASIC以上で有効期限 +30日</span>
             </div>
-            <div style="margin-top:12px;font-size:13px;color:var(--text2)" data-i18n="bonusDesc">送信者・受信者の両方がBASIC以上のプランなら、セッションの有効期限が自動で +30日。</div>
+            <div style="margin-top:12px;font-size:13px;color:rgba(255,255,255,0.5)" data-i18n="bonusDesc">送信者・受信者の両方がBASIC以上のプランなら、セッションの有効期限が自動で +30日。</div>
         </div>
     </div>
 
@@ -608,17 +609,19 @@
             }
         };
 
-        let _prcLang = localStorage.getItem('selekt-lang') || 'ja';
+        let _prcLang = localStorage.getItem('selekt_lang') || 'ja';
         function pt(key) { return (PRC_I18N[_prcLang] && PRC_I18N[_prcLang][key]) || PRC_I18N.ja[key] || key; }
 
         function setLang(lang) {
             _prcLang = lang;
-            localStorage.setItem('selekt-lang', lang);
+            localStorage.setItem('selekt_lang', lang);
             document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = pt(el.dataset.i18n));
             document.querySelectorAll('.lang-btn').forEach(b => b.style.borderColor = 'var(--border2)');
             const active = document.getElementById('lang' + lang.charAt(0).toUpperCase() + lang.slice(1));
             if (active) active.style.borderColor = 'var(--accent)';
         }
+
+        function logout() { localStorage.removeItem('selekt_token'); localStorage.removeItem('selekt_user'); window.location.href = 'SELEKT_Auth.html'; }
 
         // Show current plan badge
         function showCurrentPlan() {

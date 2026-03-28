@@ -2003,7 +2003,7 @@
                     <button class="lang-btn" onclick="setLang('zh')" style="background:none;border:1px solid #333849;color:#7B849A;padding:3px 8px;border-radius:5px;font-size:11px;cursor:pointer">中</button>
                 </div>
                 <div style="height:1px;background:#2A2F3E;margin:4px 8px"></div>
-                <a href="#" onclick="signOut(); return false;"
+                <a href="#" onclick="logout(); return false;"
                     style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#FF6B6B;font-size:12px;font-weight:500;transition:all 0.15s"
                     onmouseover="this.style.background='#2a1a1a';this.style.color='#FF8A8A'"
                     onmouseout="this.style.background='';this.style.color='#FF6B6B'"><svg width="14" height="14"
@@ -2023,7 +2023,7 @@
                 <circle cx="12" cy="7" r="4" />
             </svg>
         </a>
-        <script>(function () { var p = localStorage.getItem('selekt_avatar_photo'); if (p) { var a = document.getElementById('topbarAvatar'); a.innerHTML = '<img src="' + p + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'; } })()</script>
+        <script>(function () { var p = localStorage.getItem('selekt_avatar_photo'); if (p) { var a = document.getElementById('topbarAvatar'); var img = document.createElement('img'); img.src = p; img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%'; a.innerHTML = ''; a.appendChild(img); } })()</script>
         <div class="topbar-divider"></div>
         <span class="topbar-title" style="font-size:15px;font-weight:700;color:var(--text);font-family:var(--heading-font)"
             data-i18n="navProfile">プロフィール</span>
@@ -2774,7 +2774,7 @@
             if (s.font) setFontStyle(s.font);
             // Cover photo
             const cover = localStorage.getItem('selekt_cover_photo');
-            if (cover) { const coverEl = document.getElementById('coverPhoto'); coverEl.innerHTML = `<img src="${cover}"><div class="cover-edit-hint"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span data-i18n="changeCover">${pt('changeCover')}</span></div>`; }
+            if (cover) { const coverEl = document.getElementById('coverPhoto'); coverEl.innerHTML = ''; const img = document.createElement('img'); img.src = cover; coverEl.appendChild(img); const hint = document.createElement('div'); hint.className = 'cover-edit-hint'; hint.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>'; const span = document.createElement('span'); span.setAttribute('data-i18n', 'changeCover'); span.textContent = pt('changeCover'); hint.appendChild(span); coverEl.appendChild(hint); }
             // Avatar photo
             const avatarSrc = localStorage.getItem('selekt_avatar_photo');
             if (avatarSrc) { displayAvatarPhoto(avatarSrc); }
@@ -2995,7 +2995,7 @@
                 { key: 'socialYoutube', icon: svgYT, label: 'YouTube', url: currentUser.socialYoutube },
             ];
             links.forEach(l => {
-                if (l.url) {
+                if (l.url && /^https?:\/\//i.test(l.url)) {
                     socialHTML += `<a href="${l.url}" target="_blank" rel="noopener" class="social-icon-link" title="${l.label}">${l.icon}</a>`;
                     cardHTML += `<a href="${l.url}" target="_blank" rel="noopener" class="sns-card">${l.icon}<span class="sns-label">${l.label}</span></a>`;
                 }
@@ -3166,7 +3166,7 @@
             ];
             snsConfig.forEach(({ key, label, cls, snsCls, svg }) => {
                 const url = currentUser[key];
-                if (url) {
+                if (url && /^https?:\/\//i.test(url)) {
                     snsRow.innerHTML += `<a class="pv-sns-card ${snsCls}" href="${url}" target="_blank" rel="noopener"><span class="pv-sns-icon ${cls}">${svg}</span><span class="pv-sns-text">${label}</span></a>`;
                 } else {
                     snsRow.innerHTML += `<a class="pv-sns-card ${snsCls} unset" href="#" onclick="event.preventDefault()"><span class="pv-sns-icon ${cls}">${svg}</span><span class="pv-sns-text">${label}</span></a>`;

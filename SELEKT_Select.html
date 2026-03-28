@@ -2548,7 +2548,7 @@
         <circle cx="12" cy="7" r="4" />
       </svg>
     </a>
-    <script>(function () { var p = localStorage.getItem('selekt_avatar_photo'); if (p) { var a = document.getElementById('topbarAvatar'); a.innerHTML = '<img src="' + p + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'; } })()</script>
+    <script>(function () { var p = localStorage.getItem('selekt_avatar_photo'); if (p) { var a = document.getElementById('topbarAvatar'); var img = document.createElement('img'); img.src = p; img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%'; a.innerHTML = ''; a.appendChild(img); } })()</script>
     <div id="topbarLangBtns" style="display:flex;gap:2px;margin-left:4px;flex-shrink:0">
       <button class="lang-tab-btn active" data-lang="ja" onclick="setLang('ja')" style="padding:4px 8px;font-size:10px;font-weight:700;border-radius:5px;border:1px solid var(--border2);background:var(--surface3);color:var(--text);cursor:pointer;font-family:inherit;transition:all 0.15s">JP</button>
       <button class="lang-tab-btn" data-lang="en" onclick="setLang('en')" style="padding:4px 8px;font-size:10px;font-weight:700;border-radius:5px;border:1px solid var(--border2);background:transparent;color:var(--text-dim);cursor:pointer;font-family:inherit;transition:all 0.15s">EN</button>
@@ -3253,9 +3253,16 @@
           // Update session title and photographer in topbar
           const titleEl = document.getElementById('sessionTitle');
           const pencilSvg = ' <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.35;transition:opacity 0.15s;vertical-align:middle" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=0.35"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>';
+          // Check if user already edited title locally — don't overwrite
+          const localTitle = localStorage.getItem('selekt_project_title');
           if (titleEl) {
-            if (meta.title) {
-              titleEl.innerHTML = meta.title + pencilSvg;
+            if (localTitle !== null) {
+              titleEl.textContent = localTitle || 'プロジェクト名未設定';
+              titleEl.insertAdjacentHTML('beforeend', pencilSvg);
+              if (localTitle) delete titleEl.dataset.isDate;
+            } else if (meta.title) {
+              titleEl.textContent = meta.title;
+              titleEl.insertAdjacentHTML('beforeend', pencilSvg);
             } else if (meta.createdAt) {
               const d = new Date(meta.createdAt);
               const dateStr = `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
@@ -3456,6 +3463,8 @@
 
     // Support Data Receive via postMessage (Push)
     window.addEventListener('message', (event) => {
+      const allowedOrigins = ['https://mr114777.github.io', 'http://127.0.0.1:5500', 'http://localhost:5500'];
+      if (!allowedOrigins.includes(event.origin)) return;
       if (event.data && event.data.type === 'SELEKT_DATA') {
         const d = event.data.data;
         if (d && Array.isArray(d.groups)) {
@@ -4082,7 +4091,7 @@
       GROUPS.forEach(tg => {
         const opt = document.createElement('div');
         opt.className = 'move-dropdown-item';
-        opt.innerHTML = '<span style="width:8px;height:8px;border-radius:50%;background:' + tg.color + ';display:inline-block"></span> ' + (tg.name || tg.label);
+        opt.innerHTML = '<span style="width:8px;height:8px;border-radius:50%;background:' + escHtml(tg.color) + ';display:inline-block"></span> ' + escHtml(tg.name || tg.label);
         opt.onclick = () => bulkMoveToGroup(tg.id);
         dd.appendChild(opt);
       });
@@ -4150,7 +4159,7 @@
         });
       });
       clearSelection();
-      affectedGroups.forEach(gid => renderGroup(gid));
+      affectedGroups.forEach(gid => { const g = GROUPS.find(g => g.id === gid); if (g) renderGroup(g); });
       updateSidebarCounts();
       save();
       const labels = { ok: 'OK', nearok: '保留', ng: 'NG' };
@@ -4525,8 +4534,10 @@
       if (statLimit) statLimit.textContent = totalLimit ? totalLimit + t('photos') : t('desiredUnset');
     }
 
+    function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
     function _makeThumb(photo, group) {
-      if (photo.url) return `<div class="sel-thumb" style="background:var(--surface2);font-size:0;position:relative;"><img src="${photo.url}" alt="${photo.fname}" loading="lazy" style="width:100%;height:100%;object-fit:contain;display:block;" onerror="if(this.src!=='${photo.fullUrl || ''}') {this.src='${photo.fullUrl || ''}';} else {this.style.display='none';}"></div>`;
+      if (photo.url) { const safeFullUrl = escHtml((photo.fullUrl || '').replace(/'/g, '&#39;')); return `<div class="sel-thumb" style="background:var(--surface2);font-size:0;position:relative;"><img src="${escHtml(photo.url)}" alt="${escHtml(photo.fname)}" loading="lazy" style="width:100%;height:100%;object-fit:contain;display:block;" onerror="if(this.src!=='${safeFullUrl}') {this.src='${safeFullUrl}';} else {this.style.display='none';}"></div>`; }
       return `<div class="sel-thumb" style="background:${photo.bg || '#222'}">${photo.emoji || '📷'}</div>`;
     }
 
@@ -4548,11 +4559,11 @@
         div.innerHTML = `
       ${_makeThumb(photo, group)}
       <div class="sel-info">
-        <div class="sel-name">${photo.fname}</div>
-        <div class="sel-group" style="color:${group.color}">${group.label}: ${group.name}</div>
-        ${comment ? `<div style="font-size:10px;color:var(--yellow);margin-top:3px">💬 ${comment.substring(0, 30)}${comment.length > 30 ? '…' : ''}</div>` : ''}
+        <div class="sel-name">${escHtml(photo.fname)}</div>
+        <div class="sel-group" style="color:${group.color}">${escHtml(group.label)}: ${escHtml(group.name)}</div>
+        ${comment ? `<div style="font-size:10px;color:var(--yellow);margin-top:3px">💬 ${escHtml(comment.substring(0, 30))}${comment.length > 30 ? '…' : ''}</div>` : ''}
       </div>
-      <button class="sel-remove" onclick="setPhotoStatus('${id}', GROUPS.find(g=>g.id==='${group.id}'), null)">✕</button>`;
+      <button class="sel-remove" onclick="setPhotoStatus('${id}', GROUPS.find(g=>g.id==='${escHtml(group.id)}'), null)">✕</button>`;
         list.appendChild(div);
       });
     }
@@ -4576,11 +4587,11 @@
         div.innerHTML = `
       ${_makeThumb(photo, group)}
       <div class="sel-info">
-        <div class="sel-name">${photo.fname}</div>
+        <div class="sel-name">${escHtml(photo.fname)}</div>
         <div class="sel-group" style="color:var(--yellow)">${t('holdStatus')}</div>
-        ${comment ? `<div style="font-size:10px;color:var(--text-sub);margin-top:3px">💬 ${comment.substring(0, 30)}${comment.length > 30 ? '…' : ''}</div>` : ''}
+        ${comment ? `<div style="font-size:10px;color:var(--text-sub);margin-top:3px">💬 ${escHtml(comment.substring(0, 30))}${comment.length > 30 ? '…' : ''}</div>` : ''}
       </div>
-      <button class="sel-remove" onclick="setPhotoStatus('${id}', GROUPS.find(g=>g.id==='${group.id}'), null)">✕</button>`;
+      <button class="sel-remove" onclick="setPhotoStatus('${id}', GROUPS.find(g=>g.id==='${escHtml(group.id)}'), null)">✕</button>`;
         list.appendChild(div);
       });
     }
@@ -4603,11 +4614,11 @@
         div.innerHTML = `
       ${_makeThumb(photo, group)}
       <div class="sel-info">
-        <div class="sel-name">${photo.fname}</div>
+        <div class="sel-name">${escHtml(photo.fname)}</div>
         <div class="sel-group" style="color:var(--coral)">NG</div>
-        ${comment ? `<div style="font-size:10px;color:var(--text-sub);margin-top:3px">💬 ${comment.substring(0, 30)}${comment.length > 30 ? '…' : ''}</div>` : ''}
+        ${comment ? `<div style="font-size:10px;color:var(--text-sub);margin-top:3px">💬 ${escHtml(comment.substring(0, 30))}${comment.length > 30 ? '…' : ''}</div>` : ''}
       </div>
-      <button class="sel-remove" onclick="setPhotoStatus('${id}', GROUPS.find(g=>g.id==='${group.id}'), null)">✕</button>`;
+      <button class="sel-remove" onclick="setPhotoStatus('${id}', GROUPS.find(g=>g.id==='${escHtml(group.id)}'), null)">✕</button>`;
         list.appendChild(div);
       });
     }
@@ -5054,7 +5065,7 @@
                 _resetZoom();
               } else {
                 _zoomScale = 2;
-                _applyScale(container, imgEl, _touchStartX, _touchStartY);
+                _applyMobileZoom(container, imgEl, _touchStartX, _touchStartY);
               }
               _lastTapTime = 0;
               _lastTapX = 0;
@@ -5470,18 +5481,6 @@
       if (allJudged) launchConfetti();
     }
 
-    // ===== KEYBOARD SHORTCUTS =====
-    document.addEventListener('keydown', e => {
-      const modal = document.getElementById('modal');
-      if (!modal.classList.contains('open')) return;
-      if (e.key === 'ArrowRight') { e.preventDefault(); modalNav(1); }
-      else if (e.key === 'ArrowLeft') { e.preventDefault(); modalNav(-1); }
-      else if (e.key === 'o' || e.key === 'O') { e.preventDefault(); modalAction('ok'); }
-      else if (e.key === 'h' || e.key === 'H') { e.preventDefault(); modalAction('nearok'); }
-      else if (e.key === 'n' || e.key === 'N') { e.preventDefault(); modalAction('ng'); }
-      else if (e.key === 'Escape') { closeModal(); }
-    });
-
     function scrollToGroup(groupId, btn) {
       document.querySelectorAll('.group-nav-item').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
@@ -5815,7 +5814,8 @@
       } catch (e) { console.warn('localStorage block:', e); }
 
       if (titleEl) {
-        titleEl.innerHTML = (newTitle || 'プロジェクト名未設定') + pencilSvg;
+        titleEl.textContent = newTitle || 'プロジェクト名未設定';
+        titleEl.insertAdjacentHTML('beforeend', pencilSvg);
         delete titleEl.dataset.isDate;
       }
 
@@ -6414,13 +6414,13 @@
         const item = document.createElement('div');
         item.className = 'mobile-group-item';
         item.innerHTML = `
-          <div class="mobile-group-bar" style="background:${g.color}"></div>
+          <div class="mobile-group-bar" style="background:${escHtml(g.color)}"></div>
           <div class="mobile-group-info">
-            <div class="mobile-group-name">${g.label}: ${g.name}</div>
+            <div class="mobile-group-name">${escHtml(g.label)}: ${escHtml(g.name)}</div>
             <div class="mobile-group-count">${cnt} / ${g.limit} 枚選択 · ${g.photos.length}枚</div>
           </div>
           <div class="mobile-group-progress">
-            <div class="mobile-group-fill" style="width:${pct}%;background:${g.color}"></div>
+            <div class="mobile-group-fill" style="width:${pct}%;background:${escHtml(g.color)}"></div>
           </div>
         `;
         item.addEventListener('click', () => {

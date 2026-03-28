@@ -25,9 +25,9 @@ const ALLOWED_ORIGINS = [
 
 function getCorsHeaders(request) {
   const origin = request.headers.get('Origin') || '';
-  const allowed = ALLOWED_ORIGINS.some(o => origin.startsWith(o));
+  const allowed = ALLOWED_ORIGINS.includes(origin);
   return {
-    'Access-Control-Allow-Origin': allowed ? origin : ALLOWED_ORIGINS[0],
+    'Access-Control-Allow-Origin': allowed ? origin : 'null',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Vary': 'Origin',
@@ -35,7 +35,7 @@ function getCorsHeaders(request) {
 }
 
 function jsonResponse(data, status = 200, request = null) {
-  const cors = request ? getCorsHeaders(request) : { 'Access-Control-Allow-Origin': '*' };
+  const cors = request ? getCorsHeaders(request) : getCorsHeaders({ headers: { get: () => '' } });
   return new Response(JSON.stringify(data), {
     status,
     headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache, no-store, must-revalidate', ...cors },
@@ -56,6 +56,21 @@ async function checkRateLimit(env, key, maxHits, windowSec) {
   return data.count > maxHits;
 }
 
+// Sanitize filename to prevent path traversal
+function sanitizeFname(fname) {
+  if (!fname || typeof fname !== 'string') return null;
+  // Remove path separators, null bytes, and parent directory references
+  const cleaned = fname
+    .replace(/\\/g, '/')
+    .split('/')
+    .pop()               // take only the last segment
+    .replace(/\0/g, '')  // remove null bytes
+    .replace(/^\.+/, '') // remove leading dots
+    .trim();
+  if (!cleaned || cleaned === '.' || cleaned === '..') return null;
+  return cleaned;
+}
+
 // Validate image file type by magic bytes
 function isValidImageType(arrayBuffer) {
   const bytes = new Uint8Array(arrayBuffer.slice(0, 12));
@@ -73,6 +88,19 @@ function isValidImageType(arrayBuffer) {
 
 // --- Auth helpers ---
 async function hashPassword(password, salt) {
+  const encoder = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']
+  );
+  const hash = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: encoder.encode(salt), iterations: 100000, hash: 'SHA-256' },
+    keyMaterial, 256
+  );
+  return btoa(String.fromCharCode(...new Uint8Array(hash)));
+}
+
+// Legacy hash for migration from old SHA-256
+async function hashPasswordLegacy(password, salt) {
   const encoder = new TextEncoder();
   const data = encoder.encode(salt + password);
   const hash = await crypto.subtle.digest('SHA-256', data);
@@ -118,23 +146,23 @@ function getPlanLimits(plan, env) {
   switch (plan) {
     case 'pro':
       return {
-        storageMB: parseInt(env.PRO_MONTHLY_STORAGE_MB) || 204800,
-        maxPhotos: parseInt(env.PRO_MAX_PHOTOS) || 1500,
-        ttlDays: parseInt(env.PRO_SESSION_TTL) || 30,
-        maxSessions: parseInt(env.PRO_MAX_SESSIONS) || 9999,
+        storageMB: parseInt(env.PRO_MONTHLY_STORAGE_MB) || 307200,  // 300 GB
+        maxPhotos: parseInt(env.PRO_MAX_PHOTOS) || 99999,           // unlimited
+        ttlDays: parseInt(env.PRO_SESSION_TTL) || 90,
+        maxSessions: parseInt(env.PRO_MAX_SESSIONS) || 99999,       // unlimited
       };
     case 'basic':
       return {
-        storageMB: parseInt(env.BASIC_MONTHLY_STORAGE_MB) || 10240,
-        maxPhotos: parseInt(env.BASIC_MAX_PHOTOS) || 800,
-        ttlDays: parseInt(env.BASIC_SESSION_TTL) || 14,
-        maxSessions: parseInt(env.BASIC_MAX_SESSIONS) || 15,
+        storageMB: parseInt(env.BASIC_MONTHLY_STORAGE_MB) || 51200, // 50 GB
+        maxPhotos: parseInt(env.BASIC_MAX_PHOTOS) || 99999,         // unlimited
+        ttlDays: parseInt(env.BASIC_SESSION_TTL) || 30,
+        maxSessions: parseInt(env.BASIC_MAX_SESSIONS) || 10,
       };
     default: // free
       return {
-        storageMB: parseInt(env.FREE_MONTHLY_STORAGE_MB) || 5120,
-        maxPhotos: parseInt(env.FREE_MAX_PHOTOS) || 300,
-        ttlDays: parseInt(env.FREE_SESSION_TTL) || 7,
+        storageMB: parseInt(env.FREE_MONTHLY_STORAGE_MB) || 10240,  // 10 GB
+        maxPhotos: parseInt(env.FREE_MAX_PHOTOS) || 99999,          // unlimited
+        ttlDays: parseInt(env.FREE_SESSION_TTL) || 10,
         maxSessions: parseInt(env.FREE_MAX_SESSIONS) || 3,
       };
   }
@@ -224,8 +252,15 @@ export default {
         const user = await env.USERS.get(`users/${userId}`, 'json');
         if (!user) return errorResponse('Invalid credentials', 401);
 
-        const hash = await hashPassword(password, user.salt);
-        if (hash !== user.passwordHash) return errorResponse('Invalid credentials', 401);
+        let hash = await hashPassword(password, user.salt);
+        if (hash !== user.passwordHash) {
+          // Try legacy SHA-256 hash for migration
+          const legacyHash = await hashPasswordLegacy(password, user.salt);
+          if (legacyHash !== user.passwordHash) return errorResponse('Invalid credentials', 401);
+          // Migrate to PBKDF2
+          user.passwordHash = hash;
+          await env.USERS.put(`users/${userId}`, JSON.stringify(user));
+        }
 
         // Generate token
         const token = generateToken();
@@ -277,10 +312,15 @@ export default {
 
         const body = await request.json();
         const allowedFields = ['displayName', 'role', 'bio', 'socialX', 'socialInstagram', 'socialYoutube', 'avatarPhoto', 'coverPhoto', 'avatarPos', 'profileStyle', 'portfolio'];
+        const maxLengths = { displayName: 50, bio: 500, socialX: 200, socialInstagram: 200, socialYoutube: 200, avatarPhoto: 500000, coverPhoto: 500000 };
 
         for (const field of allowedFields) {
           if (body[field] !== undefined) {
-            user[field] = body[field];
+            const val = body[field];
+            if (typeof val === 'string' && maxLengths[field] && val.length > maxLengths[field]) {
+              return errorResponse(`${field} exceeds maximum length`, 400);
+            }
+            user[field] = val;
           }
         }
 
@@ -288,6 +328,23 @@ export default {
 
         const { salt, passwordHash, ...safeUser } = user;
         return jsonResponse({ ok: true, user: safeUser });
+      }
+
+      // === GET /api/user/search?q=xxx === (must be before :userId route)
+      if (path === '/api/user/search' && request.method === 'GET') {
+        const q = url.searchParams.get('q');
+        if (!q || q.length < 2) return errorResponse('Query must be at least 2 characters');
+
+        const user = await env.USERS.get(`users/${q}`, 'json');
+        if (!user) return jsonResponse({ results: [] });
+
+        return jsonResponse({
+          results: [{
+            id: user.id,
+            displayName: user.displayName,
+            role: user.role,
+          }],
+        });
       }
 
       // === GET /api/user/:userId ===
@@ -303,24 +360,6 @@ export default {
           role: user.role,
           plan: user.plan,
           createdAt: user.createdAt,
-        });
-      }
-
-      // === GET /api/user/search?q=xxx ===
-      if (path === '/api/user/search' && request.method === 'GET') {
-        const q = url.searchParams.get('q');
-        if (!q || q.length < 2) return errorResponse('Query must be at least 2 characters');
-
-        // KV doesn't support prefix search natively, so we try exact match
-        const user = await env.USERS.get(`users/${q}`, 'json');
-        if (!user) return jsonResponse({ results: [] });
-
-        return jsonResponse({
-          results: [{
-            id: user.id,
-            displayName: user.displayName,
-            role: user.role,
-          }],
         });
       }
 
@@ -349,9 +388,9 @@ export default {
         const body = await request.json();
         const { sessionId, direction } = body; // direction: 'received' or 'sent'
 
-        // Only allow linking to your own account or if you are the sender
-        if (direction === 'sent' && authedUser.id !== targetUserId) {
-          return errorResponse('Can only link sent sessions to your own account', 403);
+        // Only allow linking sessions to your own account
+        if (authedUser.id !== targetUserId) {
+          return errorResponse('Can only link sessions to your own account', 403);
         }
 
         const targetUser = await env.USERS.get(`users/${targetUserId}`, 'json');
@@ -413,7 +452,7 @@ export default {
           recipient: body.recipient || '',
           creatorId: creator ? creator.id : (body.creatorId || ''),
           notifyEmail: body.notifyEmail || '',
-          groups: body.groups || [],
+          groups: Array.isArray(body.groups) ? body.groups : [],
           createdAt: now,
           expiresAt,
           photoCount: 0,
@@ -447,7 +486,12 @@ export default {
           return errorResponse('Session expired', 410);
         }
 
-        return jsonResponse(meta);
+        // Only expose viewToken to the session creator
+        const requester = await getUserFromToken(request, env);
+        const isCreator = requester && requester.id === meta.creatorId;
+        const { viewToken: vt, ...publicMeta } = meta;
+        const responseMeta = isCreator ? meta : publicMeta;
+        return jsonResponse(responseMeta);
       }
 
       // === PATCH /api/session/:id — Update session metadata ===
@@ -458,6 +502,13 @@ export default {
         if (!obj) return errorResponse('Session not found', 404);
 
         const meta = JSON.parse(await obj.text());
+
+        // Require auth: only session creator can update
+        const authedUser = await getUserFromToken(request, env);
+        if (!authedUser || authedUser.id !== meta.creatorId) {
+          return errorResponse('Unauthorized', 401, request);
+        }
+
         const updates = await request.json();
 
         // Allow updating title, photographer, limits
@@ -494,6 +545,12 @@ export default {
         if (!metaObj) return errorResponse('Session not found', 404, request);
         const meta = JSON.parse(await metaObj.text());
 
+        // Require auth: only session creator can upload
+        const authedUser = await getUserFromToken(request, env);
+        if (!authedUser || authedUser.id !== meta.creatorId) {
+          return errorResponse('Unauthorized', 401, request);
+        }
+
         // Check photo limit (use session's plan)
         const planLimits = getPlanLimits(meta.plan || 'free', env);
         if (meta.photoCount >= planLimits.maxPhotos) {
@@ -503,11 +560,13 @@ export default {
         // Parse multipart form
         const formData = await request.formData();
         const file = formData.get('file');
-        const fname = formData.get('fname') || file.name;
+        const rawFname = formData.get('fname') || file.name;
+        const fname = sanitizeFname(rawFname);
         const groupId = formData.get('groupId') || '';
         const thumbData = formData.get('thumb'); // base64 or blob
 
         if (!file) return errorResponse('No file provided', 400, request);
+        if (!fname) return errorResponse('Invalid filename', 400, request);
 
         // Check file size
         const maxSize = parseInt(env.MAX_FILE_SIZE_MB || '30') * 1024 * 1024;
@@ -551,6 +610,18 @@ export default {
           );
         }
 
+        // Track storage usage
+        const monthKey = getMonthKey();
+        const usageKey = `users/${authedUser.id}/usage/${monthKey}`;
+        const usage = await env.USERS.get(usageKey, 'json') || { uploadedBytes: 0 };
+        const planLimitsForStorage = getPlanLimits(authedUser.plan || 'free', env);
+        const usedMB = Math.round((usage.uploadedBytes + file.size) / 1048576);
+        if (usedMB > planLimitsForStorage.storageMB) {
+          return errorResponse(`Storage limit exceeded (${planLimitsForStorage.storageMB}MB)`, 429, request);
+        }
+        usage.uploadedBytes += file.size;
+        await env.USERS.put(usageKey, JSON.stringify(usage), { expirationTtl: 86400 * 35 });
+
         // Update meta
         meta.photoCount++;
         meta.photos.push({
@@ -582,13 +653,21 @@ export default {
         if (!metaObj) return errorResponse('Session not found', 404);
 
         const meta = await metaObj.json();
+
+        // Require auth: only session creator can delete photos
+        const authedUser = await getUserFromToken(request, env);
+        if (!authedUser || authedUser.id !== meta.creatorId) {
+          return errorResponse('Unauthorized', 401, request);
+        }
         const { fnames } = await request.json();
         if (!fnames || !Array.isArray(fnames)) {
           return errorResponse('fnames array required', 400);
         }
 
         let deleted = 0;
-        for (const fname of fnames) {
+        for (const rawFname of fnames) {
+          const fname = sanitizeFname(rawFname);
+          if (!fname) continue;
           // Delete photo from R2
           try { await env.PHOTOS.delete(`sessions/${sessionId}/photos/${fname}`); } catch (e) { }
           // Delete thumbnail from R2
@@ -615,7 +694,8 @@ export default {
       if (photoPathMatch && request.method === 'GET') {
         const sessionId = photoPathMatch[1];
         // Prefer ?fname= query param, fallback to path segment
-        const fname = url.searchParams.get('fname') || (photoPathMatch[2] ? decodeURIComponent(photoPathMatch[2]) : null);
+        const rawFname = url.searchParams.get('fname') || (photoPathMatch[2] ? decodeURIComponent(photoPathMatch[2]) : null);
+        const fname = sanitizeFname(rawFname);
         if (!fname) return errorResponse('fname required', 400);
 
         const key = `sessions/${sessionId}/photos/${fname}`;
@@ -636,7 +716,8 @@ export default {
       if (thumbPathMatch && request.method === 'GET') {
         const sessionId = thumbPathMatch[1];
         // Prefer ?fname= query param, fallback to path segment
-        const fname = url.searchParams.get('fname') || (thumbPathMatch[2] ? decodeURIComponent(thumbPathMatch[2]) : null);
+        const rawFname = url.searchParams.get('fname') || (thumbPathMatch[2] ? decodeURIComponent(thumbPathMatch[2]) : null);
+        const fname = sanitizeFname(rawFname);
         if (!fname) return errorResponse('fname required', 400);
 
         const key = `sessions/${sessionId}/thumbs/${fname}`;
@@ -729,6 +810,12 @@ export default {
         if (!metaObj) return errorResponse('Session not found', 404, request);
 
         const meta = JSON.parse(await metaObj.text());
+
+        // Require auth: only session creator can delete
+        const authedUser = await getUserFromToken(request, env);
+        if (!authedUser || authedUser.id !== meta.creatorId) {
+          return errorResponse('Unauthorized', 401, request);
+        }
 
         // Delete all photos and thumbs
         for (const photo of (meta.photos || [])) {

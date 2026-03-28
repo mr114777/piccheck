@@ -1195,7 +1195,7 @@
                 <circle cx="12" cy="7" r="4" />
             </svg>
         </a>
-        <script>(function () { var p = localStorage.getItem('selekt_avatar_photo'); if (p) { var a = document.getElementById('topbarAvatar'); a.innerHTML = '<img src="' + p + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'; } })()</script>
+        <script>(function () { var p = localStorage.getItem('selekt_avatar_photo'); if (p) { var a = document.getElementById('topbarAvatar'); var img = document.createElement('img'); img.src = p; img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%'; a.textContent = ''; a.appendChild(img); } })()</script>
         <div class="topbar-divider"></div>
         <span class="topbar-title" style="font-size:15px;font-weight:700;color:var(--text);font-family:var(--heading-font)"
             data-i18n="topbarTitle">アップロード</span>
@@ -1375,6 +1375,9 @@
     <div class="toast" id="toast"></div>
 
     <script>
+        // ===== HELPERS =====
+        function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
         // ===== STATE =====
         let uploadedFiles = [];   // { file, url, exif, faceData }
         let groups = [];          // { label, name, reason, color, limit, photos[] }
@@ -1518,7 +1521,7 @@
         function handleFiles(files) {
             const imgs = files.filter(f => f.type.startsWith('image/'));
             imgs.forEach(f => {
-                if (uploadedFiles.find(u => u.file.name === f.name && u.file.size === f.size)) return;
+                if (uploadedFiles.find(u => u.file.name === f.name && u.file.size === f.size && u.file.lastModified === f.lastModified)) return;
                 const url = URL.createObjectURL(f);
                 // Store subfolder path for auto-grouping
                 const relPath = f.webkitRelativePath || '';
@@ -1552,8 +1555,8 @@
                 const div = document.createElement('div');
                 div.className = 'preview-thumb';
                 div.innerHTML = `
-          <img src="${item.url}" alt="${item.file.name}" loading="lazy">
-          <div class="thumb-name">${item.file.name}</div>
+          <img src="${item.url}" alt="${escHtml(item.file.name)}" loading="lazy">
+          <div class="thumb-name">${escHtml(item.file.name)}</div>
           <button class="thumb-remove" onclick="removeFile(${i})">✕</button>
         `;
                 grid.appendChild(div);
@@ -2055,7 +2058,7 @@
                     const thumb = document.createElement('div');
                     thumb.className = 'group-photo-thumb';
                     thumb.draggable = true;
-                    thumb.innerHTML = `<img src="${p.url}" alt="${p.file.name}" loading="lazy">`;
+                    thumb.innerHTML = `<img src="${p.url}" alt="${escHtml(p.file.name)}" loading="lazy">`;
 
                     // Click to toggle selection (Shift = range select)
                     thumb.addEventListener('click', (e) => {
@@ -2199,7 +2202,8 @@
         }
 
         function updateGroupLimit(gi, val) {
-            groups[gi].limit = parseInt(val) || 1;
+            const parsed = parseInt(val);
+            groups[gi].limit = isNaN(parsed) ? 0 : parsed;
             updateSummary();
         }
 
@@ -2549,8 +2553,10 @@
         function fileToDataUrl(fileOrBlobUrl, maxSize) {
             return new Promise((resolve) => {
                 // 5 second timeout to prevent hanging
+                let createdBlobUrl = null;
                 const timeout = setTimeout(() => {
                     console.warn('[Thumb] Timeout for:', typeof fileOrBlobUrl === 'string' ? fileOrBlobUrl : fileOrBlobUrl?.name);
+                    if (createdBlobUrl) URL.revokeObjectURL(createdBlobUrl);
                     resolve('');
                 }, 5000);
 
@@ -2568,22 +2574,25 @@
                         canvas.height = h;
                         canvas.getContext('2d').drawImage(img, 0, 0, w, h);
                         const result = canvas.toDataURL('image/jpeg', 0.85);
-                        URL.revokeObjectURL(img.src); // Clean up if we created a URL
+                        if (createdBlobUrl) URL.revokeObjectURL(createdBlobUrl);
                         resolve(result);
                     } catch (e) {
                         console.warn('[Thumb] Canvas error:', e);
+                        if (createdBlobUrl) URL.revokeObjectURL(createdBlobUrl);
                         resolve('');
                     }
                 };
                 img.onerror = () => {
                     clearTimeout(timeout);
+                    if (createdBlobUrl) URL.revokeObjectURL(createdBlobUrl);
                     console.warn('[Thumb] Image load error');
                     resolve('');
                 };
 
                 // Prefer File object over blob URL (blob URLs can expire)
                 if (fileOrBlobUrl instanceof File || fileOrBlobUrl instanceof Blob) {
-                    img.src = URL.createObjectURL(fileOrBlobUrl);
+                    createdBlobUrl = URL.createObjectURL(fileOrBlobUrl);
+                    img.src = createdBlobUrl;
                 } else if (typeof fileOrBlobUrl === 'string' && fileOrBlobUrl) {
                     img.src = fileOrBlobUrl;
                 } else {
@@ -2716,6 +2725,9 @@
                 }
 
                 console.log('[SELEKT] All photos uploaded to cloud');
+
+                // Release blob URLs to free memory
+                uploadedFiles.forEach(u => { if (u.url) URL.revokeObjectURL(u.url); });
 
                 // Save session to local session history
                 localStorage.setItem('selekt_sessionId', sessionId);
